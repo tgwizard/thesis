@@ -1,0 +1,15 @@
+\changetocdepth {2}
+\select@language {english}
+\select@language {english}
+\select@language {swedish}
+\select@language {english}
+\contentsline {chapter}{\chapternumberline {1}Introduction}{1}
+\contentsline {chapter}{\chapternumberline {2}First One}{3}
+\contentsline {section}{\numberline {2.1}Preliminaries}{3}
+\contentsline {subsection}{\numberline {2.1.1}Remarks}{3}
+\contentsline {subsection}{\numberline {2.1.2}Definitions}{4}
+\contentsline {section}{\numberline {2.2}The Main Theorem}{4}
+\contentsline {subsection}{\numberline {2.2.1}Problem Statement}{5}
+\contentsline {subsection}{\numberline {2.2.2}The Proof}{5}
+\contentsline {chapter}{Appendices}{6}
+\contentsline {chapter}{\chapternumberline {A}RDF}{7}
