@@ -1,0 +1,53 @@
+continuous testing and verification of runtime systems
+
+- investigate state-of-the-art
+
+- threat analysis, what can go wrong?
+	- configuration
+	- external dependencies
+	- performance degradation
+	- data dependencies
+	- browser compatibility
+	-
+
+- system characteristics
+	- is code thoroughly tested offline?
+	-
+
+- monitor system without modifying it (too much)
+	- crawling and checking response time, comparing with previous times
+	- blackbox-testing
+	- analyse bytecode
+	- dynamic analysis of running code
+	- exception catching
+	- you can still test external dependencies (ping, services, api calls, etc.)
+	- ui-tests
+	- reading existing logs
+	-
+
+- monitoring when modifying (but not rewriting from scratch) is allowed
+	- adding more logging
+	- exception handling
+	- code contracts
+	-
+
+- implement a few of these ideas (mostly in the not-so-much-modifying sectino)
+
+projects:
+	- Högskoleverket?
+	- can't intentionally crash existing commercial projects, will probably use test environment
+
+schedule:
+	- an agile process
+	- decide on a division of work/exjobb with erland and daniel
+	- final deadline: so that I can graduate in december
+	
+todo:
+	- find more ideas
+	- and papers discussing them
+	- what are commercial projects doing?
+	- use valtech live to do threat analysis
+	- talk with daniel
+	
+thoughts:
+	- dynamic analysis
