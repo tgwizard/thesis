@@ -17,7 +17,14 @@
 
 \chapter*{Exjobb preliminary specification}
 
+Suggested title: \textbf{Continuous testing and verification of runtime [web] systems}
+
 Adam Renberg, adamre@kth.se, \today
+
+\begin{tabular}{lll}
+	\textbf{Institute/School:} & School of Computer Science and Communication (CSC) at KTH \\
+    \textbf{Company}           & Valtech \\
+\end{tabular}
 
 \begin{tabular}{lll}
 	\textbf{Supervisor, Valtech:} & Erland Ranvinge & erland.ranvinge@valtech.se \\
@@ -29,26 +36,97 @@ Adam Renberg, adamre@kth.se, \today
     \textbf{Repository:} & http://github.com/tgwizard/thesis/ \\
 \end{tabular}
 
-The suggested topic is self-healing, and more specifically how to automatically detect "erroneous activities" when making changes to a system, in a "web site context". I will do the exjobb at Valtech.
 
-The idea is to first survey the existing literature and see both what the current research is and what is done in the industry, by both bigger and smaller companies. This would result in the first part of the report.
+The suggested topic is continuous testing and verification of runtime systems. As suggested by both Erland and Narges, this is of great interest in both academic and industry circles.
 
-The second part would be an implementation or modification of ideas from "some papers", industry ideas, or something similar. The implementation could hopefully be tested on "some project" at Valtech.
+The exjobb will be split in three parts: 
+
+\begin{itemize}
+	\item Background and state-of-the-art investigation
+	\item Analysis of threats, systems and what can be done
+	\item Implementation of "some of these ideas" (e.g. dynamic analysis)
+\end{itemize}
+
+The resulting "monitoring-system" will be tested on "a project" at Valtech. Since we can't intentionally crash/break existing commercial projects, it will probably be done in a testing environment.
+
+\paragraph{Outline of exjobb, and initial brainstormed ideas}
+
+\begin{itemize}
+\item investigate state-of-the-art
+	\begin{itemize}
+	\item research
+	\item industry/commercial projects
+	\end{itemize}
+
+\item threat analysis - what can go wrong?
+	\begin{itemize}
+	\item configuration
+	\item external dependencies
+	\item performance degradation
+	\item data dependencies
+	\item browser compatibility
+	\item more...
+	\end{itemize}
+
+\item system characteristics
+	\begin{itemize}
+	\item is code thoroughly tested offline?
+	\item more...
+	\end{itemize}
+
+\item monitor system without modifying it (too much)
+	\begin{itemize}
+	\item crawling and checking response time, comparing with previous times
+	\item blackbox testing
+	\item analyse bytecode
+	\item dynamic analysis of running code
+	\item exception catching
+	\item you can still test external dependencies (ping, services, api calls, etc.)
+	\item ui-tests
+	\item reading existing logs
+	\item more...
+	\end{itemize}
+
+\item monitoring when modifying (but not rewriting from scratch) is allowed
+	\begin{itemize}
+	\item adding more logging
+	\item exception handling
+	\item code contracts
+	\item more...
+	\end{itemize}
+
+\item implement a few of these ideas (mostly in the not-so-much-modifying section)
+\end{itemize}
+
+
+\paragraph{Timeplan/Schedule}
+
+An agile process...
+
+\begin{itemize}
+	\item Start: \textbf{April}
+	\item Specification done: \textbf{May 7}
+	\item Final deadline: so that I can graduate in december 2012
+\end{itemize}
 
 \paragraph{Things to do}
 
 \begin{itemize}
 
-\item The papers or ideas to make modifications/implementations of need to be found, and the ideas for the work need to be done drawn up.
+\item Decide on a division of work/exjobb with erland and daniel.
 
-\item Find project at Valtech where the as-of-yet unspecified and very vague implementation could be tested.
+\item Find more ideas and papers related to this topic
 
-\item A time plan.
+\item What are commercial projects doing?
+
+\item Utilize Valtech Live (the system-maintaining group at Valtech) to do threat analysis.
+
+\item Find a project at Valtech where the as-of-yet unspecified and very vague implementation could be tested.
+
+\item A more specific time plan, at least with a few milestone dates.
 
 \item Finalize the specification, and get it approved by KTH.
 
 \end{itemize}
-
-It would be nice if the specification could be written and approved by \textbf{May 7}.
 
 \end{document}
