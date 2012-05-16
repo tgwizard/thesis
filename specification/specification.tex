@@ -15,11 +15,13 @@
 
 \selectlanguage{english}
 
-\chapter*{Exjobb preliminary specification}
+\chapter*{Exjobb specification}
 
-Suggested title: \textbf{Continuous testing and verification of runtime [web] systems}
+Suggested title: \textit{Runtime verification "by writing tests" - An analysis of the current research and a prototype for a new framework}.
 
-Adam Renberg, adamre@kth.se, \today
+\textbf{Adam Renberg}, 19880429-6211, 070-165 34 69, adamre@kth.se
+
+\today
 
 \begin{tabular}{lll}
 	\textbf{Institute/School:} & School of Computer Science and Communication (CSC) at KTH \\
@@ -37,96 +39,60 @@ Adam Renberg, adamre@kth.se, \today
 \end{tabular}
 
 
-The suggested topic is continuous testing and verification of runtime systems. As suggested by both Erland and Narges, this is of great interest in both academic and industry circles.
+The suggested topic is runtime verification (RV) of [web] systems. As suggested by both Erland and Narges, this is of great interest in both the industry and the academic community.
 
-The exjobb will be split in three parts: 
+RV is a formal verification technique that is embedded in executing systems and verifies that specified properties holds at certain points in the code and execution. These properties are specified in a constructed language, often a logic/calculus, and a RV framework instruments the system to be monitored with code that verifies these properties. When a property violation occurs, simple actions can be taken (e.g. log the error, send emails), or more complex responses initiated, resulting in a self-healing system.
+
+Most the specification language used by many/most RV implementations is based on some formal logic and not written in the native language. In contrast, offline testing frameworks often utilize the system language to great effect, and their use is wide spread.
+
+This exjobb will be an investigation into RV, how it is used today, and how an RV framework could be implemented with inspiration from offline testing frameworks. The idea is to find an RV specification syntax that closely resembles that of offline testing frameworks, thus making RV fit better into the development process.
+
+The exjobb will be split in these parts: 
 
 \begin{itemize}
-	\item Background and state-of-the-art investigation
-	\item Analysis of threats, systems and what can be done
-	\item Implementation of "some of these ideas" (e.g. dynamic analysis)
+	\item Background and state-of-the-art "inventory". What is RV? Why does it exist?  Research results? How is it applied in practice? How is it used in web contexts? How are specification languages designed?
+	\item Background and state-of-the-art of testing frameworks and their languages/syntax.
+	\item Investigation of how RV can be applied to a [web] system. What specification language to use? In what system language: dynamic (python, ruby, etc.) static (Java, C#)? Code instrumentation?
+	\item Implement an RV framework prototype.
+	\item Apply implemented RV framework on a project at Valtech. Evaluate and analyze. Do some benchmarking to check on how the RV framework impacts performance.
 \end{itemize}
 
-The resulting "monitoring-system" will be tested on "a project" at Valtech. Since we can't intentionally crash/break existing commercial projects, it will probably be done in a testing environment.
+Suggested project(s) at Valtech: The Valtech Intranet (python).
 
-\paragraph{Outline of exjobb, and initial brainstormed ideas}
+\textbf{Timeplan/Schedule}
+
+I will work on the exjobb 50\% and 50\% on projects at Valtech, in periods of two weeks exjobb, two weeks work. This fits well into the iteration planning at Valtech. During the summer I will work more on the exjobb, and use some of my vacation hours for the exjobb.
 
 \begin{itemize}
-\item investigate state-of-the-art
-	\begin{itemize}
-	\item research
-	\item industry/commercial projects
-	\end{itemize}
-
-\item threat analysis - what can go wrong?
-	\begin{itemize}
-	\item configuration
-	\item external dependencies
-	\item performance degradation
-	\item data dependencies
-	\item browser compatibility
-	\item more...
-	\end{itemize}
-
-\item system characteristics
-	\begin{itemize}
-	\item is code thoroughly tested offline?
-	\item more...
-	\end{itemize}
-
-\item monitor system without modifying it (too much)
-	\begin{itemize}
-	\item crawling and checking response time, comparing with previous times
-	\item blackbox testing
-	\item analyse bytecode
-	\item dynamic analysis of running code
-	\item exception catching
-	\item you can still test external dependencies (ping, services, api calls, etc.)
-	\item ui-tests
-	\item reading existing logs
-	\item more...
-	\end{itemize}
-
-\item monitoring when modifying (but not rewriting from scratch) is allowed
-	\begin{itemize}
-	\item adding more logging
-	\item exception handling
-	\item code contracts
-	\item more...
-	\end{itemize}
-
-\item implement a few of these ideas (mostly in the not-so-much-modifying section)
+	\item Start: \textbf{April}.
+	\item Specification done: ? (was \textbf{May 7}).
+	\item Final deadline: so that I can graduate in december 2012.
 \end{itemize}
 
-
-\paragraph{Timeplan/Schedule}
-
-An agile process...
+Suggested approximate time plan...
 
 \begin{itemize}
-	\item Start: \textbf{April}
-	\item Specification done: \textbf{May 7}
-	\item Final deadline: so that I can graduate in december 2012
+	\item \textbf{One week} writing this specification.
+	\item \textbf{Five weeks} of background and research.
+	\item \textbf{One week} writing the background part of the report.
+	\item \textbf{Four weeks} investigating and evaluating "what to do".
+	\item \textbf{One week} writing about the investigation.
+	\item \textbf{Three weeks} implementing and evaluating the RV framework.
+	\item \textbf{Two weeks} testing and analysing the RV framework on "the project".
+	\item \textbf{Three weeks} writing and finishing the report.
 \end{itemize}
 
-\paragraph{Things to do}
+(Total: 20 weeks.)
+
+Other required work related to the exjobb, such as opposing another student's work, will take time from the work above and require flexibility in planning.
+
+\textbf{Issues}
 
 \begin{itemize}
-
-\item Decide on a division of work/exjobb with erland and daniel.
-
-\item Find more ideas and papers related to this topic
-
-\item What are commercial projects doing?
-
-\item Utilize Valtech Live (the system-maintaining group at Valtech) to do threat analysis.
-
-\item Find a project at Valtech where the as-of-yet unspecified and very vague implementation could be tested.
-
-\item A more specific time plan, at least with a few milestone dates.
-
-\item Finalize the specification, and get it approved by KTH.
-
+	\item Who will be the examiner?
+	\item Do I need to start the exjobb work at a specific date and time? Do I need to/Should I take part in an exjobb "support group"?
+	\item Do I need finish my remaining courses before I start my exjobb? One exam remains, which I'll do on May 30th, and two reports.
+	\item ...
 \end{itemize}
 
 \end{document}
