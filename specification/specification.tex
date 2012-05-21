@@ -17,7 +17,8 @@
 
 \chapter*{Exjobb specification}
 
-Suggested title: \textit{Runtime verification "by writing tests" - An analysis of the current research and a prototype for a new framework}.
+Suggested title: \textit{Test-driven runtime verification - An analysis
+of the current research and a prototype for a new framework}.
 
 \textbf{Adam Renberg}, 19880429-6211, 070-165 34 69, adamre@kth.se
 
@@ -39,59 +40,95 @@ Suggested title: \textit{Runtime verification "by writing tests" - An analysis o
 \end{tabular}
 
 
-The suggested topic is runtime verification (RV) of [web] systems. As suggested by both Erland and Narges, this is of great interest in both the industry and the academic community.
+The suggested topic is runtime verification (RV) of [web] systems. As suggested
+by both Erland and Narges, this is of great interest in both the industry and
+the academic community.
 
-RV is a formal verification technique that is embedded in executing systems and verifies that specified properties holds at certain points in the code and execution. These properties are specified in a constructed language, often a logic/calculus, and a RV framework instruments the system to be monitored with code that verifies these properties. When a property violation occurs, simple actions can be taken (e.g. log the error, send emails), or more complex responses initiated, resulting in a self-healing system.
+RV is a light-weight formal verification technique that is embedded in systems.
+It verifies that certain properties hold at certain points in the code
+\textit{during execution}. These properties are specified in a constructed
+language, often a logic/calculus, and an RV framework instruments the system to
+be monitored with code that verifies these properties. When a property
+violation occurs, simple actions can be taken (e.g. log the error, send
+emails), or more complex responses initiated, resulting in a self-healing
+system.
 
-Most the specification language used by many/most RV implementations is based on some formal logic and not written in the native language. In contrast, offline testing frameworks often utilize the system language to great effect, and their use is wide spread.
+The specification languages used by RV implementations is often based
+on some formal logic and not written in the main language. In contrast,
+offline testing frameworks often utilize the main language to great effect,
+and their use is wide spread.
 
-This exjobb will be an investigation into RV, how it is used today, and how an RV framework could be implemented with inspiration from offline testing frameworks. The idea is to find an RV specification syntax that closely resembles that of offline testing frameworks, thus making RV fit better into the development process.
+This exjobb will be an investigation into RV, how it is used today, and how an
+RV framework could be implemented with inspiration from offline testing
+frameworks. The idea is to find an RV specification syntax that closely
+resembles that of offline testing frameworks, thus making RV fit better into
+existing software development (processes), where offline testing is ubiquitous
+and well accepted.
 
-The exjobb will be split in these parts: 
+The exjobb will be split in these parts:
 
 \begin{itemize}
-	\item Background and state-of-the-art "inventory". What is RV? Why does it exist?  Research results? How is it applied in practice? How is it used in web contexts? How are specification languages designed?
-	\item Background and state-of-the-art of testing frameworks and their languages/syntax.
-	\item Investigation of how RV can be applied to a [web] system. What specification language to use? In what system language: dynamic (python, ruby, etc.) static (Java, C#)? Code instrumentation?
-	\item Implement an RV framework prototype.
-	\item Apply implemented RV framework on a project at Valtech. Evaluate and analyze. Do some benchmarking to check on how the RV framework impacts performance.
+	\item Background and state-of-the-art "inventory". What is RV? Why does it
+        exist? Research results? How is it applied in practice? How is it used
+        in web contexts? How are specification languages chosen and designed?
+	\item Background and state-of-the-art of testing frameworks and their
+        languages/syntax.
+	\item Investigation of how RV can be applied to a [web] system. What
+        specification language to use? In what system language: dynamic
+        (python, ruby, etc.) static (Java, C\#)? How should code
+        instrumentation be done?
+	\item Implement an RV framework prototype. Find a suitable test-like
+        specification language, or design it with inspiration from such
+        languages.
+	\item Apply implemented RV framework on a project at Valtech. Evaluate and
+        analyze. Do some benchmarking to check on how the RV framework impacts
+        performance.
 \end{itemize}
 
 Suggested project(s) at Valtech: The Valtech Intranet (python).
 
 \textbf{Timeplan/Schedule}
 
-I will work on the exjobb 50\% and 50\% on projects at Valtech, in periods of two weeks exjobb, two weeks work. This fits well into the iteration planning at Valtech. During the summer I will work more on the exjobb, and use some of my vacation hours for the exjobb.
+I will work on the exjobb 50\% and 50\% on projects at Valtech, in periods of
+two weeks exjobb, two weeks work. This fits well into the iteration-planning at
+Valtech. During the summer I will work more on the exjobb, and use some of my
+vacation hours for the exjobb.
 
 \begin{itemize}
 	\item Start: \textbf{April}.
-	\item Specification done: ? (was \textbf{May 7}).
+    \item Specification done and approved: \textbf{May}.
 	\item Final deadline: so that I can graduate in december 2012.
 \end{itemize}
 
 Suggested approximate time plan...
 
 \begin{itemize}
-	\item \textbf{One week} writing this specification.
+    \item \textbf{One week} writing, and doing the research for, this
+        specification.
 	\item \textbf{Five weeks} of background and research.
 	\item \textbf{One week} writing the background part of the report.
 	\item \textbf{Four weeks} investigating and evaluating "what to do".
 	\item \textbf{One week} writing about the investigation.
 	\item \textbf{Three weeks} implementing and evaluating the RV framework.
-	\item \textbf{Two weeks} testing and analysing the RV framework on "the project".
+	\item \textbf{Two weeks} testing and analysing the RV framework on "the
+        project".
 	\item \textbf{Three weeks} writing and finishing the report.
 \end{itemize}
 
 (Total: 20 weeks.)
 
-Other required work related to the exjobb, such as opposing another student's work, will take time from the work above and require flexibility in planning.
+Other required work related to the exjobb, such as doing the opposition of
+another student's work, will take time from the work above and require
+flexibility in planning.
 
 \textbf{Issues}
 
 \begin{itemize}
 	\item Who will be the examiner?
-	\item Do I need to start the exjobb work at a specific date and time? Do I need to/Should I take part in an exjobb "support group"?
-	\item Do I need finish my remaining courses before I start my exjobb? One exam remains, which I'll do on May 30th, and two reports.
+    \item Do I need to start the exjobb work at a specific date and time? Do I
+        need to/Should I take part in an exjobb "support group"?
+    \item Do I need to finish my remaining courses before I start my exjobb?
+        One exam remains, which I'll do on May 30th, and two reports.
 	\item ...
 \end{itemize}
 
