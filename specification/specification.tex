@@ -5,6 +5,10 @@
 \usepackage[latin1]{inputenc}
 \usepackage[swedish,english]{babel}
 \usepackage{modifications}
+\usepackage{color}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{colortbl}
+
 
 \begin{document}
 \removepagenumbers% Don't indent paragraphs.
@@ -17,8 +21,7 @@
 
 \chapter*{Exjobb specification}
 
-Suggested title: \textit{Test-driven runtime verification - An analysis
-of the current research and a prototype for a new framework}.
+Suggested title: \textit{Test-oriented runtime verification - Using a test-like specification syntax for runtime verification}.
 
 \textbf{Adam Renberg}, 19880429-6211, 070-165 34 69, adamre@kth.se
 
@@ -32,6 +35,8 @@ of the current research and a prototype for a new framework}.
 \begin{tabular}{lll}
 	\textbf{Supervisor, Valtech:} & Erland Ranvinge & erland.ranvinge@valtech.se \\
     \textbf{Supervisor, KTH:}     & Narges Khakpour & khakpour@liacs.nl \\
+    \textbf{Examiner, KTH:}			  & ???	& ??? \\
+    \textbf{Coordinator, KTH:}	  & Ann Bengtsson & ann@csc.kth.se \\
 \end{tabular}
 
 \begin{tabular}{ll}
@@ -65,6 +70,23 @@ resembles that of offline testing frameworks, thus making RV fit better into
 existing software development (processes), where offline testing is ubiquitous
 and well accepted.
 
+An important part of RV specifications is that they should be formal, and thus
+that the properties they specify yield a formal proof of correctness for the
+current execution. With a more lenient syntax for the specification language, such as
+a fully fledged programming language, we need to ensure that the formal properties
+still hold.
+
+We need to:
+
+\begin{enumerate}
+	\item Specify the syntax for the RV specifications
+	\item and relate these to a formal logic
+	\item and transform them so that they can be executed in the running system
+		(code instrumentation)
+\end{enumerate}
+
+We will focus on item 1 and 3.
+
 The exjobb will be split in these parts:
 
 \begin{itemize}
@@ -73,14 +95,15 @@ The exjobb will be split in these parts:
         in web contexts? How are specification languages chosen and designed?
 	\item Background and state-of-the-art of testing frameworks and their
         languages/syntax.
-	\item Investigation of how RV can be applied to a [web] system. What
+	\item Investigation of how RV can be applied to a (web) system. What
         specification language to use? In what system language: dynamic
         (python, ruby, etc.) static (Java, C\#)? How should code
         instrumentation be done?
 	\item Implement an RV framework prototype. Find a suitable test-like
         specification language, or design it with inspiration from such
         languages.
-	\item Apply implemented RV framework on a project at Valtech. Evaluate and
+	\item \textit{(Possible extension)}
+		Apply implemented RV framework on a project at Valtech. Evaluate and
         analyze. Do some benchmarking to check on how the RV framework impacts
         performance.
 \end{itemize}
@@ -94,28 +117,53 @@ two weeks exjobb, two weeks work. This fits well into the iteration-planning at
 Valtech. During the summer I will almost exclusively work on the exjobb, and also
 use some of my vacation hours for the exjobb.
 
-\begin{itemize}
-	\item Start: \textbf{April}.
-    \item Specification done and approved: \textbf{May}.
-	\item Final deadline: so that I can graduate in december 2012.
-\end{itemize}
+Suggested approximate time plan:
 
-Suggested approximate time plan...
+\begin{center}
+	\renewcommand{\arraystretch}{1.5}
+	\arrayrulecolor{Gray}
+	\begin{tabular}{ l l l | p{7cm} }
+		\textbf{Start} & \textbf{Weeks} & \textbf{N} & \textbf{Work} \\
+		\noalign{\smallskip}\hline\noalign{\smallskip}
+		
+		May & \textit{1w in May} & \textbf{1w} &
+		Writing, and doing the research for, this specification.
+		\\
+		
+		May & \textit{2w in May}, v23, v26, v27 & \textbf{5w} &
+		Doing background \& research.
+		\\
+		
+		9/7 & v28 & \textbf{1w} &
+		Writing the background part of the report.
+		\\
+		
+		16/7 & v29, v30, v31, v32 & \textbf{4w} &
+		Investigating and evaluating "what to do".
+		\\
+		
+		13/8 & v33& \textbf{1w} &
+		Writing about the investigation.
+		\\
+		
+		20/8 & v34, v35, v36 & \textbf{3w} &
+		Implementing and evaluating the RV framework.
+		\\
+		
+		10/9 & v37, v38 & \textbf{2w} &
+		Testing and analysing the RV framework on "the project".
+		\\
+		
+		24/9 & v39, v40, v41 & \textbf{3w} &
+		Writing and finishing the report.
+		\\
+		
+	\end{tabular}
+\end{center}
 
-\begin{itemize}
-    \item \textbf{One week} writing, and doing the research for, this
-        specification.
-	\item \textbf{Five weeks} of background and research.
-	\item \textbf{One week} writing the background part of the report.
-	\item \textbf{Four weeks} investigating and evaluating "what to do".
-	\item \textbf{One week} writing about the investigation.
-	\item \textbf{Three weeks} implementing and evaluating the RV framework.
-	\item \textbf{Two weeks} testing and analysing the RV framework on "the
-        project".
-	\item \textbf{Three weeks} writing and finishing the report.
-\end{itemize}
+Total: 20 weeks. End date: \textbf{12 October 2012} (very optimistic).
 
-(Total: 20 weeks.)
+I will weeks v24 and v25 off, as well as about 1 week in august (not planned). \textbf{The weeks I will be working at Valtech haven't been written into the time table.}
 
 Other required work related to the exjobb, such as doing the opposition of
 another student's work, will take time from the work above and require
@@ -127,9 +175,6 @@ flexibility in planning.
 	\item Who will be the examiner?
     \item Do I need to start the exjobb work at a specific date and time? Do I
         need to/Should I take part in an exjobb "support group"?
-    \item Do I need to finish my remaining courses before I start my exjobb?
-        One exam remains, which I'll do on May 30th, and two reports.
-	\item ...
 \end{itemize}
 
 \end{document}
