@@ -1,132 +1,181 @@
-\documentclass[a4paper,11pt]{kth-mag}
+\documentclass[a4paper,11pt]{article}
 \usepackage[T1]{fontenc}
 \usepackage{textcomp}
 \usepackage{lmodern}
-\usepackage[latin1]{inputenc}
+\usepackage[utf8]{inputenc}
 \usepackage[swedish,english]{babel}
-\usepackage{modifications}
+\usepackage{setspace}
 \usepackage{color}
 \usepackage[usenames,dvipsnames]{xcolor}
 \usepackage{colortbl}
 
 
 \begin{document}
-\removepagenumbers% Don't indent paragraphs.
+
 \setlength\parindent{0em}
 \setlength\parskip{1em}
 
-\pagestyle{empty}
-
 \selectlanguage{english}
 
-\chapter*{Exjobb specification}
+\title{Degree project specification}
+\author{Adam Renberg\\\texttt{adamre@kth.se}}
 
-Suggested title: \textit{Test-oriented runtime verification - Using a test-like specification syntax for runtime verification}.
+\maketitle
 
-\textbf{Adam Renberg}, 19880429-6211, 070-165 34 69, adamre@kth.se
-
-\today
-
-\begin{tabular}{lll}
-	\textbf{Institute/School:} & School of Computer Science and Communication (CSC) at KTH \\
-    \textbf{Company}           & Valtech \\
+\begin{tabular}{rll}
+	\textbf{School:}  & School of Computer Science and Communication (CSC) at KTH \\
+    \textbf{Company:} & Valtech, \texttt{http://www.valtech.se/} \\
 \end{tabular}
 
-\begin{tabular}{lll}
-	\textbf{Supervisor, Valtech:} & Erland Ranvinge & erland.ranvinge@valtech.se \\
-    \textbf{Supervisor, KTH:}     & Narges Khakpour & khakpour@liacs.nl \\
-    \textbf{Examiner, KTH:}			  & ???	& ??? \\
-    \textbf{Coordinator, KTH:}	  & Ann Bengtsson & ann@csc.kth.se \\
-\end{tabular}
-
-\begin{tabular}{ll}
-    \textbf{Website:} & http://tgwizard.github.com/thesis/ \\
-    \textbf{Repository:} & http://github.com/tgwizard/thesis/ \\
+\begin{tabular}{rll}
+	\textbf{Supervisor, Valtech:} & Erland Ranvinge & \texttt{erland.ranvinge@valtech.se} \\
+    \textbf{Supervisor, CSC:}     & Narges Khakpour & \texttt{nargeskh@kth.se} \\
+    \textbf{Examiner:}		  & Johan Håstad	& \texttt{johanh@kth.se} \\
+    \textbf{Coordinator, KTH:}	  & Ann Bengtsson & \texttt{ann@csc.kth.se} \\
 \end{tabular}
 
 
-The suggested topic is runtime verification (RV) of [web] systems. As suggested
-by both Erland and Narges, this is of great interest in both the industry and
-the academic community. The exjobb will be done at Valtech.
+\begin{spacing}{0.8}
+\setlength\parskip{0.1em}
+\tableofcontents
+\end{spacing}
 
-RV is a light-weight formal verification technique that is embedded in systems.
-It verifies that certain properties hold at certain points in the code
-\textit{during execution}. These properties are specified in a constructed
-language, often a logic/calculus, and an RV framework instruments the system to
-be monitored with code that verifies these properties. When a property
-violation occurs, simple actions can be taken (e.g. log the error, send
-emails), or more complex responses initiated, resulting in a self-healing
-system.
+\section{Short Background}
 
-The specification languages used by RV implementations is often based
-on some formal logic and not written in the main language. In contrast,
-offline unit testing frameworks, such as \textit{JUnit} for Java or \textit{unittest} for python,
-often utilize the main language to great effect,and their use is wide spread.
+Runtime verification (RV) is a light-weight formal verification technique, see e.g. \cite{leucker08,delgado04}.
+It verifies that specified properties hold during the execution of a program. It operates on a \emph{trace} of the \emph{current execution}, either while it is running (online), or at some other time and/or place (offline).
 
-This exjobb will be an investigation into RV, how it is used today, and how an
-RV framework could be implemented with inspiration from offline unit testing
-frameworks. The idea is to find an RV specification syntax that closely
-resembles that of offline unit testing frameworks, thus making RV fit better into
-existing software development (processes), where unit testing is ubiquitous
-and well accepted.
+The properties that should be verified are specified in a constructed
+language, often a logic/calculus, such as Linear Temporal Logic \cite{pnueli77}.
+An RV framework then instruments the target program with monitors so that the properties
+can be checked, and the execution verified against the specification.
+
+When a violation against the specification occurs, simple actions can be taken (e.g. log the error, send emails, etc.), or more complex responses initiated, resulting in a \textit{self-healing} or \textit{self-adapting} system (see e.g. \cite{huebscher08}).
+
+\textit{Unit testing} is the concept of writing small tests, or test suites, for the units in a program, be it functions, classes, etc. These tests are used during development to test the functionality of the units. They aim to reduce the risk of breaking existing functionality when developing new features or modifying existing code (by preventing regression).
+
+Writing unit tests, often using unit testing \textit{frameworks} such as JUnit \cite{junit} for Java and unittest \cite{python-unittest} for Python, is a common practice on many development teams.
+
+\section{Problem}
+
+\subsection{Problem Definition}
+
+How can runtime verification specifications be written in a manner that resembles
+the syntax of unit tests?
+
+Suggested title: \textit{Test-oriented runtime verification - using a unit test-like specification syntax for runtime verification}.
+
+
+\subsection{Motivation}
+
+Verification that a program works correctly is of great interest to software developers, and
+formal formal verification techniques can often help. Traditional approaches, such as
+\textit{theorem proving}, \textit{model checking} can be impractical with larger programs,
+and verification by \textit{testing} is informal. Runtime verification can here be a lightweight
+addition to the list.
 
 An important part of RV specifications is that they should be formal, and thus
 that the properties they specify yield a formal proof of correctness for the
-current execution. With a more lenient syntax for the specification language, such as
-a fully fledged programming language, we need to ensure that the formal properties
-still hold.
+current execution.
 
-We need to:
+The specification languages used by RV implementations is therefore often based
+on some formal logic and not written in the target program's programming language. In contrast,
+offline unit testing frameworks often utilize the programming language to great effect,
+and their use is wide spread.
+
+If RV specifications more resembled unit tests, and were written in the target program's
+programming language, it might popularize the use of runtime verification.
+
+
+\section{Literature}
+
+\subsection{Previous Research}
+
+Runtime verification is a somewhat new area of research, but the research on verification and formal methods goes back several centuries.
+
+Unit testing is also quite young, perhaps having started in the 90s, and it isn't as much researched as formal methods.
+
+The work on the Linear Temporal Logic, on runtime verification in general and its applications, on code instrumentation (e.g. \cite{aspectj,matusiak09}), and on unit testing and their frameworks will lay the foundation of this work.
+
+
+\subsection{Examination}
+
+The literature study will be examined as a part of the report, as the report will contain
+both a general description of RV and unit testing, and more detailed sections on research related to the problem.
+
+
+\section{Method}
+
+The work will consist of three parts:
+
+
+\subsection{Related Work}
+
+I will do a background and state-of-the-art inventory of RV and unit testing. The focus will lie on the syntax used for writing the specifications/tests, and how they are executed and the target program instrumented.
+
+
+
+\subsection{Approach/Investigation}
+
+In this investigative part I will answer the following questions:
 
 \begin{enumerate}
-	\item Define the syntax for the unit test-like RV specification
-	\item and relate this to a formal logic, to ensure the correctness of the specification 
-	\item and instrument the code to monitor the system and build the system model
-	\item which will be used (online) to verify the system against the specification
+	\item How should the syntax for the specification be defined,
+	so that it looks similar to that for unit tests, but works for RV?
+		Which language could be used? Which unit testing framework to take inspiration from?
+	\item How can this be related to a formal logic, to ensure the correctness of the specification?
+		What formal logic should be used? 
+	\item How should the code be instrumented to monitor the system and build the system model?
+		How should the specification be transformed so it can be executed? 
+	\item How will this be used to (online) verify the system against the specification?
 \end{enumerate}
 
-We will focus on item 1 and 3.
+I will focus on item 1 and 3.
 
-The exjobb will be split in these parts:
+\subsection{Evaluation/Experiments/Implementation}
 
-\begin{itemize}
-	\item Background and state-of-the-art "inventory". What is RV? Why does it
-        exist? Research results? How is it applied in practice? How is it used
-        in web contexts? How are specification languages chosen and designed?
-	\item Background and state-of-the-art of testing frameworks and their
-        languages/syntax.
-	\item Investigation of how RV can be applied to a (web) system. What
-        specification language to use? In what system language: dynamic
-        (python, ruby, etc.) static (Java, C\#)? How should code
-        instrumentation be done?
-	\item Implement an RV framework prototype. Find a suitable test-like
-        specification language, or design it with inspiration from such
-        languages.
-	\item \textit{(Possible extension)}
-		Apply implemented RV framework on a project at Valtech. Evaluate and
-        analyze. Do some benchmarking to check on how the RV framework impacts
-        performance.
-\end{itemize}
+In this part I will implement an RV framework prototype, based on the previous
+investigation.
 
-Suggested project(s) at Valtech: The Valtech Intranet (python).
+If possible, I will also attempt to use the resulting framework to enable runtime verification on a project at Valtech.
 
-\textbf{Timeplan/Schedule}
 
-I will work on the exjobb 50\% and 50\% on projects at Valtech, in periods of
-two weeks exjobb, two weeks work. This fits well into the iteration-planning at
-Valtech. During the summer I will almost exclusively work on the exjobb, and also
-use some of my vacation hours for the exjobb.
+\section{Resources}
 
-Suggested approximate time plan:
+If I attempt to try the prototype framework on a project at Valtech, I need to get access to such a project. One suggested possible project is the Valtech Intranet.
+
+
+\section{Scope}
+
+The the report will contain a section on how to relate the new specification syntax to a formal logic, thus showing that specifications written in the new syntax can be used for runtime verification.
+
+TODO: What should be here? What will \emph{not} be in the report?
+
+
+\section{Working Procedure}
+
+I will work on the degree project 50\% and 50\% on projects at Valtech, in periods of
+two weeks degree project, two weeks work. This fits well into the iteration-planning at
+Valtech. During the summer I will almost exclusively work on the degree project, and also
+use some of my vacation hours to work on it.
+
+Other required work related to the degree project, such as doing the opposition of
+another student's work, will take time from the work above and require
+flexibility in planning.
+
+I will keep a diary, \texttt{http://tgwizard.github.com/thesis}, in which I will write on my progress. 
+
+\subsection{Approximate Time Plan}
+
 
 \begin{center}
 	\renewcommand{\arraystretch}{1.5}
 	\arrayrulecolor{Gray}
-	\begin{tabular}{ l l l | p{7cm} }
-		\textbf{Start} & \textbf{Weeks} & \textbf{N} & \textbf{Work} \\
+	\begin{tabular}{ l l l | p{8cm} }
+		\textbf{Start} & \textbf{Weeks} &  & \textbf{Work} \\
 		\noalign{\smallskip}\hline\noalign{\smallskip}
 		
-		May & \textit{1w in May} & \textbf{1w} &
+		May & \textit{1w in May/June} & \textbf{1w} &
 		Writing, and doing the research for, this specification.
 		\\
 		
@@ -138,20 +187,17 @@ Suggested approximate time plan:
 		Writing the background part of the report.
 		\\
 		
-		16/7 & v29, v30, v31, v32 & \textbf{4w} &
+		16/7 & v29, v30, v31, v32, v33 & \textbf{5w} &
 		Investigating and evaluating "what to do".
 		\\
 		
-		13/8 & v33& \textbf{1w} &
+		13/8 & v34& \textbf{1w} &
 		Writing about the investigation.
 		\\
 		
-		20/8 & v34, v35, v36 & \textbf{3w} &
+		20/8 & v35, v36, v37, v38 & \textbf{4w} &
 		Implementing and evaluating the RV framework.
-		\\
-		
-		10/9 & v37, v38 & \textbf{2w} &
-		Testing and analysing the RV framework on "the project".
+		Possibly testing and analysing the RV framework on a project.
 		\\
 		
 		24/9 & v39, v40, v41 & \textbf{3w} &
@@ -161,20 +207,69 @@ Suggested approximate time plan:
 	\end{tabular}
 \end{center}
 
+I will take the weeks v24 and v25 off, as well as about 1 week in august (not planned).
+\textbf{The weeks I will be working at Valtech haven't been written into the time table.}
+
 Total: 20 weeks. End date: \textbf{12 October 2012} (very optimistic).
 
-I will weeks v24 and v25 off, as well as about 1 week in august (not planned). \textbf{The weeks I will be working at Valtech haven't been written into the time table.}
+\section{Licensing}
 
-Other required work related to the exjobb, such as doing the opposition of
-another student's work, will take time from the work above and require
-flexibility in planning.
+I will license any resulting code under some open source license, and any documentation, including the report, under Creative Commons Attribution 3.0 Unported License \cite{cc-by} (or something similar).
 
-\textbf{Issues}
 
-\begin{itemize}
-	\item Who will be the examiner?
-    \item Do I need to start the exjobb work at a specific date and time? Do I
-        need to/Should I take part in an exjobb "support group"?
-\end{itemize}
+\begin{thebibliography}{9}
+
+\bibitem{leucker08}
+	Martin Leucker, Christian Schallhart.
+	A brief account of runtime verification.
+	In \emph{The Journal of Logic and Algebraic Programming 78}.
+	2009, pages 293-303.
+
+\bibitem{delgado04}
+	Nelly Delgado, Ann Q. Gates, Steve Roach.
+	A Taxonomy and Catalog of Runtime Software-Fault Monitoring Tools.
+	In \emph{IEEE Transactions on Software Engineering}.
+	IEEE, 2004.
+
+\bibitem{pnueli77}
+	Amir Pnueli.
+	The temporal logic of programs. 
+	In \emph{Proceedings of the 18th IEEE Symposium on the Foundations of Computer Science (FOCS-77)}.
+	IEEE, 1977
+
+\bibitem{huebscher08}
+	Markus C. Huebscher, Julie A. McCann.
+	A survey of Autonomic Computing \- degrees, models and applications.
+	In \emph{ACM Computing Surveys}, Volume 40 Issue 3.
+	ACM, 2008.
+	
+\bibitem{junit}
+	Kent Beck, Eric Gamma, David Saff.
+	JUnit.
+	\texttt{http://junit.sourceforge.net/},
+	June 2012.
+
+\bibitem{python-unittest}
+	Python Software Foundation.
+	unittest.
+	\texttt{http://docs.python.org/library/unittest.html},
+	June 2012.
+
+\bibitem{aspectj}
+	AspectJ.
+	\texttt{http://www.eclipse.org/aspectj/},
+	June 2012
+
+\bibitem{matusiak09}
+	Martin Matusiak.
+	Strategies for aspect oriented programming in Python.
+	2009
+
+\bibitem{cc-by}
+	Creative Commons.
+	Creative Commons Attribution 3.0 Unported License.
+	\texttt{http://creativecommons.org/licenses/by/3.0/}
+
+\end{thebibliography}
 
 \end{document}
