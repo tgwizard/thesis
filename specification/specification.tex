@@ -42,46 +42,60 @@
 
 \section{Short Background}
 
-Runtime verification (RV) is a light-weight formal verification technique, see e.g. \cite{leucker08,delgado04}.
-It verifies that specified properties hold during the execution of a program. It operates on a \emph{trace} of the \emph{current execution}, either while it is running (online), or at some other time and/or place (offline).
+Runtime verification (RV) is a dynamic approach to checking program correctness, in contrast to the more 
+traditional static analysis tools of \emph{model checking}, \emph{bounded reachability} and \emph{theorem proving}. These are often very useful, but suffers from severe problems such as the
+state explosion problem, incompleteness, undecidability and the overall difficulty of using them
+on large programs. Moreover, static analysis only verifies the abstract model of the program, and cannot guarantee the correctness of the implementation or the dynamic properties of the executing code.
 
-The properties that should be verified are specified in a constructed
-language, often a logic/calculus, such as Linear Temporal Logic \cite{pnueli77}.
-An RV framework then instruments the target program with monitors so that the properties
-can be checked, and the execution verified against the specification.
+Runtime verification is a light-weight formal verification technique, see e.g. \cite{leucker08,delgado04}.
+It verifies that specified properties hold during the execution of a program. It operates on a \emph{trace} of the \emph{current execution}, either while it is running (online), or at some other time and/or place (offline), and verifies the execution against a \emph{specification}.
+
+The specification that should be verified is written in a formal
+language, often a logic/calculus, such as linear temporal logic \cite{pnueli77}. To generate
+a \emph{system model} for the logic (or an automaton thereof) to operate on, the target program
+needs to emit and expose certain events and data. Many RV frameworks use \textit{code instrumentation}
+to generate \textit{monitors} for this end.
 
 When a violation against the specification occurs, simple actions can be taken (e.g. log the error, send emails, etc.), or more complex responses initiated, resulting in a \textit{self-healing} or \textit{self-adapting} system (see e.g. \cite{huebscher08}).
 
-\textit{Unit testing} is the concept of writing small tests, or test suites, for the units in a program, be it functions, classes, etc. These tests are used during development to test the functionality of the units. They aim to reduce the risk of breaking existing functionality when developing new features or modifying existing code (by preventing regression).
+On the other end of the program-correctness-checking spectrum is \emph{testing}, which is the
+practical approach of checking that the program, given a certain input, produces the correct output.
+Testing is not complete, and lacks a formal foundation, so it cannot be used for formal verification. 
+Testing can be a complement to formal techniques, such as RV (but is in many places the sole correctness-checking tool).
 
-Writing unit tests, often using unit testing \textit{frameworks} such as JUnit \cite{junit} for Java and unittest \cite{python-unittest} for Python, is a common practice on many development teams.
+\textit{Unit testing} is the concept of writing small tests, or test suites, for the units in
+a program, be it functions, classes, etc. These tests are used during development to test the 
+functionality of the units. They aim to reduce the risk of breaking existing functionality when 
+developing new features or modifying existing code (by preventing regression).
+
+Writing unit tests, often using unit testing \textit{frameworks} such as JUnit \cite{junit}
+for Java and unittest \cite{python-unittest} for Python, is a common practice on many
+development teams.
+
 
 \section{Problem}
 
 \subsection{Problem Definition}
 
-How can runtime verification specifications be written in a manner that resembles
-the syntax of unit tests?
+How can runtime verification specifications be written in a manner that resembles the syntax of
+the target program's programming language, and the structure of unit tests?
 
-Suggested title: \textit{Test-oriented runtime verification - using a unit test-like specification syntax for runtime verification}.
+Suggested title: \textit{Test-inspired runtime verification - using a unit test-like specification syntax for runtime verification}.
 
 
 \subsection{Motivation}
 
-Verification that a program works correctly is of great interest to software developers, and
-formal formal verification techniques can often help. Traditional approaches, such as
-\textit{theorem proving}, \textit{model checking} can be impractical with larger programs,
-and verification by \textit{testing} is informal. Runtime verification can here be a lightweight
-addition to the list.
+Checking that a program works correctly is of great interest to software developers, and
+formal verification techniques can often help. As mentioned above, traditional approaches
+can be impractical with larger programs, and verification by testing is informal.
+Runtime verification can here be a lightweight addition to the list.
 
-An important part of RV specifications is that they should be formal, and thus
-that the properties they specify yield a formal proof of correctness for the
-current execution.
-
-The specification languages used by RV implementations is therefore often based
-on some formal logic and not written in the target program's programming language. In contrast,
-offline unit testing frameworks often utilize the programming language to great effect,
-and their use is wide spread.
+The specification languages used by RV approaches are often based
+on formal logic and not written in the target program's programming language. 
+This means that writing the specifications require specific knowledge and expertise in mathematics. 
+It also requires mental-context switching and special tools
+to support this specialised language syntax. In contrast, unit testing frameworks often
+utilize the programming language to great effect, and their use is wide spread.
 
 If RV specifications more resembled unit tests, and were written in the target program's
 programming language, it might popularize the use of runtime verification.
@@ -93,9 +107,9 @@ programming language, it might popularize the use of runtime verification.
 
 Runtime verification is a somewhat new area of research, but the research on verification and formal methods goes back several centuries.
 
-Unit testing is also quite young, perhaps having started in the 90s, and it isn't as much researched as formal methods.
+Unit testing is also quite young, perhaps having started in the 90s, and it isn't as much researched as formal methods. Testing in general is very old.
 
-The work on the Linear Temporal Logic, on runtime verification in general and its applications, on code instrumentation (e.g. \cite{aspectj,matusiak09}), and on unit testing and their frameworks will lay the foundation of this work.
+The work on the linear temporal logic (and other logics), on runtime verification in general and its applications, on code instrumentation (e.g. \cite{aspectj,matusiak09}), and on unit testing and their frameworks will lay the foundation of this work.
 
 
 \subsection{Examination}
@@ -121,7 +135,7 @@ In this investigative part I will answer the following questions:
 
 \begin{enumerate}
 	\item How should the syntax for the specification be defined,
-	so that it looks similar to that for unit tests, but works for RV?
+		so that it looks similar to that for unit tests, but works for RV?
 		Which language could be used? Which unit testing framework to take inspiration from?
 	\item How can this be related to a formal logic, to ensure the correctness of the specification?
 		What formal logic should be used? 
