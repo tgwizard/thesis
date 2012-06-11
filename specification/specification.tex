@@ -35,8 +35,8 @@
 \end{tabular}
 
 
-\begin{spacing}{0.8}
-\setlength\parskip{0.1em}
+\begin{spacing}{1.0}
+\setlength\parskip{0.15em}
 \tableofcontents
 \end{spacing}
 
@@ -111,6 +111,8 @@ Unit testing is also quite young, perhaps having started in the 90s, and it isn'
 
 The work on the linear temporal logic (and other logics), on runtime verification in general and its applications, on code instrumentation (e.g. \cite{aspectj,matusiak09}), and on unit testing and their frameworks will lay the foundation of this work.
 
+I've already studied several papers, mostly in runtime verification, verification tools, logics, etc.
+A list of these can be found at the project's website: \texttt{http://tgwizard.github.com/thesis}.
 
 \subsection{Examination}
 
@@ -120,18 +122,14 @@ both a general description of RV and unit testing, and more detailed sections on
 
 \section{Method}
 
-The work will consist of three parts:
+The work will consist of two parts:
 
 
-\subsection{Related Work}
+\subsection{Approach}
 
 I will do a background and state-of-the-art inventory of RV and unit testing. The focus will lie on the syntax used for writing the specifications/tests, and how they are executed and the target program instrumented.
 
-
-
-\subsection{Approach/Investigation}
-
-In this investigative part I will answer the following questions:
+I will also answer the following questions:
 
 \begin{enumerate}
 	\item How should the syntax for the specification be defined,
@@ -146,7 +144,8 @@ In this investigative part I will answer the following questions:
 
 I will focus on item 1 and 3.
 
-\subsection{Evaluation/Experiments/Implementation}
+
+\subsection{Evaluation}
 
 In this part I will implement an RV framework prototype, based on the previous
 investigation.
@@ -157,13 +156,6 @@ If possible, I will also attempt to use the resulting framework to enable runtim
 \section{Resources}
 
 If I attempt to try the prototype framework on a project at Valtech, I need to get access to such a project. One suggested possible project is the Valtech Intranet.
-
-
-\section{Scope}
-
-The the report will contain a section on how to relate the new specification syntax to a formal logic, thus showing that specifications written in the new syntax can be used for runtime verification.
-
-TODO: What should be here? What will \emph{not} be in the report?
 
 
 \section{Working Procedure}
@@ -220,6 +212,8 @@ I will keep a diary, \texttt{http://tgwizard.github.com/thesis}, in which I will
 		
 	\end{tabular}
 \end{center}
+
+vXX means week-of-the-year XX, calculated the Swedish way. I.e., week 28 starts on the 9th of July.
 
 I will take the weeks v24 and v25 off, as well as about 1 week in august (not planned).
 \textbf{The weeks I will be working at Valtech haven't been written into the time table.}
