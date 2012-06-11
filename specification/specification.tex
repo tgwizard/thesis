@@ -35,8 +35,8 @@
 \end{tabular}
 
 
-\begin{spacing}{1.0}
-\setlength\parskip{0.15em}
+\begin{spacing}{0.9}
+\setlength\parskip{0.1em}
 \tableofcontents
 \end{spacing}
 
@@ -105,11 +105,11 @@ programming language, it might popularize the use of runtime verification.
 
 \subsection{Previous Research}
 
-Runtime verification is a somewhat new area of research, but the research on verification and formal methods goes back several centuries.
+Runtime verification is a somewhat new area of research, but the research on verification and formal methods goes back several centuries. Research of interest include the early work on formal methods, e.g. by Hoare \cite{hoare69} and Floyd \cite{floyd67}, and work on logics suitable for runtime verification, e.g. LTL by Pnueli \cite{pnueli77}. Relevant work on runtime verification include \cite{bauer06} on instrumenting code and transforming specifications into automata, \cite{bodden05} on runtime verification through \emph{aspect-oriented programming} \cite{aspectj}, and more. 
 
 Unit testing is also quite young, perhaps having begun in earnest in the 90s, and it is not as much researched as formal methods. Testing in general is very old.
 
-The work on the linear temporal logic (and other logics), on runtime verification in general and its applications, on code instrumentation (e.g. \cite{aspectj,matusiak09}), and on unit testing and their frameworks will lay the foundation of this work.
+The work on the linear temporal logic (and other logics), on runtime verification in general and its applications, on code instrumentation (e.g. \cite{aspectj,matusiak09}), and on unit testing and their frameworks will lay the foundation of this work. Interesting research also include the work by Meyer on the "Design by Contract" methodology \cite{meyer92} and on programming with assertions in general, see e.g. \cite{rosenblum95,bartetzko01}.
 
 I have already studied several papers, mostly in runtime verification, verification tools, logics, etc.
 A list of these can be found at the project's website: \texttt{http://tgwizard.github.com/thesis/}.
@@ -160,6 +160,8 @@ If I attempt to try the prototype framework on a project at Valtech, I need to g
 
 \section{Working Procedure}
 
+\subsection{Overview}
+
 I will work on the degree project 50\% and 50\% on projects at Valtech, in periods of
 two weeks degree project, two weeks work. This fits well into the iteration-planning at
 Valtech. During the summer I will almost exclusively work on the degree project, and also
@@ -177,7 +179,10 @@ I will keep a diary, \texttt{http://tgwizard.github.com/thesis/}, in which I wil
 \begin{center}
 	\renewcommand{\arraystretch}{1.5}
 	\arrayrulecolor{Gray}
-	\begin{tabular}{ l l l | p{8cm} }
+	\begin{table}[h!b!p!]
+	
+	\begin{tabular}{ l | l l | p{8cm} }
+		
 		\textbf{Start} & \textbf{Weeks} &  & \textbf{Work} \\
 		\noalign{\smallskip}\hline\noalign{\smallskip}
 		
@@ -185,7 +190,7 @@ I will keep a diary, \texttt{http://tgwizard.github.com/thesis/}, in which I wil
 		Writing, and doing the research for, this specification.
 		\\
 		
-		May & \textit{2w in May}, v23, v26, v27 & \textbf{5w} &
+		May & \textit{2w in May}, v23\footnotemark[1], v26, v27 & \textbf{5w} &
 		Doing background \& research.
 		\\
 		
@@ -211,9 +216,11 @@ I will keep a diary, \texttt{http://tgwizard.github.com/thesis/}, in which I wil
 		\\
 		
 	\end{tabular}
+	\caption{Time plan week-by-week}
+	\end{table}
 \end{center}
 
-vXX means week-of-the-year XX, calculated the Swedish way. I.e., week 28 starts on the 9th of July.
+\footnotetext[1]{vXX means week-of-the-year XX, calculated in the Swedish way. i.e., week 23 starts on the 6th of June}
 
 I will take the weeks v24 and v25 off, as well as about 1 week in august (not planned).
 \textbf{The weeks I will be working at Valtech haven't been written into the time table.}
@@ -262,6 +269,48 @@ I will license any resulting code under some open source license, and any docume
 	unittest.
 	\texttt{http://docs.python.org/library/unittest.html},
 	June 2012.
+
+\bibitem{hoare69}
+	C. A. R. Hoare.
+	An Axiomatic Basis for Computer Programming.
+	In \emph{Communications of the ACM}, Volume 12 Issue 10.
+	ACM, 1969
+
+\bibitem{floyd67}
+	Robert W. Floyd.
+	Assigning meaning to programs.
+	In \emph{Proceedings of Symposium on Applied Mathematics}, Vol. 19.
+	A.M.S., 1967
+
+\bibitem{bauer06}
+	Andreas Bauer, Martin Leucker, Christian Schallhart.
+	Monitoring of real-time properties.
+	In \emph{Proceedings of the 26th Conference on Foundations of Software Technology and Theoretical Computer Science} (FSTTCS), volume 4337 of LNCS.
+	Springer, 2006.
+
+\bibitem{bodden05}
+	Eric Bodden.
+	Efficient and Expressive Runtime Verification for Java.
+	In Grand Finals of the ACM Student Research Competition 2005.
+	ACM, 2005.
+
+\bibitem{meyer92}
+	Bertrand Meyer.
+	Applying "Design by Contract".
+	In \emph{Computer (IEEE)}, 25, 10.
+	IEEE, 1992.
+	
+\bibitem{rosenblum95}
+	Davis S. Rosenblum.
+	A Practical Approach to Programming With Assertions.
+	in \emph{IEEE Transactions on Software Engineering}, Vol. 21, No. 1.
+	IEEE, 1995.
+
+\bibitem{bartetzko01}
+	Detlef Bartetzko, Clemens Fischer, Michael Möller, Heike Wehrheim.
+	Jass - Java with Assertions.
+	In \emph{Electronic Notes in Theoretical Computer Science}, Volume 55, Issue 2.
+	Elsevier 2001.
 
 \bibitem{aspectj}
 	AspectJ.
