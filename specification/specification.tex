@@ -190,57 +190,66 @@ I will keep a diary, \texttt{http://tgwizard.github.com/thesis/}, in which I wil
 
 \subsection{Approximate Time Plan}
 
-
 \begin{center}
 	\renewcommand{\arraystretch}{1.5}
 	\arrayrulecolor{Gray}
 	\begin{table}[h!b!p!]
-	
-	\begin{tabular}{ l | l l | p{8cm} }
-		
-		\textbf{Start} & \textbf{Weeks} &  & \textbf{Work} \\
+
+	\begin{tabular}{ p{4cm} | l l l l l l | l }
+        \textbf{Task} & \textbf{May} & \textbf{Jun} & \textbf{Jul} &
+        \textbf{Aug} & \textbf{Sep} & \textbf{Oct} &
+        \textbf{Total} \\
 		\noalign{\smallskip}\hline\noalign{\smallskip}
-		
-		May & \textit{1w in May/June} & \textbf{1w} &
-		Writing, and doing the research for, this specification.
-		\\
-		
-		May & \textit{2w in May}, v23\footnotemark[1], v26, v27 & \textbf{5w} &
-		Doing background \& research.
-		\\
-		
-		9/7 & v28 & \textbf{1w} &
-		Writing the background part of the report.
-		\\
-		
-		16/7 & v29, v30, v31, v32, v33 & \textbf{5w} &
-		Investigating and evaluating the questions section of the approach part.
-		\\
-		
-		13/8 & v34& \textbf{1w} &
-		Writing about the investigation.
-		\\
-		
-		20/8 & v35, v36, v37, v38 & \textbf{4w} &
-		Implementing and evaluating the RV framework.
-		Possibly testing and analysing the RV framework on a project.
-		\\
-		
-		24/9 & v39, v40, v41 & \textbf{3w} &
-		Writing and finishing the report.
-		\\
-		
+
+        Preparing specification &
+        1w & 0.5w  & & & & & 1.5w \\
+
+        Literature survey &
+        2w & 2w & 1.5w & & & & 5.5w \\
+
+        Write report (background) &
+        & & 1w & & & & 1w \\
+
+        Language syntax design &
+        & & 1w & 0.5w & & & 1.5w \\
+
+        Provide formal semantics &
+        & & 0.5w & 1w & & & 1.5w \\
+
+        Develop verification approach &
+        & & & 1w & & & 1w \\
+
+        Propose approach for code instrumentation &
+        & & & 1w & & & 1w \\
+
+        Implementation of RV framework &
+        & & & & 2w & & 2w \\
+
+        Evaluating approach &
+        & & & & 1.5w & & 1.5w \\
+
+        Write report (all) &
+        & & & & 1.5w & 2w & 3.5w \\
+
+		\noalign{\smallskip}\hline\noalign{\smallskip}
+        \textbf{Total} &
+        3w & 2.5w & 4w & 3.5w & 5w & 2w & 20w \\
+
 	\end{tabular}
 	\caption{Time plan week-by-week}
 	\end{table}
 \end{center}
 
-\footnotetext[1]{vXX means week-of-the-year XX, calculated in the Swedish way. i.e., week 23 starts on the 6th of June}
+The literature survey includes: runtime verification approaches, definition of
+semantics, test approaches/frameworks, formal verification approaches. The
+evaluation consists of applying the prototype framework on a (possibly
+real-life) framework.
 
 I will take the weeks v24 and v25 off, as well as about 1 week in august (not planned).
 \textbf{The weeks I will be working at Valtech haven't been written into the time table.}
 
 Total: 20 weeks. End date: \textbf{12 October 2012} (very optimistic).
+
 
 \section{Licensing}
 
