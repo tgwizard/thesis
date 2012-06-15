@@ -47,7 +47,7 @@ traditional formal static analysis techniques of \emph{model checking} (or its
 bounded form) and \emph{theorem proving}. These are often very useful, but suffer from severe problems such as the
 state explosion problem, incompleteness, undecidability etc.,
 when they are used for verification of large-scale systems.
-Moreover, static analysis only verifies an abstract model of the program, and cannot guarantee the correctness of the implementation or the dynamic properties of the executing code.
+Moreover, static analysis usually verifies an abstract model of the program, and cannot guarantee the correctness of the implementation or the dynamic properties of the executing code.
 
 Runtime verification is a light-weight formal verification technique, see e.g. \cite{leucker08,delgado04}.
 It verifies whether some specified properties hold during the execution of a
@@ -59,10 +59,10 @@ The specification that should be verified is written in a formal
 language, often a logic/calculus, such as linear temporal logic
 \cite{pnueli77}. To build
 a \emph{system model} for verifying the properties of the specification, the target program
-needs to emit and expose certain events and data. Many RV frameworks use \textit{code instrumentation}
+needs to emit and expose certain events and data. The collected events and data are used to build the system model. Many RV frameworks use \textit{code instrumentation}
 to generate \textit{monitors} for this end.
 
-When a violation against the specification occurs, simple actions can be taken (e.g. log the error, send emails, etc.), or more complex responses initiated, resulting in a \textit{self-healing} or \textit{self-adapting} system (see e.g. \cite{huebscher08}).
+When a violation of the specification occurs, simple actions can be taken (e.g. log the error, send emails, etc.), or more complex responses initiated, resulting in a \textit{self-healing} or \textit{self-adapting} system (see e.g. \cite{huebscher08}).
 
 On the other end of the program-correctness-checking spectrum is \emph{testing}, which is the
 practical approach of checking that the program, given a certain input, produces the correct output.
@@ -99,7 +99,7 @@ Runtime verification can here be a lightweight addition to the list.
 
 The specification languages used by RV approaches are often based
 on formal languages/formalisms (e.g. logic or algebra) and not written in the target program's programming language. 
-This means that writing the specifications require specific knowledge and expertise in mathematics. 
+This means that writing the specifications requires specific knowledge and expertise in mathematics. 
 It also requires mental-context switching and special tools
 to support this specialised language syntax. In contrast, unit testing frameworks often
 utilize the programming language to great effect, and their use is wide spread.
@@ -113,7 +113,7 @@ checking the correctness of software systems.
 
 \subsection{Previous Research}
 
-Runtime verification is a somewhat new area of research, but the research on verification and formal methods goes back several centuries. Research of interest include the early work on formal methods, e.g. by Hoare \cite{hoare69} and Floyd \cite{floyd67}, and work on logics suitable for runtime verification, e.g. LTL by Pnueli \cite{pnueli77}. Relevant work on runtime verification include \cite{bauer06} on instrumenting code and transforming specifications into automata, \cite{bodden05} on runtime verification through \emph{aspect-oriented programming} \cite{aspectj}, and more. 
+Runtime verification is a new area of research, but the research on verification and formal methods goes back several centuries. Research of interest include the early work on formal methods, e.g. by Hoare \cite{hoare69} and Floyd \cite{floyd67}, and work on logics suitable for runtime verification, e.g. LTL by Pnueli \cite{pnueli77}. Relevant work on runtime verification include \cite{bauer06} on instrumenting code and transforming specifications into automata, \cite{bodden05} on runtime verification through \emph{aspect-oriented programming} \cite{aspectj}, and more. 
 
 Unit testing is also quite young, perhaps having begun in earnest in the 90s, and it is not as much researched as formal methods. Testing in general is very old.
 
@@ -138,8 +138,7 @@ The work will consist of two parts:
 I will do a background and state-of-the-art inventory of RV and unit testing.
 The focus will lie on the syntax used for writing the specifications, how the
 properties are verified against the system model, and how code instrumentation
-is done. For unit testing the structure and syntax, and purpose thereof, will
-have relevance.
+is done. I will also focus on the syntax and structure of unit tests, which will have a large bearing on this project.
 
 I will also answer the following questions:
 
@@ -155,8 +154,7 @@ I will also answer the following questions:
         monitored system against the specification?)
 \end{enumerate}
 
-Item one and three are of most interest to this project, but all four items are
-important and required parts of runtime verification.
+Steps one and three are of most interest to this project, as well as step 2 for the formal foundation, but all four steps are important and required parts of runtime verification.
 
 
 \subsection{Evaluation}
