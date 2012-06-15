@@ -51,16 +51,17 @@ Moreover, static analysis usually verifies an abstract model of the program, and
 
 Runtime verification is a light-weight formal verification technique, see e.g. \cite{leucker08,delgado04}.
 It verifies whether some specified properties hold during the execution of a
-program. It operates on a \emph{trace} of the \emph{current execution}, either
-during the execution (\emph{online monitoring}), or at some other time and/or place
-(\emph{offline monitoring}).
+program.
 
 The specification that should be verified is written in a formal
 language, often a logic/calculus, such as linear temporal logic
 \cite{pnueli77}. To build
 a \emph{system model} for verifying the properties of the specification, the target program
 needs to emit and expose certain events and data. The collected events and data are used to build the system model. Many RV frameworks use \textit{code instrumentation}
-to generate \textit{monitors} for this end.
+to generate \textit{monitors} for this end. There are two types of monitoring:
+\emph{online} and \emph{offline}.
+In online monitoring, the analysis and verification is done during the execution, in a synchronous
+manner with the observed system. In offline monitoring, a log of events is analysed at a later time.
 
 When a violation of the specification occurs, simple actions can be taken (e.g. log the error, send emails, etc.), or more complex responses initiated, resulting in a \textit{self-healing} or \textit{self-adapting} system (see e.g. \cite{huebscher08}).
 
@@ -102,10 +103,10 @@ on formal languages/formalisms (e.g. logic or algebra) and not written in the ta
 This means that writing the specifications requires specific knowledge and expertise in mathematics. 
 It also requires mental-context switching and special tools
 to support this specialised language syntax. In contrast, unit testing frameworks often
-utilize the programming language to great effect, and their use is wide spread.
+utilise the programming language to great effect, and their use is wide spread.
 
 If RV specifications more resembled unit tests, and were written in the target program's
-programming language, it might popularize the use of runtime verification for
+programming language, it might popularise the use of runtime verification for
 checking the correctness of software systems.
 
 
@@ -113,9 +114,19 @@ checking the correctness of software systems.
 
 \subsection{Previous Research}
 
-Runtime verification is a new area of research, but the research on verification and formal methods goes back several centuries. Research of interest include the early work on formal methods, e.g. by Hoare \cite{hoare69} and Floyd \cite{floyd67}, and work on logics suitable for runtime verification, e.g. LTL by Pnueli \cite{pnueli77}. Relevant work on runtime verification include \cite{bauer06} on instrumenting code and transforming specifications into automata, \cite{bodden05} on runtime verification through \emph{aspect-oriented programming} \cite{aspectj}, and more. 
+Runtime verification is a new area of research, but the research on verification and formal methods goes back several centuries. Research of interest include the early work on formal methods, e.g. by Hoare \cite{hoare69} and Floyd \cite{floyd67}, and work on logics suitable for runtime verification, e.g. LTL by Pnueli \cite{pnueli77}. Pnueli's work have
+been very influential on RV and the specification languages used.
+
+Relevant work on runtime verification include \cite{bauer06}, in which Bauer et al. work with a three-valued boolean logic (true, false and ?), and presents how to transform specifications into automata (i.e. runtime monitors). Bodden presents in \cite{bodden05} RV done through \emph{aspect-oriented programming} \cite{aspectj} in Java, with specifications written
+as code annotations.
+
+Leucker et al. attempts a definition of RV in \cite{leucker08}, together with an exposition on the advantages and disadvantages, similarities and differences, with other verification approaches. In \cite{delgado04}, Delgado et al. presents and catalogues several different approaches and frameworks to runtime verification.
 
 Unit testing is also quite young, perhaps having begun in earnest in the 90s, and it is not as much researched as formal methods. Testing in general is very old.
+
+Kent Beck introduced the style of the modern unit testing framework in his
+work on a testing framework  for Smalltalk \cite{beck-smalltalk-testing}. 
+Together with Eric Gamma he later ported it to Java, resulting in JUnit \cite{junit}. Today, this has lead to frameworks in several programming languages, and they are collectively called \textit{xUnit}.
 
 The work on the linear temporal logic (and other logics), on runtime verification in general and its applications, on code instrumentation (e.g. \cite{aspectj,matusiak09}), and on unit testing and their frameworks will lay the foundation of this work. Interesting research also include the work by Meyer on the "Design by Contract" methodology \cite{meyer92} and on programming with assertions in general, see e.g. \cite{rosenblum95,bartetzko01}.
 
@@ -284,13 +295,13 @@ I will license any resulting code under some open source license, and any docume
 	Kent Beck, Eric Gamma, David Saff.
 	JUnit.
 	\texttt{http://junit.sourceforge.net/},
-	June 2012.
+	Retrieved on June 2012.
 
 \bibitem{python-unittest}
 	Python Software Foundation.
 	unittest.
 	\texttt{http://docs.python.org/library/unittest.html},
-	June 2012.
+	Retrieved on June 2012.
 
 \bibitem{hoare69}
 	C. A. R. Hoare.
@@ -316,6 +327,12 @@ I will license any resulting code under some open source license, and any docume
 	In Grand Finals of the ACM Student Research Competition 2005.
 	ACM, 2005.
 
+\bibitem{beck-smalltalk-testing}
+	Kent Beck.
+	Simple Smalltalk Testing: With Patterns
+	\texttt{http://www.xprogramming.com/testfram.htm},
+	Retrieved on June 2012.
+
 \bibitem{meyer92}
 	Bertrand Meyer.
 	Applying "Design by Contract".
@@ -337,7 +354,7 @@ I will license any resulting code under some open source license, and any docume
 \bibitem{aspectj}
 	AspectJ.
 	\texttt{http://www.eclipse.org/aspectj/},
-	June 2012
+	Retrieved on June 2012
 
 \bibitem{matusiak09}
 	Martin Matusiak.
