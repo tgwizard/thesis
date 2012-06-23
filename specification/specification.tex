@@ -114,24 +114,24 @@ checking the correctness of software systems.
 
 \subsection{Previous Research}
 
-Runtime verification is a new area of research, but the research on verification and formal methods goes back several centuries. Research of interest include the early work on formal methods, e.g. by Hoare \cite{hoare69} and Floyd \cite{floyd67}, and work on logics suitable for runtime verification, e.g. LTL by Pnueli \cite{pnueli77}. Pnueli's work have
-been very influential on RV and the specification languages used.
+I have already studied several papers, mostly in runtime verification, verification tools, logics, etc.
+A list of these can be found at the project's website: \texttt{http://tgwizard.github.com/thesis/}.
+Studying all those papers is beyond the scope of this document. Therefore, I will restrict myself to briefly refer to some of the most relevant work here.
 
-Relevant work on runtime verification include \cite{bauer06}, in which Bauer et al. work with a three-valued boolean logic (true, false and ?), and presents how to transform specifications into automata (i.e. runtime monitors). Bodden presents in \cite{bodden05} RV done through \emph{aspect-oriented programming} \cite{aspectj} in Java, with specifications written
+Runtime verification is a new area of research, but the research on verification and formal methods goes back several decades. Research of interest include the early work on formal methods, e.g. by Hoare \cite{hoare69} and Floyd \cite{floyd67}, and work on logics suitable for runtime verification, e.g. LTL by Pnueli \cite{pnueli77}. The seminal work done by Hoare, Floyd and Pnueli are among the interesting approaches used for runtime verification. LTL is one of the common formal languages used for formal specifications in RV.
+
+The work on the linear temporal logic (and other logics), on runtime verification in general and its applications, on code instrumentation (e.g. \cite{aspectj,matusiak09}), and on unit testing and their frameworks will lay the foundation of this work. Interesting research also include the work by Meyer on the "Design by Contract" methodology \cite{meyer92} and on programming with assertions in general, see e.g. \cite{rosenblum95,bartetzko01}.
+
+Relevant work on runtime verification include \cite{bauer06}, in which Bauer et al. use a three-valued boolean logic (true, false and ?), and present how to transform specifications into automata (i.e. runtime monitors). Bodden presents in \cite{bodden05} a framework for RV implemented through \emph{aspect-oriented programming} \cite{aspectj} in Java, with specifications written
 as code annotations.
 
-Leucker et al. attempts a definition of RV in \cite{leucker08}, together with an exposition on the advantages and disadvantages, similarities and differences, with other verification approaches. In \cite{delgado04}, Delgado et al. presents and catalogues several different approaches and frameworks to runtime verification.
+Leucker et al. present a definition of RV in \cite{leucker08}, together with an exposition on the advantages and disadvantages, similarities and differences, with other verification approaches. In \cite{delgado04}, Delgado et al. classify and review several different approaches and frameworks to runtime verification.
 
 Unit testing is also quite young, perhaps having begun in earnest in the 90s, and it is not as much researched as formal methods. Testing in general is very old.
 
 Kent Beck introduced the style of the modern unit testing framework in his
 work on a testing framework  for Smalltalk \cite{beck-smalltalk-testing}. 
 Together with Eric Gamma he later ported it to Java, resulting in JUnit \cite{junit}. Today, this has lead to frameworks in several programming languages, and they are collectively called \textit{xUnit}.
-
-The work on the linear temporal logic (and other logics), on runtime verification in general and its applications, on code instrumentation (e.g. \cite{aspectj,matusiak09}), and on unit testing and their frameworks will lay the foundation of this work. Interesting research also include the work by Meyer on the "Design by Contract" methodology \cite{meyer92} and on programming with assertions in general, see e.g. \cite{rosenblum95,bartetzko01}.
-
-I have already studied several papers, mostly in runtime verification, verification tools, logics, etc.
-A list of these can be found at the project's website: \texttt{http://tgwizard.github.com/thesis/}.
 
 \subsection{Examination}
 
