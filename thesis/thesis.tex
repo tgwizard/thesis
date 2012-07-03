@@ -43,7 +43,7 @@ aptent taciti sociosqu ad litora torquent per conubia nostra, per
 inceptos hymenaeos.
 
 \bigskip\noindent
-Keywords: 
+Keywords: Runtime Verification, Unit Testing
 \end{abstract}
 \clearpage
 
@@ -71,7 +71,7 @@ Keywords (Sökord? Nyckelord?):
 
 This is a master thesis / exjobb in Computer Science at the Royal Institute of Technology (KTH), Stocholm. The work was done at Valtech Sweden, an IT Consultancy. It was supervised by Erland Ranvinge (Valtech) and Dr. (TODO: check) Narges Khakpour (CSC KTH).
 
-Thanks to people.
+Thanks to people. TODO: 
 \clearpage
 
 \pagestyle{newchap}
@@ -83,6 +83,14 @@ Thanks to people.
 \chapter{Introduction}
 
 This is the introduction.
+
+Some temporary citations:
+\cite{hoare69}, \cite{floyd67}, \cite{pnueli77},
+\cite{leucker09abriefaccount}, \cite{bauer06monitoring}, \cite{bauer08goodbadugly}, \cite{delgado04taxonomy}, \cite{meyer92applyingdbc},
+\cite{rosenblum95practicalassertions}, \cite{bartetzko01jass},
+\cite{bodden04lightweightltl}, \cite{bodden05efficientrv},
+\cite{becksmalltalktesting}, \cite{fowlerxunit},
+\cite{matusiak09aoppy}
 
 Purpose: Test-like syntax of runtime verification specifications.
 
@@ -113,6 +121,8 @@ Not formal - doesn't prove anything except for the specified test cases.
 
 Manual. Automatic test-generation?
 
+TDD. BDD.
+
 \section{Runtime Verification}
 
 The idea: Lightweight formal verification. Execution trace. Speed? Monitoring.
@@ -120,6 +130,8 @@ The idea: Lightweight formal verification. Execution trace. Speed? Monitoring.
 \subsection{Writing Specifications}
 
 LTL. TLTL. EAGLE?
+
+High-level, abstract. Easier than the implementation.
 
 \subsection{Transforming Specifications and Instrumenting Code}
 
@@ -175,4 +187,8 @@ And here is a figure
 \end{figure}
 
 that we refer to here: \ref{RDF_4}
+
+% the ieeetr style orders the references after first appearance
+\bibliographystyle{ieeetr}
+\bibliography{references}
 \end{document}
