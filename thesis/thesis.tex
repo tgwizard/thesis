@@ -11,11 +11,15 @@
 \SetWatermarkLightness{0.9}
 \SetWatermarkScale{1.1}
 
-\title{Test-oriented runtime verification}
+\newcommand{\todo}[1]{\textbf{todo: #1}}
+\newcommand{\rephrase}{\textbf{(rephrase)} }
 
-\subtitle{Using a test-like specification syntax for runtime verification}
+\title{Test-inspired runtime verification}
+
+\subtitle{Using a unit test-like
+specification syntax for runtime verification}
           
-\foreigntitle{"Test-orienterad runtime-verifiering"}
+\foreigntitle{"TODO: Test-inspirerad runtime-verifiering"}
               
 \author{Adam Renberg}
 \date{May 2012}
@@ -27,20 +31,18 @@
 \pagestyle{empty}
 \removepagenumbers
 \maketitle
-
 \selectlanguage{english}
-\begin{abstract}
-  This is a skeleton for KTH theses. More documentation
-  regarding the KTH thesis class file can be found in
-  the package documentation.
 
-Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Mauris
-purus. Fusce tempor. Nulla facilisi. Sed at turpis. Phasellus eu
-ipsum. Nam porttitor laoreet nulla. Phasellus massa massa, auctor
-rutrum, vehicula ut, porttitor a, massa. Pellentesque fringilla. Duis
-nibh risus, venenatis ac, tempor sed, vestibulum at, tellus. Class
-aptent taciti sociosqu ad litora torquent per conubia nostra, per
-inceptos hymenaeos.
+
+
+
+%================================================
+%====== The Abstracts
+%================================================
+
+\begin{abstract}
+
+Abstract in English. Write when most of the report is written. 
 
 \bigskip\noindent
 Keywords: Runtime Verification, Unit Testing
@@ -48,17 +50,8 @@ Keywords: Runtime Verification, Unit Testing
 \clearpage
 
 \begin{foreignabstract}{swedish}
-  Denna fil ger ett avhandlingsskelett.
-  Mer information om \LaTeX-mallen finns i
-  dokumentationen till paketet.
 
-Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Mauris
-purus. Fusce tempor. Nulla facilisi. Sed at turpis. Phasellus eu
-ipsum. Nam porttitor laoreet nulla. Phasellus massa massa, auctor
-rutrum, vehicula ut, porttitor a, massa. Pellentesque fringilla. Duis
-nibh risus, venenatis ac, tempor sed, vestibulum at, tellus. Class
-aptent taciti sociosqu ad litora torquent per conubia nostra, per
-inceptos hymenaeos.
+Sammanfattning på svenska. Skrivs sist.
 
 \bigskip\noindent
 Keywords (Sökord? Nyckelord?): 
@@ -66,12 +59,18 @@ Keywords (Sökord? Nyckelord?):
 \clearpage
 
 
+
+
+%================================================
+%====== The Preface and ToC
+%================================================
+
 \pagestyle{newchap}
 \chapter*{Preface}
 
-This is a master thesis / exjobb in Computer Science at the Royal Institute of Technology (KTH), Stocholm. The work was done at Valtech Sweden, an IT Consultancy. It was supervised by Erland Ranvinge (Valtech) and Dr. (TODO: check) Narges Khakpour (CSC KTH).
+This is a master thesis / degree project in Computer Science at the Royal Institute of Technology (KTH), Stocholm. The work was done at Valtech Sweden, an IT Consultancy. It was supervised by Erland Ranvinge (Valtech) and Dr. (\todo{check}) Narges Khakpour (CSC KTH).
 
-Thanks to people. TODO: 
+\todo{Thanks to people}
 \clearpage
 
 \pagestyle{newchap}
@@ -79,10 +78,282 @@ Thanks to people. TODO:
 \mainmatter
 
 
+
+
+%================================================
+%====== Chapter 1, Introduction
+%================================================
+
 \pagestyle{newchap}
 \chapter{Introduction}
 
-This is the introduction.
+Due to the increasing size and complexity of computer software it has become more difficult,
+if not impossible, to convince oneself that the program works as desired, without the help
+of verification tools. Of these tools, testing is the one known by most and in wide spread use.
+The spread of agile development practices and test-driven development has also popularized the
+concept of \textit{unit testing}, in which a program or system is divided into small modules
+and tested individually.
+
+While testing is popular and often works well, it is incomplete and informal, and thus yields
+no proof that the program does what it should - follow its specification. Formal verification
+techniques, such as theorem proving, model checking (and its bounded variant), can give such
+proofs, but they often suffer from complexity problems (incompleteness, undecidability) and
+practical issues, such as the so-called state explosion problem, and not being fully automated.
+
+A relatively \rephrase new approach to this area is runtime verification, in which the
+program \textit{execution} is verified against its specification. With the specification written
+in a suitably formal language, the program can be monitored to check that the specification is
+followed.
+
+
+\section{Problem Statement}
+
+How can runtime verification specifications be written in a manner that uses
+the syntax of the target program’s programming language, and resembles
+the structure of unit tests?
+
+\section{Motivation}
+
+Checking that a program works correctly is of great interest to software developers, and
+formal verification techniques can often help. As mentioned above, traditional approaches
+can be impractical with larger programs, and verification by testing is
+informal and incomplete. Runtime verification can here be a lightweight addition to the list \rephrase of verification techniques.
+
+The specification languages used by runtime verification approaches are often based
+on formal languages/formalisms (e.g. logic or algebra) and not written in the
+target program's programming language.  This means that writing the specifications
+requires specific knowledge and expertise in mathematics. 
+It also requires mental context-switching and special tools
+to support this specialised language's syntax. In contrast, unit testing frameworks often
+utilise the programming language to great effect, and their use is wide spread.
+
+If runtime verification specifications more resembled unit tests, and were written in the target program's
+programming language, it might popularise the use of runtime verification for
+checking the correctness of software systems.
+
+\section{Disposition}
+
+Perhaps: Discuss the sectioning of this report.
+
+The rest of this report is structured in as follows. Chapter 2 gives a
+background to the subject of verifying program correctness. Chapter 3
+continues by describing the previous research on runtime verification and
+the design of specification languages. 
+
+What will this report discuss? What problems? Why is this interesting?
+
+What will this report \textbf{not} discuss?
+
+
+%================================================
+%====== Chapter 2, Background
+%================================================
+
+\pagestyle{newchap}
+\chapter{Background}
+
+\todo{More general background on correctness, testing, unit testing, etc.}
+
+\todo{How verification tools are used in practice?}
+
+Runtime verification is a new area of research, but the research on verification and formal methods goes back several decades. Research of interest include the early work on formal methods, e.g. by Hoare \cite{hoare69} and Floyd \cite{floyd67}, and work on logics suitable for runtime verification, e.g. LTL by Pnueli \cite{pnueli77}. The seminal work done by Hoare, Floyd and Pnueli are among the interesting approaches used for runtime verification. LTL is one of the common formal languages used for formal specifications in RV.
+
+The work on the linear temporal logic (and other logics), on runtime verification in general and its applications, on code instrumentation (e.g. \cite{aspectj,matusiak09aoppy}), and on unit testing and their frameworks will lay the foundation of this work. Interesting research also include the work by Meyer on the "Design by Contract" methodology \cite{meyer92applyingdbc} and on programming with assertions in general, see e.g. \cite{rosenblum95practicalassertions,bartetzko01jass}.
+
+Relevant work on runtime verification include \cite{bauer06}, in which Bauer et al. use a three-valued boolean logic (true, false and ?), and present how to transform specifications into automata (i.e. runtime monitors). Bodden presents in \cite{bodden05efficientrv} a framework for RV implemented through \emph{aspect-oriented programming} \cite{aspectj} in Java, with specifications written
+as code annotations.
+
+Leucker et al. present a definition of RV in \cite{leucker09abriefaccount}, together with an exposition on the advantages and disadvantages, similarities and differences, with other verification approaches. In \cite{delgado04taxonomy}, Delgado et al. classify and review several different approaches and frameworks to runtime verification.
+
+Unit testing is also quite young, perhaps having begun in earnest in the 90s, and it is not as much researched as formal methods. Testing in general is very old.
+
+Kent Beck introduced the style of the modern unit testing framework in his
+work on a testing framework  for Smalltalk \cite{becksmalltalktesting}. 
+Together with Eric Gamma he later ported it to Java, resulting in JUnit \cite{junit}. Today, this has lead to frameworks in several programming languages, and they are collectively called \textit{fowlerxunit}.
+
+\section{Proving Correctness}
+
+\section{Formal Verification}
+
+"Best result". Tedious. Often impossible.
+
+\section{Model Checking}
+
+Nice, simpler than formal verification. Can yield impossibly large state spaces. Bounded model checking.
+
+Requires a model. Can learn model for black box.
+
+\section{Testing}
+
+Not formal - doesn't prove anything except for the specified test cases. Not complete.
+
+Manual. Automatic test-generation?
+
+TDD. BDD.
+
+
+
+
+%================================================
+%====== Chapter 3, Previous Research
+%================================================
+
+\pagestyle{newchap}
+\chapter{Previous Research}
+
+\todo{Previous work, in RV.}
+
+\todo{Copied from spec, rewrite}
+
+Runtime verification (RV) is a dynamic approach to checking program correctness, in contrast to the more 
+traditional formal static analysis techniques of \emph{model checking} (or its
+bounded form) and \emph{theorem proving}. These are often very useful, but suffer from severe problems such as the
+state explosion problem, incompleteness, undecidability etc.,
+when they are used for verification of large-scale systems.
+Moreover, static analysis usually verifies an abstract model of the program, and cannot guarantee the correctness of the implementation or the dynamic properties of the executing code.
+
+Runtime verification is a light-weight formal verification technique, see e.g. \cite{leucker09abriefaccount,delgado04taxonomy}.
+It verifies whether some specified properties hold during the execution of a
+program.
+
+The specification that should be verified is written in a formal
+language, often a logic/calculus, such as linear temporal logic
+\cite{pnueli77}. To build
+a \emph{system model} for verifying the properties of the specification, the target program
+needs to emit and expose certain events and data. The collected events and data are used to build the system model. Many RV frameworks use \textit{code instrumentation}
+to generate \textit{monitors} for this end. There are two types of monitoring:
+\emph{online} and \emph{offline}.
+In online monitoring, the analysis and verification is done during the execution, in a synchronous
+manner with the observed system. In offline monitoring, a log of events is analysed at a later time.
+
+When a violation of the specification occurs, simple actions can be taken (e.g. log the error, send emails, etc.), or more complex responses initiated, resulting in a \textit{self-healing} or \textit{self-adapting} system (see e.g. \cite{huebscher08}).
+
+On the other end of the program-correctness-checking spectrum is \emph{testing}, which is the
+practical approach of checking that the program, given a certain input, produces the correct output.
+Testing is not complete, and lacks a formal foundation, so it cannot be used for formal verification. 
+Testing can be a complement to more formal techniques, such as RV (but is in many cases the sole correctness-checking tool).
+
+\textit{Unit testing} is the concept of writing small tests, or test suites, for the units in
+a program, such as functions, classes, etc. These tests are used during development to test the 
+functionality of the units. They aim to reduce the risk of breaking existing functionality when 
+developing new features or modifying existing code (by preventing regression).
+
+Writing unit tests, often using unit testing \textit{frameworks} such as JUnit \cite{junit}
+for Java and unittest \cite{python-unittest} for Python, is a common practice on many
+development teams.
+
+\section{Runtime Verification}
+
+The idea: Lightweight formal verification. Execution trace. Speed? Monitoring.
+
+Much in common with model checking. Only current execution. Finite traces. Dynamic environment. 
+
+\section{Specifications}
+
+High-level, abstract. Easier than the implementation.
+
+\subsection{Linear Temporal Logic}
+
+Linear Temporal Logic (LTL) and its cousins (such as Timed Linear Temporal Logic, TLTL)
+
+LTL. TLTL. LTL$_{3}$.
+
+\subsection{EAGLE?}
+
+What about EAGLE?
+
+\subsection{CPL}
+
+Hmm, CPL?
+
+\subsection{Design by Contract}
+
+Write some about DbC, and how it is written. LTL without the temporal parts.
+
+\section{Verification against Specifications}
+
+Monitors. Büchi Automatons.
+
+\section{Code Instrumentation}
+
+What other stuff is there?
+
+\subsection{Aspects}
+AspectJ.
+
+\section{Unit Testing}
+
+How do they work? What are their syntaxes? This section mostly concerns the language and syntax used for writing unit tests.
+
+\subsection{xUnit}
+
+JUnit. suites, test cases, set up / tear down. Fixtures? Mocking? This is "TDD"-style
+
+\subsection{"BDD"-style}
+
+describe. it. should. etc.
+
+
+
+
+
+
+%================================================
+%====== Chapter 4, Method
+%================================================
+
+\pagestyle{newchap}
+\chapter{Method}
+
+What have I done, and why (again)? Test-Inspired Runtime Verification.
+
+
+\section{Syntax?}
+
+asdf
+
+\section{Verification, Constructing Monitors}
+
+Bauer, Leucker, Schallhart.
+
+\section{Correctness}
+
+It is all awwwesomee!
+
+
+
+
+%================================================
+%====== Chapter 5, Results
+%================================================
+
+\pagestyle{newchap}
+\chapter{Results}
+
+Mm.
+
+
+
+
+%================================================
+%====== Chapter 6, Conclusions
+%================================================
+
+\pagestyle{newchap}
+\chapter{Conclusions}
+Yay, it worked!
+
+
+\section{Discussion}
+
+What do we see in the future? How can this be extended, continued?
+
+Results (un)expected? Larger context.
+
+Some speculation? Recommendations?
+
+\section{Future Work}
+
 
 Some temporary citations:
 \cite{hoare69}, \cite{floyd67}, \cite{pnueli77},
@@ -92,88 +363,23 @@ Some temporary citations:
 \cite{becksmalltalktesting}, \cite{fowlerxunit},
 \cite{matusiak09aoppy}
 
-Purpose: Test-like syntax of runtime verification specifications.
-
-What will this report discuss? What problems? Why is this interesting?
-
-What will this report \textbf{not} discuss?
-
-Perhaps: Discuss the sectioning of this report.
-
-\pagestyle{newchap}
-\chapter{Background}
-
-Previous work, in correctness and RV.
-
-\section{Proving Correctness}
-
-\subsection{Formal Verification}
-
-Best result. Tedious. Often impossible.
-
-\subsection{Model Checking}
-
-Nice, simpler than formal verification. Can yield impossibly large state spaces.
-
-\subsection{Testing}
-
-Not formal - doesn't prove anything except for the specified test cases.
-
-Manual. Automatic test-generation?
-
-TDD. BDD.
-
-\section{Runtime Verification}
-
-The idea: Lightweight formal verification. Execution trace. Speed? Monitoring.
-
-\subsection{Writing Specifications}
-
-LTL. TLTL. EAGLE?
-
-High-level, abstract. Easier than the implementation.
-
-\subsection{Transforming Specifications and Instrumenting Code}
-
-B\"uchi Automatons.
-AspectJ.
-
-\subsection{Online v. Offline}
-
-\pagestyle{newchap}
-\chapter{Test-Oriented Runtime Verification}
-
-What have I done, and why (again)?
-
-\section{Testing Frameworks}
-
-How do they work? What are their syntaxes?
-
-\section{Comparing Testing Frameworks, Languages and Environments}
-
-Why this testing framework as starting point? Why this language?
-
-\section{pyrv}
-
-\subsection{General}
-
-\subsection{Syntax?}
-
-\subsection{Correctness}
 
 
-\section{Conclusions}
 
-It is all awwwesomee!
+%================================================
+%====== Bibliography
+%================================================
 
-\pagestyle{newchap}
-\chapter{Discussion}
+% the ieeetr style orders the references after first appearance
+\bibliographystyle{ieeetr}
+\bibliography{references}
 
-What do we see in the future? How can this be extended, continued?
 
-Results (un)expected? Larger context.
 
-Some speculation? Recommendations?
+
+%================================================
+%====== Appendices
+%================================================
 
 \appendix
 \addappheadtotoc
@@ -187,8 +393,4 @@ And here is a figure
 \end{figure}
 
 that we refer to here: \ref{RDF_4}
-
-% the ieeetr style orders the references after first appearance
-\bibliographystyle{ieeetr}
-\bibliography{references}
 \end{document}
