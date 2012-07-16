@@ -5,6 +5,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[swedish,english]{babel}
 \usepackage{modifications}
+\usepackage{amsmath}
 \usepackage{draftwatermark}
 %\usepackage[firstpage]{draftwatermark}
 
@@ -100,7 +101,7 @@ techniques, such as theorem proving, model checking (and its bounded variant), c
 proofs, but they often suffer from complexity problems (incompleteness, undecidability) and
 practical issues, such as the so-called state explosion problem, and not being fully automated.
 
-A relatively \rephrase new approach to this area is runtime verification, in which the
+A relatively \rephrase new approach in this area is runtime verification, in which the
 program \textit{execution} is verified against its specification. With the specification written
 in a suitably formal language, the program can be monitored to check that the specification is
 followed.
@@ -253,6 +254,32 @@ Much in common with model checking. Only current execution. Finite traces. Dynam
 High-level, abstract. Easier than the implementation.
 
 \subsection{Linear Temporal Logic}
+
+Linear Temporal Logic (LTL) was first discussed by Pnueli in \cite{pnueli77}, and has since been
+popular in many areas dealing with a system model containing a temporal dimension. As Pnueli
+describes it, it is simpler than other logics, but expressive enough to describe many problems
+of interest for verification. This has been "confirmed" \rephrase by the diverse use of
+many researchers \todo{citations}.
+
+LTL uses a system model of infinite execution traces, or histories. This fits well into the domain
+of model checking and theorem proveing. However, due to the necessarily finite nature of runtime
+verification (no execution of a real-world program can be infinite), Bauer et al. argue in
+\cite{bauer07rvltl} and \cite{bauer06monitoring} for a slightly modified variant of LTL more suitable
+for finite execution traces. They name it LTL$_3$, and the name derives from the fact that they
+modify the semantics of LTL to not only yield the truth values $\top$ (true) and $\bot$ (false), but also $?$ (inconclusive).
+
+Given a finite execution trace (a word) $u$ and a LTL$_3$ formula $\varphi$, the truth value of $\varphi$ with respect to $u$ is denoted by $[u \models \varphi]$, and takes the truth value according to:
+
+\[
+  [u \models \varphi] = \left\{
+  \begin{array}{l l}
+    \top & \quad \text{if all (in)finite continuations of $u$ would yield $\top$} \\
+    \bot & \quad \text{if all (in)finite continuations of $u$ would yield $\bot$} \\
+    ?    & \quad \text{otherwise} \\
+  \end{array} \right.
+\] 
+
+\todo{Perhaps be more "formal" with symbols}
 
 Linear Temporal Logic (LTL) and its cousins (such as Timed Linear Temporal Logic, TLTL)
 
