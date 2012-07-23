@@ -86,7 +86,7 @@ This is a master thesis / degree project in Computer Science at the Royal Instit
 %================================================
 
 \pagestyle{newchap}
-\chapter{Introduction}
+\chapter{Introduction} \label{chapter-introduction}
 
 Due to the increasing size and complexity of computer software it has become increasingly difficult,
 if not impossible, to convince oneself that the software works as desired. This is where verification tools can be used to great effect. Of these tools, testing is the one known by most and in wide spread use.
@@ -150,7 +150,7 @@ What will this report \textbf{not} discuss?
 %================================================
 
 \pagestyle{newchap}
-\chapter{Background}
+\chapter{Background} \label{chapter-background}
 
 \todo{More general background on correctness, testing, unit testing, etc.}
 
@@ -172,9 +172,13 @@ Nice, simpler than formal verification. Can yield impossibly large state spaces.
 
 Requires a model. Can learn model for black box.
 
-\section{Runtime Verification}
+\section{Runtime Verification}\label{section-rv}
 
 \todo{Copied from spec, rewrite}
+
+The idea: Lightweight formal verification. Execution trace. Speed? Monitoring.
+
+Much in common with model checking. Only current execution. Finite traces. Dynamic environment. 
 
 Runtime verification (RV) is a dynamic approach to checking program correctness, in contrast to the more 
 traditional formal static analysis techniques of \emph{model checking} (or its
@@ -242,20 +246,21 @@ TDD. BDD.
 %================================================
 
 \pagestyle{newchap}
-\chapter{Previous Research}
+\chapter{Previous Research} \label{chapter-previous-research}
 
 \todo{Previous work, in RV.}
 
+As we saw in Section \ref{section-rv}, runtime verification is the technique of verifying a
+program's compliance against a specification during runtime. These specifications need to be
+written somehow, which will be discussed in Section \ref{section-specifications}. Approaches for verification
+are discussed in Section \ref{section-verification}. For verification to work, during runtime, the program usually needs to be instrumented in such a way that the verification
+process can access all pertinent data. This is discussed in Section \ref{section-instrumentation}
+
+The design of unit test syntax is discussed in Section \ref{section-unit-testing}. The combination
+of the two, runtime verification and unit testing, will be the main point in Chapters \ref{chapter-method} and \ref{chapter-results}.
 
 
-
-\section{Runtime Verification}
-
-The idea: Lightweight formal verification. Execution trace. Speed? Monitoring.
-
-Much in common with model checking. Only current execution. Finite traces. Dynamic environment. 
-
-\section{Specifications}
+\section{Specifications} \label{section-specifications}
 
 Specifications come in many forms, from the informal ones like "I want it to be easy to use", to the
 contractual ones written by companies and clients, to the ones written in formal languages, specifying properties that should verifiably hold about the program. It is this last type of specifications we are interested in here, and which play an important role in runtime verification.
@@ -348,7 +353,7 @@ pre- and post-conditions, invariants, and more. Other approaches \todo{who?} use
 boolean expressions under runtime \todo{cite jass}.
 
 
-\section{Verification against Specifications}
+\section{Verification against Specifications} \label{section-verification}
 
 Formal specifications are written so that programs can be verified against them - to see whether
 they follow the specification, or violate parts of it.
@@ -361,7 +366,7 @@ Monitors are state machines that operate with the input language of events emitt
 
 \todo{Monitors. Büchi Automatons.}
 
-\section{Code Instrumentation}
+\section{Code Instrumentation} \label{section-instrumentation}
 
 To verification to work, the verifier (such as a monitor) needs access to events happening in the
 program. Such events can be functions called, statements executed, variables assigned, etc., depending on the system model of the specification language \rephrase. The program needs to be instrumented for it to emit such events. This often means wrapping function calls and variable assignments in a "recording layer", which performs the desired action after logging the event.
@@ -382,7 +387,7 @@ An interesting approach to external injection is to use aspect-oriented programm
 \todo{define aspects, join points and point cuts}.
 
 
-\section{Unit Testing}
+\section{Unit Testing} \label{section-unit-testing}
 
 How do they work? What are their syntaxes? This section mostly concerns the language and syntax used for writing unit tests.
 
@@ -404,7 +409,7 @@ describe. it. should. etc.
 %================================================
 
 \pagestyle{newchap}
-\chapter{Method}
+\chapter{Method} \label{chapter-method}
 
 What have I done, and why (again)? Test-Inspired Runtime Verification.
 
@@ -429,7 +434,7 @@ It is all awwwesomee!
 %================================================
 
 \pagestyle{newchap}
-\chapter{Results}
+\chapter{Results} \label{chapter-results}
 
 Mm.
 
