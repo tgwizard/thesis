@@ -19,9 +19,9 @@
 
 \subtitle{Using a unit test-like
 specification syntax for runtime verification}
-          
+
 \foreigntitle{"TODO: Test-inspirerad runtime-verifiering"}
-              
+
 \author{Adam Renberg}
 \date{May 2012}
 \blurb{Master's Thesis at CSC\\Supervisor Valtech: TITLE? Erland Ranvinge\\Supervisor CSC: TITLE Narges Khakpour\\Examiner: TITLE Johan Håstad}
@@ -43,7 +43,7 @@ specification syntax for runtime verification}
 
 \begin{abstract}
 
-Abstract in English. Write when most of the report is written. 
+Abstract in English. Write when most of the report is written.
 
 \bigskip\noindent
 Keywords: Runtime Verification, Unit Testing
@@ -69,7 +69,10 @@ Keywords (Sökord? Nyckelord?):
 \pagestyle{newchap}
 \chapter*{Preface}
 
-This is a master thesis / degree project in Computer Science at the Royal Institute of Technology (KTH), Stocholm. The work was done at Valtech Sweden, an IT Consultancy. It was supervised by Erland Ranvinge (Valtech) and Dr. (\todo{check}) Narges Khakpour (CSC KTH).
+This is a master thesis / degree project in Computer Science at the Royal
+Institute of Technology (KTH), Stocholm. The work was done at Valtech Sweden,
+an IT Consultancy. It was supervised by Erland Ranvinge (Valtech) and Dr.
+(\todo{check}) Narges Khakpour (CSC KTH).
 
 \todo{Thanks to people}
 \clearpage
@@ -88,21 +91,25 @@ This is a master thesis / degree project in Computer Science at the Royal Instit
 \pagestyle{newchap}
 \chapter{Introduction} \label{chapter-introduction}
 
-Due to the increasing size and complexity of computer software it has become increasingly difficult,
-if not impossible, to convince oneself that the software works as desired. This is where verification tools can be used to great effect. Of these tools, testing is the one known by most and in wide spread use.
-The spread of agile development practices and test-driven development has also popularized the
-concept of \textit{unit testing}, in which small modules of a program or system are tested individually.
+Due to the increasing size and complexity of computer software it has become
+increasingly difficult, if not impossible, to convince oneself that the
+software works as desired. This is where verification tools can be used to
+great effect. Of these tools, testing is the one known by most and in wide
+spread use.  The spread of agile development practices and test-driven
+development has also popularized the concept of \textit{unit testing}, in which
+small modules of a program or system are tested individually.
 
-While testing is popular and often works well, it is incomplete and informal, and thus yields
-no proof that the program does what it should - follow its specification. Formal verification
-techniques, such as theorem proving, model checking (and its bounded variant), can give such
-proofs, but they often suffer from complexity problems (incompleteness, undecidability) and
-practical issues, such as the so-called state explosion problem, and not being fully automated.
+While testing is popular and often works well, it is incomplete and informal,
+and thus yields no proof that the program does what it should - follow its
+specification. Formal verification techniques, such as theorem proving, model
+checking (and its bounded variant), can give such proofs, but they often suffer
+from complexity problems (incompleteness, undecidability) and practical issues,
+such as the so-called state explosion problem, and not being fully automated.
 
-A relatively \rephrase new approach in this area is runtime verification, in which the
-program \textit{execution} is verified against its specification. With the specification written
-in a suitably formal language, the program can be monitored to check that the specification is
-followed.
+A relatively \rephrase new approach in this area is runtime verification, in
+which the program \textit{execution} is verified against its specification.
+With the specification written in a suitably formal language, the program can
+be monitored to check that the specification is followed.
 
 
 \section{Problem Statement}
@@ -113,32 +120,34 @@ the structure of unit tests?
 
 \section{Motivation}
 
-Checking that a program works correctly is of great interest to software developers, and
-formal verification techniques can often help. As mentioned above, traditional approaches
-can be impractical with larger programs, and verification by testing is
-informal and incomplete. Runtime verification can here be a lightweight addition to the list \rephrase of verification techniques.
+Checking that a program works correctly is of great interest to software
+developers, and formal verification techniques can often help. As mentioned
+above, traditional approaches can be impractical with larger programs, and
+verification by testing is informal and incomplete. Runtime verification can
+here be a lightweight addition to the list \rephrase of verification
+techniques.
 
-The specification languages used by runtime verification approaches are often based
-on formal languages/formalisms (e.g. logic or algebra) and not written in the
-target program's programming language.  This means that writing the specifications
-requires specific knowledge and expertise in mathematics. 
-It also requires mental context-switching and special tools
-to support this specialised language's syntax. In contrast, unit testing frameworks often
+The specification languages used by runtime verification approaches are often
+based on formal languages/formalisms (e.g. logic or algebra) and not written in
+the target program's programming language.  This means that writing the
+specifications requires specific knowledge and expertise in mathematics.  It
+also requires mental context-switching and special tools to support this
+specialised language's syntax. In contrast, unit testing frameworks often
 utilise the programming language to great effect, and their use is wide spread.
 
-If runtime verification specifications more resembled unit tests, and were written in the target program's
-programming language, it might popularise the use of runtime verification for
-checking the correctness of software systems.
+If runtime verification specifications more resembled unit tests, and were
+written in the target program's programming language, it might popularise the
+use of runtime verification for checking the correctness of software systems.
 
 \section{Disposition}
 
 Perhaps: Discuss the sectioning of this report.
 
 The rest of this report is structured in as follows. Chapter 2 gives a
-background to the subject of verifying program correctness. Chapter 3
-continues by describing the previous research on runtime verification and
-the design of specification languages. It also gives an overview of the current ideas in
-unit testing.
+background to the subject of verifying program correctness. Chapter 3 continues
+by describing the previous research on runtime verification and the design of
+specification languages. It also gives an overview of the current ideas in unit
+testing.
 
 What will this report discuss? What problems? Why is this interesting?
 
@@ -156,9 +165,21 @@ What will this report \textbf{not} discuss?
 
 \todo{How verification tools are used in practice?}
 
-Runtime verification is a new area of research, but the research on verification and formal methods goes back several decades. Research of interest include the early work on formal methods, e.g. by Hoare \cite{hoare69} and Floyd \cite{floyd67}, and work on logics suitable for runtime verification, e.g. LTL by Pnueli \cite{pnueli77}. The seminal work done by Hoare, Floyd and Pnueli are among the interesting approaches used for runtime verification. LTL is one of the common formal languages used for formal specifications in RV.
+Runtime verification is a new area of research, but the research on
+verification and formal methods goes back several decades. Research of interest
+include the early work on formal methods, e.g. by Hoare \cite{hoare69} and
+Floyd \cite{floyd67}, and work on logics suitable for runtime verification,
+e.g. LTL by Pnueli \cite{pnueli77}. The seminal work done by Hoare, Floyd and
+Pnueli are among the interesting approaches used for runtime verification. LTL
+is one of the common formal languages used for formal specifications in RV.
 
-The work on the linear temporal logic (and other logics), on runtime verification in general and its applications, on code instrumentation (e.g. \cite{aspectj,matusiak09aoppy}), and on unit testing and their frameworks will lay the foundation of this work. Interesting research also include the work by Meyer on the "Design by Contract" methodology \cite{meyer92applyingdbc} and on programming with assertions in general, see e.g. \cite{rosenblum95practicalassertions,bartetzko01jass}.
+The work on the linear temporal logic (and other logics), on runtime
+verification in general and its applications, on code instrumentation (e.g.
+\cite{aspectj,matusiak09aoppy}), and on unit testing and their frameworks will
+lay the foundation of this work. Interesting research also include the work by
+Meyer on the "Design by Contract" methodology \cite{meyer92applyingdbc} and on
+programming with assertions in general, see e.g.
+\cite{rosenblum95practicalassertions,bartetzko01jass}.
 
 \section{Proving Correctness}
 
@@ -168,7 +189,8 @@ The work on the linear temporal logic (and other logics), on runtime verificatio
 
 \section{Model Checking}
 
-Nice, simpler than formal verification. Can yield impossibly large state spaces. Bounded model checking.
+Nice, simpler than formal verification. Can yield impossibly large state
+spaces. Bounded model checking.
 
 Requires a model. Can learn model for black box.
 
@@ -178,61 +200,83 @@ Requires a model. Can learn model for black box.
 
 The idea: Lightweight formal verification. Execution trace. Speed? Monitoring.
 
-Much in common with model checking. Only current execution. Finite traces. Dynamic environment. 
+Much in common with model checking. Only current execution. Finite traces.
+Dynamic environment. 
 
-Runtime verification (RV) is a dynamic approach to checking program correctness, in contrast to the more 
-traditional formal static analysis techniques of \emph{model checking} (or its
-bounded form) and \emph{theorem proving}. These are often very useful, but suffer from severe problems such as the
-state explosion problem, incompleteness, undecidability etc.,
-when they are used for verification of large-scale systems.
-Moreover, static analysis usually verifies an abstract model of the program, and cannot guarantee the correctness of the implementation or the dynamic properties of the executing code.
+Runtime verification (RV) is a dynamic approach to checking program
+correctness, in contrast to the more traditional formal static analysis
+techniques of \emph{model checking} (or its bounded form) and \emph{theorem
+proving}. These are often very useful, but suffer from severe problems such as
+the state explosion problem, incompleteness, undecidability etc., when they are
+used for verification of large-scale systems.  Moreover, static analysis
+usually verifies an abstract model of the program, and cannot guarantee the
+correctness of the implementation or the dynamic properties of the executing
+code.
 
-Runtime verification is a light-weight formal verification technique, see e.g. \cite{leucker09abriefaccount,delgado04taxonomy}.
-It verifies whether some specified properties hold during the execution of a
-program.
+Runtime verification is a light-weight formal verification technique, see e.g.
+\cite{leucker09abriefaccount,delgado04taxonomy}.  It verifies whether some
+specified properties hold during the execution of a program.
 
-The specification that should be verified is written in a formal
-language, often a logic/calculus, such as linear temporal logic
-\cite{pnueli77}. To build
-a \emph{system model} for verifying the properties of the specification, the target program
-needs to emit and expose certain events and data. The collected events and data are used to build the system model. Many RV frameworks use \textit{code instrumentation}
-to generate \textit{monitors} for this end. There are two types of monitoring:
-\emph{online} and \emph{offline}.
-In online monitoring, the analysis and verification is done during the execution, in a synchronous
-manner with the observed system. In offline monitoring, a log of events is analysed at a later time.
+The specification that should be verified is written in a formal language,
+often a logic/calculus, such as linear temporal logic \cite{pnueli77}. To build
+a \emph{system model} for verifying the properties of the specification, the
+target program needs to emit and expose certain events and data. The collected
+events and data are used to build the system model. Many RV frameworks use
+\textit{code instrumentation} to generate \textit{monitors} for this end. There
+are two types of monitoring: \emph{online} and \emph{offline}.  In online
+monitoring, the analysis and verification is done during the execution, in a
+synchronous manner with the observed system. In offline monitoring, a log of
+events is analysed at a later time.
 
-When a violation of the specification occurs, simple actions can be taken (e.g. log the error, send emails, etc.), or more complex responses initiated, resulting in a \textit{self-healing} or \textit{self-adapting} system (see e.g. \cite{huebscher08}).
+When a violation of the specification occurs, simple actions can be taken (e.g.
+log the error, send emails, etc.), or more complex responses initiated,
+resulting in a \textit{self-healing} or \textit{self-adapting} system (see e.g.
+\cite{huebscher08}).
 
-On the other end of the program-correctness-checking spectrum is \emph{testing}, which is the
-practical approach of checking that the program, given a certain input, produces the correct output.
-Testing is not complete, and lacks a formal foundation, so it cannot be used for formal verification. 
-Testing can be a complement to more formal techniques, such as RV (but is in many cases the sole correctness-checking tool).
+On the other end of the program-correctness-checking spectrum is
+\emph{testing}, which is the practical approach of checking that the program,
+given a certain input, produces the correct output.  Testing is not complete,
+and lacks a formal foundation, so it cannot be used for formal verification.
+Testing can be a complement to more formal techniques, such as RV (but is in
+many cases the sole correctness-checking tool).
 
-Relevant work on runtime verification include \cite{bauer06}, in which Bauer et al. use a three-valued boolean logic (true, false and ?), and present how to transform specifications into automata (i.e. runtime monitors). Bodden presents in \cite{bodden05efficientrv} a framework for RV implemented through \emph{aspect-oriented programming} \cite{aspectj} in Java, with specifications written
-as code annotations.
+Relevant work on runtime verification include \cite{bauer06}, in which Bauer et
+al. use a three-valued boolean logic (true, false and ?), and present how to
+transform specifications into automata (i.e. runtime monitors). Bodden presents
+in \cite{bodden05efficientrv} a framework for RV implemented through
+\emph{aspect-oriented programming} \cite{aspectj} in Java, with specifications
+written as code annotations.
 
-Leucker et al. present a definition of RV in \cite{leucker09abriefaccount}, together with an exposition on the advantages and disadvantages, similarities and differences, with other verification approaches. In \cite{delgado04taxonomy}, Delgado et al. classify and review several different approaches and frameworks to runtime verification.
+Leucker et al. present a definition of RV in \cite{leucker09abriefaccount},
+together with an exposition on the advantages and disadvantages, similarities
+and differences, with other verification approaches. In
+\cite{delgado04taxonomy}, Delgado et al. classify and review several different
+approaches and frameworks to runtime verification.
 
 
 \section{Testing}
 
-Unit testing is quite young, perhaps having begun in earnest in the 90s, and it is not as much researched as formal methods. Testing in general is very old.
+Unit testing is quite young, perhaps having begun in earnest in the 90s, and it
+is not as much researched as formal methods. Testing in general is very old.
 
-Kent Beck introduced the style of the modern unit testing framework in his
-work on a testing framework  for Smalltalk \cite{becksmalltalktesting}. 
-Together with Eric Gamma he later ported it to Java, resulting in JUnit \cite{junit}. Today, this has lead to frameworks in several programming languages, and they are collectively called \textit{fowlerxunit}.
+Kent Beck introduced the style of the modern unit testing framework in his work
+on a testing framework  for Smalltalk \cite{becksmalltalktesting}.  Together
+with Eric Gamma he later ported it to Java, resulting in JUnit \cite{junit}.
+Today, this has lead to frameworks in several programming languages, and they
+are collectively called \textit{fowlerxunit}.
 
+\textit{Unit testing} is the concept of writing small tests, or test suites,
+for the units in a program, such as functions, classes, etc. These tests are
+used during development to test the functionality of the units. They aim to
+reduce the risk of breaking existing functionality when developing new features
+or modifying existing code (by preventing regression).
 
-\textit{Unit testing} is the concept of writing small tests, or test suites, for the units in
-a program, such as functions, classes, etc. These tests are used during development to test the 
-functionality of the units. They aim to reduce the risk of breaking existing functionality when 
-developing new features or modifying existing code (by preventing regression).
+Writing unit tests, often using unit testing \textit{frameworks} such as JUnit
+\cite{junit} for Java and unittest \cite{python-unittest} for Python, is a
+common practice on many development teams.
 
-Writing unit tests, often using unit testing \textit{frameworks} such as JUnit \cite{junit}
-for Java and unittest \cite{python-unittest} for Python, is a common practice on many
-development teams.
-
-Not formal - doesn't prove anything except for the specified test cases. Not complete.
+Not formal - doesn't prove anything except for the specified test cases. Not
+complete.
 
 Manual. Automatic test-generation?
 
@@ -250,54 +294,71 @@ TDD. BDD.
 
 \todo{Previous work, in RV.}
 
-As we saw in Section \ref{section-rv}, runtime verification is the technique of verifying a
-program's compliance against a specification during runtime. These specifications need to be
-written somehow, which will be discussed in Section \ref{section-specifications}. Approaches for verification
-are discussed in Section \ref{section-verification}. For verification to work, during runtime, the program usually needs to be instrumented in such a way that the verification
-process can access all pertinent data. This is discussed in Section \ref{section-instrumentation}
+As we saw in Section \ref{section-rv}, runtime verification is the technique of
+verifying a program's compliance against a specification during runtime. These
+specifications need to be written somehow, which will be discussed in Section
+\ref{section-specifications}. Approaches for verification are discussed in
+Section \ref{section-verification}. For verification to work, during runtime,
+the program usually needs to be instrumented in such a way that the
+verification process can access all pertinent data. This is discussed in
+Section \ref{section-instrumentation}
 
-The design of unit test syntax is discussed in Section \ref{section-unit-testing}. The combination
-of the two, runtime verification and unit testing, will be the main point in Chapters \ref{chapter-method} and \ref{chapter-results}.
+The design of unit test syntax is discussed in Section
+\ref{section-unit-testing}. The combination of the two, runtime verification
+and unit testing, will be the main point in Chapters \ref{chapter-method} and
+\ref{chapter-results}.
 
 
 \section{Specifications} \label{section-specifications}
 
-Specifications come in many forms, from the informal ones like "I want it to be easy to use", to the
-contractual ones written by companies and clients, to the ones written in formal languages, specifying properties that should verifiably hold about the program. It is this last type of specifications we are interested in here, and which play an important role in runtime verification.
+Specifications come in many forms, from the informal ones like "I want it to be
+easy to use", to the contractual ones written by companies and clients, to the
+ones written in formal languages, specifying properties that should verifiably
+hold about the program. It is this last type of specifications we are
+interested in here, and which play an important role in runtime verification.
 
-In general, specifications should be abstract, written in a high-level language, and succinctly
-capture the desired property. Writing erroneous specifications is still possible; specifications need
-to be easier for humans to verify than the program's implementation. There is little point to have
-a specification as complex as the program itself, except as a point of reference. A program can,
-of course, be seen as a all-encompassing, perfect, always-true, specification of itself.
+In general, specifications should be abstract, written in a high-level
+language, and succinctly capture the desired property. Writing erroneous
+specifications is still possible; specifications need to be easier for humans
+to verify than the program's implementation. There is little point to have a
+specification as complex as the program itself, except as a point of reference.
+A program can, of course, be seen as a all-encompassing, perfect, always-true,
+specification of itself.
 
 
 
 \subsection{Formalisms for Specifications}
 
-There are several common formalisms for writing specifications, and many papers that expand,
-rephrase and illuminate on them. Although they can be quite different, they share a
-common origin in the work done by Floyd \cite{floyd67}, Hoare \cite{hoare69}, and others before them.
-Floyd thought of formulas specifying in/out properties of statements, and chaining these together
-to form a formal proof for the program. Hoare elaborated on this idea by basing his proofs on
-a few axioms of the programming language and target computer architecture, and building the proof from there.
+There are several common formalisms for writing specifications, and many papers
+that expand, rephrase and illuminate on them. Although they can be quite
+different, they share a common origin in the work done by Floyd \cite{floyd67},
+Hoare \cite{hoare69}, and others before them.  Floyd thought of formulas
+specifying in/out properties of statements, and chaining these together to form
+a formal proof for the program. Hoare elaborated on this idea by basing his
+proofs on a few axioms of the programming language and target computer
+architecture, and building the proof from there.
 
 \subsubsection{Linear Temporal Logic}
 
-Linear Temporal Logic (LTL) was first discussed by Pnueli in \cite{pnueli77}, and has since been
-popular in many areas dealing with a system model containing a temporal dimension. As Pnueli
-describes it, it is simpler than other logics, but expressive enough to describe many problems
-of interest for verification. This has been "confirmed" \rephrase by the diverse use of
-many researchers \todo{citations}.
+Linear Temporal Logic (LTL) was first discussed by Pnueli in \cite{pnueli77},
+and has since been popular in many areas dealing with a system model containing
+a temporal dimension. As Pnueli describes it, it is simpler than other logics,
+but expressive enough to describe many problems of interest for verification.
+This has been "confirmed" \rephrase by the diverse use of many researchers
+\todo{citations}.
 
-LTL uses a system model of infinite execution traces, or histories. This fits well into the domain
-of model checking and theorem proveing. However, due to the necessarily finite nature of runtime
-verification (no execution of a real-world program can be infinite), Bauer et al. argue in
-\cite{bauer07rvltl,bauer06monitoring} for a slightly modified variant of LTL more suitable
-for finite execution traces. They name it LTL$_3$, and the name derives from the fact that they
-modify the semantics of LTL to not only yield the truth values $\top$ (true) and $\bot$ (false), but also $?$ (inconclusive).
+LTL uses a system model of infinite execution traces, or histories. This fits
+well into the domain of model checking and theorem proveing. However, due to
+the necessarily finite nature of runtime verification (no execution of a
+real-world program can be infinite), Bauer et al. argue in
+\cite{bauer07rvltl,bauer06monitoring} for a slightly modified variant of LTL
+more suitable for finite execution traces. They name it LTL$_3$, and the name
+derives from the fact that they modify the semantics of LTL to not only yield
+the truth values $\top$ (true) and $\bot$ (false), but also $?$ (inconclusive).
 
-Given a finite execution trace (a word) $u$ and a LTL$_3$ formula $\varphi$, the truth value of $\varphi$ with respect to $u$ is denoted by $[u \models \varphi]$, and takes the truth value according to:
+Given a finite execution trace (a word) $u$ and a LTL$_3$ formula $\varphi$,
+the truth value of $\varphi$ with respect to $u$ is denoted by $[u \models
+\varphi]$, and takes the truth value according to:
 
 \[
   [u \models \varphi] = \left\{
@@ -310,13 +371,17 @@ Given a finite execution trace (a word) $u$ and a LTL$_3$ formula $\varphi$, the
 
 \todo{Perhaps be more "formal" with symbols}
 
-As they write in the paper, this leads to more informative information verifying the specification,
-and which is particularly well suited for incremental, ongoing, evaluation. In regular LTL, a formula
-can either be true or false, given an execution trace, but this gives no information of whether it
+As they write in the paper, this leads to more informative information
+verifying the specification, and which is particularly well suited for
+incremental, ongoing, evaluation. In regular LTL, a formula can either be true
+or false, given an execution trace, but this gives no information of whether it
 will change in the future.
 
-There is a counterpart to LTL in the real-time setting called Timed Linear Temporal Logic \todo{cite someone}. It introduces clocks to make specifications of real-time properties possible. It is
-of great interest to runtime verification, but won't be discussed further here. \todo{See [] and [] for more on TLTL}.
+There is a counterpart to LTL in the real-time setting called Timed Linear
+Temporal Logic \todo{cite someone}. It introduces clocks to make specifications
+of real-time properties possible. It is of great interest to runtime
+verification, but won't be discussed further here. \todo{See [] and [] for more
+on TLTL}.
 
 \subsubsection{EAGLE?}
 
@@ -330,70 +395,98 @@ Hmm, CPL?
 
 \subsubsection{Design by Contract}
 
-Design by Contract was introduced by Bertrand Meyer in \todo{where}, and has been fully implemented
-int the Eiffel programming language. A contract is the idea that functions, and methods on objects,
-promise to fulfill certain post-conditions (or promises) if the inputs they are given fulfill the pre-conditions (or requirements) in the contract. Design by Contract also contains constructs for
-specifying loop-invariants and class-invariants, properties that should always hold during loops and for objects of a class, respectively.
+Design by Contract was introduced by Bertrand Meyer in \todo{where}, and has
+been fully implemented int the Eiffel programming language. A contract is the
+idea that functions, and methods on objects, promise to fulfill certain
+post-conditions (or promises) if the inputs they are given fulfill the
+pre-conditions (or requirements) in the contract. Design by Contract also
+contains constructs for specifying loop-invariants and class-invariants,
+properties that should always hold during loops and for objects of a class,
+respectively.
 
-Design by Contract is inspired by Hoare logic, and is essentially Hoare logic written in a certain style.
+Design by Contract is inspired by Hoare logic, and is essentially Hoare logic
+written in a certain style.
 
 \subsection{Writing Specifications}
 
-For verification in general, specifications can be written and used externally to the program. They
-can be used in specialized model-checking tools, in tools for theorem proving etc.
+For verification in general, specifications can be written and used externally
+to the program. They can be used in specialized model-checking tools, in tools
+for theorem proving etc.
 
-Runtime verification requires that the specifications are accessible when building and running the program. At the very least, the program needs to be instrumented \rephrase to expose the
-correct system model so that the specification can be verified. It is often \rephrase desired in runtime verification to do online verification, and then the specifications need to be available and
-embedded into the system. A few approaches have been taken to enable this.
+Runtime verification requires that the specifications are accessible when
+building and running the program. At the very least, the program needs to be
+instrumented \rephrase to expose the correct system model so that the
+specification can be verified. It is often \rephrase desired in runtime
+verification to do online verification, and then the specifications need to be
+available and embedded into the system. A few approaches have been taken to
+enable this.
 
-In Bodden, specifications are written as Java annotations \todo{footnote describing them?} embedded
-in the target program. Rosuenblum \cite{rosenblum95practicalassertions} uses specially annotated
-comments. The programming language Eiffel has full language support for Design by Contract, with
-pre- and post-conditions, invariants, and more. Other approaches \todo{who?} use external specification files. For simple cases it is common to write assertions in the program, checking
-boolean expressions under runtime \todo{cite jass}.
+In Bodden, specifications are written as Java annotations \todo{footnote
+describing them?} embedded in the target program. Rosuenblum
+\cite{rosenblum95practicalassertions} uses specially annotated comments. The
+programming language Eiffel has full language support for Design by Contract,
+with pre- and post-conditions, invariants, and more. Other approaches
+\todo{who?} use external specification files. For simple cases it is common to
+write assertions in the program, checking boolean expressions under runtime
+\todo{cite jass}.
 
 
 \section{Verification against Specifications} \label{section-verification}
 
-Formal specifications are written so that programs can be verified against them - to see whether
-they follow the specification, or violate parts of it.
+Formal specifications are written so that programs can be verified against them
+- to see whether they follow the specification, or violate parts of it.
 
-There are several ways to verify a program against its specification \rephrase \todo{which}. A common
-one, used in \cite{bauer06monitoring,bodden05efficientrv} among others, is to generate monitors
-from the specification.
+There are several ways to verify a program against its specification \rephrase
+\todo{which}. A common one, used in
+\cite{bauer06monitoring,bodden05efficientrv} among others, is to generate
+monitors from the specification.
 
-Monitors are state machines that operate with the input language of events emitted by the program.
+Monitors are state machines that operate with the input language of events
+emitted by the program.
 
 \todo{Monitors. Büchi Automatons.}
 
 \section{Code Instrumentation} \label{section-instrumentation}
 
-To verification to work, the verifier (such as a monitor) needs access to events happening in the
-program. Such events can be functions called, statements executed, variables assigned, etc., depending on the system model of the specification language \rephrase. The program needs to be instrumented for it to emit such events. This often means wrapping function calls and variable assignments in a "recording layer", which performs the desired action after logging the event.
-The events can then be "sent" to the verification tools.
+To verification to work, the verifier (such as a monitor) needs access to
+events happening in the program. Such events can be functions called,
+statements executed, variables assigned, etc., depending on the system model of
+the specification language \rephrase. The program needs to be instrumented for
+it to emit such events. This often means wrapping function calls and variable
+assignments in a "recording layer", which performs the desired action after
+logging the event.  The events can then be "sent" to the verification tools.
 
-Instrumentation techniques can be divided into two parts: those that require you to manually
-mark code for "recording", and those that inject the recording code externally. Boddy
+Instrumentation techniques can be divided into two parts: those that require
+you to manually mark code for "recording", and those that inject the recording
+code externally. Boddy
 
-Rosuenblum \cite{rosenblum95practicalassertions} uses a pre-processor step
-in the C compilation setup instrument code, where the specifications (called assertions there)
-are written adjacent to the code under watch. Bodden \cite{bodden05efficientrv} uses Java annotations, which are written at function and variable definitions, to mark code for verification. \todo{more, and rephrase}.
+Rosuenblum \cite{rosenblum95practicalassertions} uses a pre-processor step in
+the C compilation setup instrument code, where the specifications (called
+assertions there) are written adjacent to the code under watch. Bodden
+\cite{bodden05efficientrv} uses Java annotations, which are written at function
+and variable definitions, to mark code for verification. \todo{more, and
+rephrase}.
 
-For compiled, and byte-compiled \todo{define, another word?}, code, it is possible to rewrite the 
-compiled program to add recording functionality. In dynamic languages, such as Python, Ruby or JavaScript, this can be done dynamically during runtime.
+For compiled, and byte-compiled \todo{define, another word?}, code, it is
+possible to rewrite the compiled program to add recording functionality. In
+dynamic languages, such as Python, Ruby or JavaScript, this can be done
+dynamically during runtime.
 
-An interesting approach to external injection is to use aspect-oriented programming.
+An interesting approach to external injection is to use aspect-oriented
+programming.
 
 \todo{define aspects, join points and point cuts}.
 
 
 \section{Unit Testing} \label{section-unit-testing}
 
-How do they work? What are their syntaxes? This section mostly concerns the language and syntax used for writing unit tests.
+How do they work? What are their syntaxes? This section mostly concerns the
+language and syntax used for writing unit tests.
 
 \subsection{xUnit}
 
-JUnit. suites, test cases, set up / tear down. Fixtures? Mocking? This is "TDD"-style
+JUnit. suites, test cases, set up / tear down. Fixtures? Mocking? This is
+"TDD"-style
 
 \subsection{"BDD"-style}
 
@@ -462,11 +555,11 @@ Some speculation? Recommendations?
 
 
 Some temporary citations:
-\cite{hoare69}, \cite{floyd67}, \cite{pnueli77},
-\cite{leucker09abriefaccount}, \cite{bauer06monitoring}, \cite{bauer08goodbadugly}, \cite{delgado04taxonomy}, \cite{meyer92applyingdbc},
-\cite{rosenblum95practicalassertions}, \cite{bartetzko01jass},
-\cite{bodden04lightweightltl}, \cite{bodden05efficientrv},
-\cite{becksmalltalktesting}, \cite{fowlerxunit},
+\cite{hoare69}, \cite{floyd67}, \cite{pnueli77}, \cite{leucker09abriefaccount},
+\cite{bauer06monitoring}, \cite{bauer08goodbadugly}, \cite{delgado04taxonomy},
+\cite{meyer92applyingdbc}, \cite{rosenblum95practicalassertions},
+\cite{bartetzko01jass}, \cite{bodden04lightweightltl},
+\cite{bodden05efficientrv}, \cite{becksmalltalktesting}, \cite{fowlerxunit},
 \cite{matusiak09aoppy}
 
 
