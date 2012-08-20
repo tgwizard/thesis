@@ -24,7 +24,8 @@ specification syntax for runtime verification}
 
 \author{Adam Renberg}
 \date{May 2012}
-\blurb{Master's Thesis at CSC\\Supervisor Valtech: TITLE? Erland Ranvinge\\Supervisor CSC: TITLE Narges Khakpour\\Examiner: TITLE Johan Håstad}
+\blurb{Master's Thesis at CSC\\Supervisor Valtech: title? Erland
+Ranvinge\\Supervisor CSC: title Narges Khakpour\\Examiner: title Johan Håstad}
 \trita{TRITA xxx yyyy-nn}
 
 \begin{document}
@@ -115,7 +116,7 @@ be monitored to check that the specification is followed.
 \section{Problem Statement}
 
 How can runtime verification specifications be written in a manner that uses
-the syntax of the target program’s programming language, and resembles
+the syntax of the target program's programming language, and resembles
 the structure of unit tests?
 
 \section{Motivation}
@@ -128,7 +129,7 @@ here be a lightweight addition to the list \rephrase of verification
 techniques.
 
 The specification languages used by runtime verification approaches are often
-based on formal languages/formalisms (e.g. logic or algebra) and not written in
+based on formal languages/formalisms (e.g.\ logic or algebra) and not written in
 the target program's programming language.  This means that writing the
 specifications requires specific knowledge and expertise in mathematics.  It
 also requires mental context-switching and special tools to support this
@@ -167,7 +168,7 @@ What will this report \textbf{not} discuss?
 
 Runtime verification is a new area of research, but the research on
 verification and formal methods goes back several decades. Research of interest
-include the early work on formal methods, e.g. by Hoare \cite{hoare69} and
+include the early work on formal methods, e.g.\ by Hoare \cite{hoare69} and
 Floyd \cite{floyd67}, and work on logics suitable for runtime verification,
 e.g. LTL by Pnueli \cite{pnueli77}. The seminal work done by Hoare, Floyd and
 Pnueli are among the interesting approaches used for runtime verification. LTL
@@ -201,7 +202,7 @@ Requires a model. Can learn model for black box.
 The idea: Lightweight formal verification. Execution trace. Speed? Monitoring.
 
 Much in common with model checking. Only current execution. Finite traces.
-Dynamic environment. 
+Dynamic environment.
 
 Runtime verification (RV) is a dynamic approach to checking program
 correctness, in contrast to the more traditional formal static analysis
@@ -228,10 +229,10 @@ monitoring, the analysis and verification is done during the execution, in a
 synchronous manner with the observed system. In offline monitoring, a log of
 events is analysed at a later time.
 
-When a violation of the specification occurs, simple actions can be taken (e.g.
-log the error, send emails, etc.), or more complex responses initiated,
-resulting in a \textit{self-healing} or \textit{self-adapting} system (see e.g.
-\cite{huebscher08}).
+When a violation of the specification occurs, simple actions can be taken
+(e.g.\ log the error, send emails, etc.), or more complex responses initiated,
+resulting in a \textit{self-healing} or \textit{self-adapting} system (see
+e.g.\ \cite{huebscher08}).
 
 On the other end of the program-correctness-checking spectrum is
 \emph{testing}, which is the practical approach of checking that the program,
@@ -241,16 +242,16 @@ Testing can be a complement to more formal techniques, such as RV (but is in
 many cases the sole correctness-checking tool).
 
 Relevant work on runtime verification include \cite{bauer06}, in which Bauer et
-al. use a three-valued boolean logic (true, false and ?), and present how to
-transform specifications into automata (i.e. runtime monitors). Bodden presents
-in \cite{bodden05efficientrv} a framework for RV implemented through
+al.\ use a three-valued boolean logic (true, false and ?), and present how to
+transform specifications into automata (i.e.\ runtime monitors). Bodden
+presents in \cite{bodden05efficientrv} a framework for RV implemented through
 \emph{aspect-oriented programming} \cite{aspectj} in Java, with specifications
 written as code annotations.
 
-Leucker et al. present a definition of RV in \cite{leucker09abriefaccount},
+Leucker et al.\ present a definition of RV in \cite{leucker09abriefaccount},
 together with an exposition on the advantages and disadvantages, similarities
 and differences, with other verification approaches. In
-\cite{delgado04taxonomy}, Delgado et al. classify and review several different
+\cite{delgado04taxonomy}, Delgado et al.\ classify and review several different
 approaches and frameworks to runtime verification.
 
 
@@ -280,7 +281,7 @@ complete.
 
 Manual. Automatic test-generation?
 
-TDD. BDD.
+Test-driven development. Behaviour-driven development.
 
 
 
@@ -294,18 +295,18 @@ TDD. BDD.
 
 \todo{Previous work, in RV.}
 
-As we saw in Section \ref{section-rv}, runtime verification is the technique of
+As we saw in Section~\ref{section-rv}, runtime verification is the technique of
 verifying a program's compliance against a specification during runtime. These
-specifications need to be written somehow, which will be discussed in Section
-\ref{section-specifications}. Approaches for verification are discussed in
-Section \ref{section-verification}. For verification to work, during runtime,
+specifications need to be written somehow, which will be discussed in
+Section~\ref{section-specifications}. Approaches for verification are discussed
+in Section~\ref{section-verification}. For verification to work, during
+runtime,
 the program usually needs to be instrumented in such a way that the
 verification process can access all pertinent data. This is discussed in
-Section \ref{section-instrumentation}
+Section~\ref{section-instrumentation}
 
-The design of unit test syntax is discussed in Section
-\ref{section-unit-testing}. The combination of the two, runtime verification
-and unit testing, will be the main point in Chapters \ref{chapter-method} and
+The design of unit test syntax is discussed in Section~\ref{section-unit-testing}. The combination of the two, runtime verification
+and unit testing, will be the main point in Chapters~\ref{chapter-method} and
 \ref{chapter-results}.
 
 
@@ -350,7 +351,7 @@ This has been "confirmed" \rephrase by the diverse use of many researchers
 LTL uses a system model of infinite execution traces, or histories. This fits
 well into the domain of model checking and theorem proveing. However, due to
 the necessarily finite nature of runtime verification (no execution of a
-real-world program can be infinite), Bauer et al. argue in
+real-world program can be infinite), Bauer et al.\ argue in
 \cite{bauer07rvltl,bauer06monitoring} for a slightly modified variant of LTL
 more suitable for finite execution traces. They name it LTL$_3$, and the name
 derives from the fact that they modify the semantics of LTL to not only yield
@@ -367,7 +368,7 @@ the truth value of $\varphi$ with respect to $u$ is denoted by $[u \models
     \bot & \quad \text{if all (in)finite continuations of $u$ would yield $\bot$} \\
     ?    & \quad \text{otherwise} \\
   \end{array} \right.
-\] 
+\]
 
 \todo{Perhaps be more "formal" with symbols}
 
@@ -485,7 +486,7 @@ language and syntax used for writing unit tests.
 
 \subsection{xUnit}
 
-JUnit. suites, test cases, set up / tear down. Fixtures? Mocking? This is
+JUnit, suites, test cases, set up / tear down. Fixtures? Mocking? This is
 "TDD"-style
 
 \subsection{"BDD"-style}
@@ -591,5 +592,4 @@ And here is a figure
 \end{center}
 \end{figure}
 
-that we refer to here: \ref{RDF_4}
 \end{document}
