@@ -164,7 +164,6 @@ What will this report \textbf{not} discuss?
 
 \todo{More general background on correctness, testing, unit testing, etc.}
 
-\todo{How verification tools are used in practice?}
 
 Runtime verification is a new area of research, but the research on
 verification and formal methods goes back several decades. Research of interest
@@ -184,16 +183,30 @@ programming with assertions in general, see e.g.
 
 \section{Proving Correctness}
 
-\section{Formal Verification}
+A correctness proof is a certificate, based in mathematics and logics, that a
+program/system/function follows its specifications, i.e.\ does what it is
+supposed to do. There are several approaches, with their advantages and
+disadvantages.
 
-"Best result". Tedious. Often impossible.
+\todo{Formal verification}, as started by Hoare \cite{hoare69} and
+Floyd{floyd67} and those around them, is the manual, semi-automated, or (not so
+often) fully automated process of proving that at all points in the program,
+given inputs satisfying some pre-conditions, the outputs will satisfy the
+post-conditions. By formulating the post-conditions of the exit point(s) so
+that they yield according to the specification, and by linking together the
+pre-conditions of program points with their preceding program points'
+post-conditions, we now know that correct indata will yield correct results.
 
-\section{Model Checking}
+This way of proving correctness often yields the best results. But it is slow,
+hard to automate, and therefore requires much manual labor. Wading through
+large programs thus often becomes impractical.
 
-Nice, simpler than formal verification. Can yield impossibly large state
-spaces. Bounded model checking.
+\texttt{Model checking}, is what?  Nice, simpler than formal verification. Can
+yield impossibly large state spaces. Bounded model checking.
 
 Requires a model. Can learn model for black box.
+
+\todo{How verification tools are used in practice?}
 
 \section{Runtime Verification}\label{section-rv}
 
