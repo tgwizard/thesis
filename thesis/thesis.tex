@@ -8,6 +8,7 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{listings}
+\usepackage{alltt}
 \usepackage{draftwatermark}
 %\usepackage[firstpage]{draftwatermark}
 
@@ -31,6 +32,9 @@ Ranvinge\\Supervisor CSC: title Narges Khakpour\\Examiner: title Johan Håstad}
 \trita{TRITA xxx yyyy-nn}
 
 \begin{document}
+
+\lstset{basicstyle=\ttfamily, tabsize=2}
+
 \frontmatter
 \pagestyle{empty}
 \removepagenumbers
@@ -148,7 +152,7 @@ Perhaps: Discuss the sectioning of this report.
 
 The rest of this report is structured in as follows. Chapter 2 gives a
 background to the subject of verifying program correctness. Chapter 3 continues
-by describing the previous research on runtime verification and the design of
+by describing the previous research on runtime verification and the syntax of
 specification languages. It also gives an overview of the current ideas in unit
 testing.
 
@@ -376,21 +380,36 @@ states of the execution. LTL specifications are formulas that operate on these
 states. An LTL formula consists of \textit{propositional variables} that work
 on the domain model of the state (checking variables, global state, etc.), the
 normal logical operators such as negation and disjunction, and some temporal
-operators. The most basic and common temporal operators are $\boldsymbol{X}
-$\textit{next} and $\boldsymbol{U} $\textit{until}. Other operators can be
-derived from these, such as $\boldsymbol{G}$ \textit{globally} and
-$\boldsymbol{F}$ \textit{eventually}.
+operators. The most basic and common temporal operators are $\boldsymbol{X}$,
+\textit{next}, and $\boldsymbol{U}$, \textit{until}. Other operators can be
+derived from these, such as $\boldsymbol{G}$, \textit{globally}, and
+$\boldsymbol{F}$, \textit{eventually}.
+
+Bauer et al.\ introduce a three-valued boolean logic LTL$_3$ in
+\cite{bauer06monitoring}, taking the values (true, false and ?). This logic is
+arguably more suited for the finite nature of runtime verification, whereas LTL
+was designed with infinite traces in mind. The semantics of LTL$_3$ reflect the
+fact that when verifying runtime verification specifications, can not only
+be satisfied or violated, but inconclusive. For satisfied or violated
+specifications, no further verification is required - we already know the
+outcome. For inconclusive verification, we need to continue verification, as,
+with future events, the result could be either or.
 
 An example LTL formula, taken from a list of common specification patterns
 \cite{dwyer99patterns}, could be: $S$ precedes $P$, i.e.\, if the state $P$ holds
-sometime, the state $S$ will hold before it.
+sometime, the state $S$ will hold before it. This is shown in
+Figure~\ref{figure-ltl}.
+
+\begin{figure}[h!]
 
 \[
 \boldsymbol{G} \, P \rightarrow (\neg P \, \boldsymbol{U} \, (S \wedge \neg P)
 \]
 
-(This can be read as: Globally, if $P$ holds, then, while $P$ didn't hold, $S$
-held at some point).
+\caption{An example of an LTL formula. This can be read as: Globally, if $P$
+holds, then, while $P$ didn't hold, $S$ held at some point.}
+\label{figure-ltl}
+\end{figure}
 
 There is a counterpart to LTL in the real-time setting called Timed Linear
 Temporal Logic \todo{cite someone}. It introduces clocks to make specifications
@@ -449,14 +468,18 @@ verification to do online verification, and then the specifications need to be
 available and embedded into the system. A few approaches have been taken to
 enable this.
 
-In Bodden, specifications are written as Java annotations \todo{footnote
-describing them?} embedded in the target program. Rosuenblum
-\cite{rosenblum95practicalassertions} uses specially annotated comments. The
-programming language Eiffel has full language support for Design by Contract,
-with pre- and post-conditions, invariants, and more. Other approaches
-\todo{who?} use external specification files. For simple cases it is common to
-write assertions in the program, checking boolean expressions under runtime
-\todo{cite jass}.
+Approaches to writing specifications can be divided into two parts: those that
+require you to manually mark code for verification, and those that inject the
+verification code from external specifications.
+
+Rosuenblum \cite{rosenblum95practicalassertions} uses specially annotated
+comments. Bodden \cite{bodden05efficientrv} uses Java annotations, which are
+written at function and variable definitions, to mark code for verification.
+\todo{more, and rephrase}. The programming language Eiffel has full language
+support for Design by Contract, with pre- and post-conditions, invariants, and
+more. Other approaches \todo{who?} use external specification files. For simple
+cases it is common to write assertions in the program, checking boolean
+expressions under runtime \todo{cite jass}.
 
 
 \section{Verification against Specifications} \label{section-verification}
@@ -464,15 +487,14 @@ write assertions in the program, checking boolean expressions under runtime
 Formal specifications are written so that programs can be verified against them
 - to see whether they follow the specification, or violate parts of it.
 
-There are several ways to verify a program against its specification \rephrase
-\todo{which}. A common one, used in
-\cite{bauer06monitoring,bodden05efficientrv} among others, is to generate
-monitors from the specification.
-
-Monitors are state machines that operate with the input language of events
-emitted by the program.
+There are several ways to verify a program against its specification. A common
+one, used in \cite{bauer06monitoring,bodden05efficientrv} among others, is to
+generate state machines from the specification. These state machines, often
+called \textit{monitors}, operate with the input language of events emitted by
+the program.
 
 \todo{Monitors. Büchi Automatons.}
+
 
 \section{Code Instrumentation} \label{section-instrumentation}
 
@@ -482,23 +504,32 @@ statements executed, variables assigned, etc., depending on the system model of
 the specification language \rephrase. The program needs to be instrumented for
 it to emit such events. This often means wrapping function calls and variable
 assignments in a "recording layer", which performs the desired action after
-logging the event.  The events can then be "sent" to the verification tools.
+logging the event. The events can then be "sent" to the verification tools.
 
-Instrumentation techniques can be divided into two parts: those that require
-you to manually mark code for "recording", and those that inject the recording
-code externally.
+
+\subsection{Pre-processing the Code}
 
 Rosuenblum \cite{rosenblum95practicalassertions} uses a pre-processor step in
 the C compilation setup instrument code, where the specifications (called
-assertions there) are written adjacent to the code under watch. Bodden
-\cite{bodden05efficientrv} uses Java annotations, which are written at function
-and variable definitions, to mark code for verification. \todo{more, and
-rephrase}.
+assertions there) are written adjacent to the code under watch.
 
-For compiled, and byte-compiled \todo{define, another word?}, code, it is
-possible to rewrite the compiled program to add recording functionality. This
-can also be done dynamically during runtme, which is especially simple and
-suitable for dynamic languages, such as Python, Ruby or JavaScript.
+
+\subsection{Post-processing the Code}
+
+It is also possible to rewrite the compiled program, instrumenting the code
+after compilation. This way, the program needs no knowledge of the verification
+framework.
+
+
+\subsection{Dynamic Code Rewriting}
+
+In many dynamic languages, such as Python, Ruby or Javascript, it is possible
+to rewrite the code during runtime, which is sometimes called monkey patching.
+A function to be monitored could be rewritten, adding a lightweight wrapper
+that records all calls to it, and then delegates to it.
+
+
+\subsection{Aspects}
 
 An interesting approach to external injection is to use aspect-oriented
 programming. In aspect-oriented theory, a program is divided into modules, each
@@ -514,14 +545,16 @@ point cut are called \textit{join points}.
 Runtime verification is a typical case of a cross-cutting concern. Bodden
 \cite{bodden05efficientrv} uses it in his runtime verification implementation.
 
+Aspects are often implemented as a post-processing step in the compilation
+process, adding code for handling the aspects.
+
+
 \section{Unit Testing} \label{section-unit-testing}
 
 We discussed testing and unit testing in general in
-Section~\ref{section-testing}.  Here we will discuss the specifics of unit
-testing syntax.
-
-How do they work? What are their syntaxes? This section mostly concerns the
-language and syntax used for writing unit tests.
+Section~\ref{section-testing}. How does unit testing work? What is the
+syntaxes? This section mostly concerns the language and syntax used for writing
+unit tests.
 
 \subsection{xUnit}
 
@@ -531,16 +564,18 @@ based on the same concept, and since JUnit is the canonical, and one of the
 first, implementation, I'll use it for a short demonstration. See
 Figure~\ref{figure-junit}.
 
-\begin{figure}[h!] \label{figure-junit}
-\lstset{language=Java, tabsize=4}
+\begin{figure}[h!]
+\lstset{language=Java}
 \begin{lstlisting}
+// required imports removed for brevity
+
 public class TestSomeClass extends TestCase {
-	private World;
+	private Environment;
 
 	@Before
 	public void setUp() {
 		// setup the fixture for each test
-		World = new World();
+		Environment = new Environment();
 	}
 
 	@After
@@ -557,29 +592,143 @@ public class TestSomeClass extends TestCase {
 	}
 
 	@Test
-	public void testThatNullArgumentsShouldThrow() {
+	public void testThatDoWorkReturnsX() {
 		// do setup for this test
+		Target t = new Target(...);
 		// exercise the object under test
+		t.doWork(...);
 		// do verification
+		assert t.getValues() == x;
 	}
 }
 \end{lstlisting}
-\caption{An example of unit testing syntax, written for JUnit.}
+\caption{An example of unit testing syntax, written as a test case for JUnit.}
+\label{figure-junit}
 \end{figure}
 
-JUnit, suites, test cases, set up / tear down. Fixtures? Mocking? This is
-"TDD"-style
+In JUnit, and xUnit, you run a \textit{test suite} of \textit{test cases},
+which contain tests. The example in Figure~\ref{figure-junit}, the test suite
+is implicitly created by JUnit, although it is possible to create it and
+control it your self. A \textit{test runner} runs the test suite, showing
+progress to the user.  When the tests are finished, any errors are shown to the
+user.
 
-\subsubsection{"BDD"-style}
+The example in Figure~\ref{figure-junit} has two tests, and methods to set up
+and tear down the tests \textit{fixture}. The fixture is the surrounding set of
+objects (environment) that the object under test requires to work properly.
+These functions are usually called \textit{setUp} and \textit{tearDown},
+respectively.
 
-describe. it. should. etc.
+The order in which tests are executed is arbitrary in JUnit. One possible
+ordering of the relevant methods in the example is:
+
+\begin{enumerate}
+	\item \textit{setUp}
+	\item \textit{testSimpleAddition}
+	\item \textit{tearDown}
+
+	\item \textit{setUp}
+	\item \textit{testThatDoWorkReturnsX}
+	\item \textit{tearDown}
+\end{enumerate}
+
+Test written in this style are traditional unit tests. 
+
+\todo{Mocking? This is "TDD"-style}
+
+\subsubsection{Behaviour-driven Development}
+
+There is a style of writing tests called behaviour-driven development
+\cite{north06bdd}. It originated from test-driven development, and is built on
+the idea that the tests you write should test the behaviour of the program. The
+simplest example is that you write your unit tests after the behaviour you
+desire, perhaps naming your tests according to "X should do Y". A more radical
+example is shown in Figure~\ref{figure-bdd}.
+
+\begin{figure}[h!]
+
+\begin{alltt}
++Scenario 1: Account is in credit+
+\textit{Given} the account is in credit
+\textit{And} the card is valid
+\textit{And} the dispenser contains cash
+\textit{When} the customer requests cash
+\textit{Then} ensure the account is debited
+\textit{And} ensure cash is dispensed
+\textit{And} ensure the card is returned
+\end{alltt}
+
+\caption{An example scenario describing a behaviour, as written in BDD.
+Scenario taken from \cite{north06bdd}.}
+\label{figure-bdd}
+\end{figure}
+
+The test runner parses each scenario, and for each line finds a matching unit
+of code that does what the line describes. This way of writing tests, or
+describing behaviours, leads to a outside-in, or top-down, way of writing and
+thinking about your program.
+
+\subsubsection{Mocking and Faking}
+
+A common issue when writing unit tests is that, to instantiate some object X,
+or to call some function Y, the program needs access to some other
+objects/data/configuration Z. Z might be something simple, which we can easily
+create in the test. It might also be a network or database connection, or
+something doing heavy calculation, or just something complex.
+
+One way to work around this is to create fake/mock/dummy, objects. A fake
+network connection has the same interface as a real network connection, but
+calling it doesn't actually transmit anything anywhere, and it might return
+hard coded data. Fake objects could save what actions are taken upon them, and
+the test could then verify that these are according to expectations.
 
 \subsubsection{Expectations}
 
-Write about expectations.
+Instead of writing fake objects, we can create a mock object and pre-record
+what actions we expect to be taken upon them. This is called writing
+\textit{expectations} \cite{fowler07expectations}. A simple example of
+expectations is shown in Figure~\ref{figure-expectations}.
 
+\begin{figure}[h!]
 
+\lstset{language=Java}
+\begin{lstlisting}
+public class OrderInteractionTester extends MockObjectTestCase {
+	private static String TALISKER = "Talisker";
 
+	public void testFillingRemovesInventoryIfInStock() {
+		// setup - data
+		Order order = new Order(TALISKER, 50);
+		Mock warehouseMock = new Mock(Warehouse.class);
+
+		// setup - expectations
+		warehouseMock.expects(once()).method("hasInventory")
+			.with(eq(TALISKER),eq(50))
+			.will(returnValue(true));
+		warehouseMock.expects(once()).method("remove")
+			.with(eq(TALISKER), eq(50))
+			.after("hasInventory");
+
+		// exercise
+		order.fill((Warehouse) warehouseMock.proxy());
+
+		// verify
+		warehouseMock.verify();
+		assertTrue(order.isFilled());
+	}
+}
+\end{lstlisting}
+
+\caption{An example of expectations, written using jMock and JUnit.
+Example taken from \cite{fowler07expectations}.}
+\label{figure-expectations}
+\end{figure}
+
+Figure~\ref{figure-expectations} shows a test of a fictional shop. The test
+tests only one thing, the fill method of the Order object, but it requires a
+Warehouse object, for access to the inventory. We supply a mock Warehouse, with
+expectations on which methods should be called on it, with which arguments and
+what they should return.
 
 %================================================
 %====== Chapter 4, Method
