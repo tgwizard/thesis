@@ -119,7 +119,7 @@ With the specification written in a suitably formal language, the program can
 be monitored to check that the specification is followed.
 
 
-\section{Problem Statement}
+\section{Problem Statement} \label{section-problem-statement}
 
 How can runtime verification specifications be written in a manner that uses
 the syntax of the target program's programming language, and resembles
@@ -334,7 +334,7 @@ Section~\ref{section-instrumentation}
 
 The design of unit test syntax is discussed in
 Section~\ref{section-unit-testing}. The combination of the two, runtime
-verification and unit testing, will be the main point in
+verification and unit testing, will be the main subject in
 Chapters~\ref{chapter-method} and~\ref{chapter-results}.
 
 
@@ -730,6 +730,9 @@ Warehouse object, for access to the inventory. We supply a mock Warehouse, with
 expectations on which methods should be called on it, with which arguments and
 what they should return.
 
+
+
+
 %================================================
 %====== Chapter 4, Method
 %================================================
@@ -737,20 +740,44 @@ what they should return.
 \pagestyle{newchap}
 \chapter{Method} \label{chapter-method}
 
-What have I done, and why (again)? Test-Inspired Runtime Verification.
+As stated in Section~\ref{section-problem-statement}, the objective of this
+thesis is to investigate whether it is possible to do runtime verification with
+specifications written in the target program's programming language, structured
+similar to unit tests. To find a solution to this, there are four issues we
+need to address:
 
+\begin{enumerate}
+	\item How should the syntax for the specification be defined, so that it
+		looks similar to that for unit tests, but works for runtime verification?
+		Which language could be used? Which unit testing framework to take
+		inspiration from?
+	\item How can it be provided with a formal foundation?
+	\item How should the program be instrumented to monitor the system, to expose
+		the appropriate events and data, and to build the system model?
+	\item How will this be used to verify the system against the
+		specification? Online or offline verification? E.g.\ which techniques
+		should be used to verify the monitored system against the specification?
+\end{enumerate}
 
-\section{Syntax?}
+This report is a documentation on how to solve these issues. The following
+sections are each dedicated to one issue, and shows a proof-of-concept of these
+ideas. The implementation can be found online. \todo{footnote}
+
+\section{Syntax}
 
 asdf
 
-\section{Verification, Constructing Monitors}
+\section{Formal Foundation}
 
-Bauer, Leucker, Schallhart.
+This is the most difficult part, and I haven't done it yet.
 
-\section{Correctness}
+\section{Instrumentation}
 
-It is all awwwesomee!
+dfgh
+
+\section{Verification}
+
+fghj
 
 
 
