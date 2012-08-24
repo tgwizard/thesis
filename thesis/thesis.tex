@@ -175,47 +175,61 @@ verification and formal methods goes back several decades. Research of interest
 include the early work on formal methods, e.g.\ by Hoare \cite{hoare69} and
 Floyd \cite{floyd67}, and work on logics suitable for runtime verification,
 e.g. LTL by Pnueli \cite{pnueli77}. The seminal work done by Hoare, Floyd and
-Pnueli are among the interesting approaches used for runtime verification. LTL
-is one of the common formal languages used for formal specifications in RV.
+Pnueli lay the foundation for many interesting approaches used for runtime
+verification. LTL is one of the common formal languages used for formal
+specifications in runtime verification.
 
-The work on the linear temporal logic (and other logics), on runtime
-verification in general and its applications, on code instrumentation (e.g.
-\cite{aspectj,matusiak09aoppy}), and on unit testing and their frameworks will
-lay the foundation of this work. Interesting research also include the work by
-Meyer on the "Design by Contract" methodology \cite{meyer92applyingdbc} and on
-programming with assertions in general, see e.g.
-\cite{rosenblum95practicalassertions,bartetzko01jass}.
+This chapter gives a short overview of the background to the concepts of this
+report. It starts with laying out what we mean by proving the correctness of
+programs in Section~\ref{section-proving-correctness}. Section~\ref{section-rv}
+describes runtime verification and its place in proving correctness. And
+finally, Section~\ref{section-testing} discusses testing.
 
-\todo{More general background on correctness, testing, unit testing, etc.}
 
-\section{Proving Correctness}
+\section{Proving Correctness} \label{section-proving-correctness}
 
 A correctness proof is a certificate, based in mathematics and logics, that a
 program/system/function follows its specifications, i.e.\ does what it is
 supposed to do. There are several approaches, with their advantages and
 disadvantages.
 
-\todo{Formal verification}, as started by Hoare \cite{hoare69} and Floyd
-\cite{floyd67} and those around them, is the manual, semi-automated, or (not so
-often) fully automated process of proving that at all points in the program,
-given inputs satisfying some pre-conditions, the outputs will satisfy the
-post-conditions. By formulating the post-conditions of the exit point(s) so
-that they yield according to the specification, and by linking together the
-pre-conditions of program points with their preceding program points'
-post-conditions, we now know that correct indata will yield correct results.
+\textit{Theorem proving}, as started by Hoare \cite{hoare69}, Floyd
+\cite{floyd67} and others, is the manual, semi-automated, or (not so often)
+fully automated process of mathematically proving that the system follows its
+specification. There are many ways of doing such proofs.
+
+One way is to prove that at all points in the program, given inputs satisfying
+some pre-conditions, the outputs will satisfy the post-conditions. By
+formulating the post-conditions of the exit point(s) so that they follow the
+specification, and by linking together the pre-conditions of program points
+with their preceding program points' post-conditions, we now know that correct
+indata will yield correct results.
 
 This way of proving correctness often yields the best results. But it is slow,
 hard to automate, and therefore requires much manual labor. Wading through
 large programs thus often becomes impractical.
 
-\textit{Model checking}, is what?  Nice, simpler than formal verification. Can
-yield impossibly large state spaces. Bounded model checking.
+\textit{Model checking} is the concept of verifying that a \textit{model} of a
+system follows its specification. This requires that both the model and the
+specification is written in a mathematical formalism. Given this, the task
+becomes to see if the model satisfies a logical formula. It is often simpler
+than theorem proving, and can be automated.
 
-Requires a model. Can learn model for black box.
+The model of the system is usually structured as a finite state machine, and
+verification means visiting all accessible states, checking that they follow
+the specification. This can be problematic, especially when the state space
+becomes very big, something known as the \textit{state explosion problem}.
+There are approaches to address this issue, such as \textit{bounded model
+checking}, or by using higher-level abstractions.
 
-\todo{How verification tools are used in practice?}
+Proving that a model of a system is correct can be very useful, but it suffers
+from the inherent flaw of only verifying the model, not the actual system. The
+model can be difficult to construct, or deviate too far from the system.
+Runtime verification attempts to solve this by dealing directly with the
+system, creating its model during runtime.
 
-\section{Runtime Verification}\label{section-rv}
+
+\section{Runtime Verification} \label{section-rv}
 
 Much in common with model checking. Only current execution. Finite traces.
 Dynamic environment.
@@ -636,7 +650,7 @@ Test written in this style are traditional unit tests.
 
 \todo{Mocking? This is "TDD"-style}
 
-\subsubsection{Behaviour-driven Development}
+\subsection{Behaviour-driven Development}
 
 There is a style of writing tests called behaviour-driven development
 \cite{north06bdd}. It originated from test-driven development, and is built on
@@ -668,7 +682,7 @@ of code that does what the line describes. This way of writing tests, or
 describing behaviours, leads to a outside-in, or top-down, way of writing and
 thinking about your program.
 
-\subsubsection{Mocking and Faking}
+\subsection{Mocking and Faking}
 
 A common issue when writing unit tests is that, to instantiate some object X,
 or to call some function Y, the program needs access to some other
@@ -682,7 +696,7 @@ calling it doesn't actually transmit anything anywhere, and it might return
 hard coded data. Fake objects could save what actions are taken upon them, and
 the test could then verify that these are according to expectations.
 
-\subsubsection{Expectations}
+\subsection{Expectations}
 
 Instead of writing fake objects, we can create a mock object and pre-record
 what actions we expect to be taken upon them. This is called writing
@@ -730,6 +744,33 @@ Warehouse object, for access to the inventory. We supply a mock Warehouse, with
 expectations on which methods should be called on it, with which arguments and
 what they should return.
 
+An expectation follows a simple pattern:
+
+\begin{itemize}
+	\item Object (optional) and function.
+	\item Invocation count, how often is the function expected to be called
+	\item Expected arguments. Can be explicit values, or generic types, or
+		ignored.
+	\item What should happen, e.g.\ what the function should return.
+	\item When this should happen, e.g.\ in what sequence of function calls, in
+		what global state.
+\end{itemize}
+
+There are two common ways of specifying expectations: recording and explicit
+specification. Figure~\ref{figure-expectations} shows an example of how to
+explicitly specify expectations.
+
+When recording expectations, you create a mock object and call the expected
+functions, with expected arguments and return values, in the expected order.
+Then you set the mock into replay mode, and it will replay the recorded
+expectations, and verify that they occur correctly.
+
+There are several frameworks for working with expectations, such as
+jMock\footnote{\texttt{http://www.jmock.org/}} for Java, Rhino
+Mocks\footnote{\texttt{http://ayende.com/wiki/Rhino+Mocks.ashx}} and
+Ludibrio\footnote{\texttt{https://github.com/nsigustavo/ludibrio/}} for Python.
+
+
 
 
 
@@ -761,7 +802,8 @@ need to address:
 
 This report is a documentation on how to solve these issues. The following
 sections are each dedicated to one issue, and shows a proof-of-concept of these
-ideas. The implementation can be found online. \todo{footnote}
+ideas. The implementation can be found
+online\footnote{\texttt{https://github.com/tgwizard/pythonrv}}.
 
 \section{Syntax}
 
