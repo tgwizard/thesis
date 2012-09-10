@@ -9,11 +9,15 @@
 \usepackage{amsfonts}
 \usepackage{listings}
 \usepackage{alltt}
+\usepackage{subfigure}
 \usepackage{draftwatermark}
 %\usepackage[firstpage]{draftwatermark}
 
 \SetWatermarkLightness{0.9}
 \SetWatermarkScale{1.1}
+
+\usepackage{tikz}
+\usetikzlibrary{automata,positioning,shapes.symbols}
 
 \newcommand{\todo}[1]{\textbf{todo: #1}}
 \newcommand{\rephrase}{\textbf{(rephrase)} }
@@ -809,9 +813,167 @@ online\footnote{\texttt{https://github.com/tgwizard/pythonrv}}.
 
 asdf
 
-\section{Formal Foundation}
+\section{Formal Foundation} \label{section-method-syntax}
 
-This is the most difficult part, and I haven't done it yet.
+This is the most difficult part, and I really figured it out yet. What follows
+is an early attempt at it.
+
+A seemingly insurmountable problem quickly arises when attempting to give a
+formal foundation to the specifications described in
+Section~\ref{section-method-syntax}. The specifications are written as ordinary
+python functions and, as such, are difficult to formalize. Python as a language
+is rather informal - one implementation of it, CPython, serves as the reference
+implementation.
+
+One way to go around this is to define a semantics for a subset of python.
+Specifications written in this subset will have a formal semantics, and they
+will have a way to formally prove their correctness.
+
+One formal semantics that can quite easily be ascribed to python code is that
+of finite automata. The python code is translated into a finite automata. To
+make this more manageable, translations are shown for some small "types of
+python specifications", which can be composed to yield more complex
+specifications. Proofs can thus use structural induction to prove general
+properties no specifications.
+
+The system model for the automata, the alphabet it works on, is the events of
+the function(s) that a specification monitors. \todo{Currently the
+specifications below only allow for one monitored function per specification.}
+
+The idea with the transitions in the automata is that either we always follow a
+transition, and we label it $\Sigma$, or we follow a transition only if the
+event that has occurred satisfies some predicate $P$. If no transition fits,
+the specification has been violated.
+
+One peculiarity should be noted: On each new event, a new "instance" of the
+automaton is spawned, starting from the beginning. All current "executions" of
+the automaton is also continued.
+
+Next follows the four specification modules I think are required. Their
+presentation is quite ugly, unfortunately.
+
+%%%%
+%% null spec
+\begin{figure}[h!]
+
+	\begin{minipage}{0.45\textwidth}
+		\centering
+		\lstset{language=Python}
+		\begin{lstlisting}
+		def null_spec():
+			pass
+		\end{lstlisting}
+	\end{minipage}
+	% comment to prevent newline between figures
+	\begin{minipage}{0.45\textwidth}
+		\centering
+		\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto,scale=.5]
+			\node[state,initial,accepting] (q0)   {$q_0$};
+			\path[->]
+				(q0) edge [loop right] node {$\Sigma$} (q0);
+		\end{tikzpicture}
+	\end{minipage}
+
+	\caption{The \textit{null specification} - the simplest of specifications.}
+	\label{label-spec-null}
+\end{figure}
+
+%%%%
+%% assert spec
+\begin{figure}[h!]
+
+	\begin{minipage}{0.45\textwidth}
+		\centering
+		\lstset{language=Python}
+		\begin{lstlisting}
+		def assert_spec():
+			assert P
+		\end{lstlisting}
+	\end{minipage}
+	% comment to prevent newline between figures
+	\begin{minipage}{0.45\textwidth}
+		\centering
+		\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto,scale=.5]
+			\node[state,initial] (q0)									{$q_0$};
+			\node[state,accepting] (q1) [right of=q0]	{$q_1$};
+			\path[->]
+				(q0) edge node {$P$} (q1);
+		\end{tikzpicture}
+	\end{minipage}
+
+	\caption{The \textit{assert specification} - the simplest specification that
+	actually does something.}
+	\label{label-spec-assert}
+\end{figure}
+
+%%%%
+%% next spec
+\begin{figure}[h!]
+
+	\begin{minipage}{0.45\textwidth}
+		\centering
+		\lstset{language=Python}
+		\begin{lstlisting}
+		def next_spec():
+			next(any_spec)
+
+		\end{lstlisting}
+	\end{minipage}
+	% comment to prevent newline between figures
+	\begin{minipage}{0.45\textwidth}
+		\centering
+		\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto,scale=.5]
+			\node[state,initial] (q0)									{$q_0$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (q1) [below right of=q0]
+			{$A(any\_spec)$};
+			\path[->]
+				(q0) edge node {$\Sigma$} (q1);
+		\end{tikzpicture}
+	\end{minipage}
+
+	\caption{The \textit{next specification} - the specification that deals with
+	time.}
+	\label{label-spec-next}
+\end{figure}
+
+%%%%
+%% if spec
+\begin{figure}[h!]
+
+	\begin{minipage}{0.45\textwidth}
+		\centering
+		\lstset{language=Python}
+		\begin{lstlisting}
+		def if_spec():
+			if P0:
+				inner_spec0() # next or null spec
+			# optional additional conditionals, 1 to n-1
+			else if Pi:
+				inner_speci() # next or null spec
+			# optional else clause
+			else:
+				inner_specn() # next or null spec
+
+		\end{lstlisting}
+	\end{minipage}
+
+	\begin{minipage}{0.45\textwidth}
+		\centering
+		\begin{tikzpicture}[shorten >=1pt,node distance=6cm,on grid,auto,scale=.5]
+			\node[state,initial] (q0)									{$q_0$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (q1) [right of=q0] {$A(inner\_spec0)$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (q2) [below right of=q0] {$A(inner\_speci)$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (q3) [below of=q0] {$A(inner\_specn)$};
+			\path[->]
+				(q0) edge node {$P0$} (q1)
+				(q0) edge node {$Pi \wedge \forall_{j=0}^{i-1} \bar{P_j}$} (q2)
+				(q0) edge node {$\forall_{j=0}^{n} \bar{P_j}$} (q3);
+		\end{tikzpicture}
+	\end{minipage}
+
+	\caption{The \textit{if specification} - the most complex specification.}
+	\label{label-spec-if}
+\end{figure}
 
 \section{Instrumentation}
 
