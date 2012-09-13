@@ -829,7 +829,7 @@ A few simple example below will introduce the syntax of pythonrv. After that
 the capabilities and limitations of the current implementation will be
 exposited.
 
-\subsection{Four Simple Examples}
+\subsection{Three Examples}
 \lstset{language=Python,numbers=left}
 
 \begin{figure}[h!]
@@ -1096,7 +1096,7 @@ presentation is quite ugly, unfortunately.
 		\centering
 		\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto,scale=.5]
 			\node[state,initial] (q0)									{$q_0$};
-			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (q1) [below right of=q0]
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (q1) [right of=q0]
 			{$A(any\_spec)$};
 			\path[->]
 				(q0) edge node {$\Sigma$} (q1);
