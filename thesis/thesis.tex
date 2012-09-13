@@ -37,7 +37,8 @@ Ranvinge\\Supervisor CSC: title Narges Khakpour\\Examiner: title Johan Håstad}
 
 \begin{document}
 
-\lstset{basicstyle=\ttfamily, tabsize=2}
+\lstset{basicstyle=\ttfamily, tabsize=2, showspaces=false,
+showstringspaces=false}
 
 \frontmatter
 \pagestyle{empty}
@@ -871,6 +872,105 @@ about the current event. On line 6, the array of input arguments used to call
 The specification function in Figure~\ref{figure-syntax-example-1} will be
 called upon every invocation to \texttt{fibmodule.fib}.
 
+\begin{figure}[h!]
+
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+	\begin{lstlisting}
+	from pythonrv import rv
+	import mymodule
+
+	@rv.monitor(foo=mymodule.foo,
+		bar=mymodule.bar)
+	def spec(event):
+		if event.fn.foo.called:
+			# the foo function was called
+			# either the size of the event history
+			# is 1 - this is the first event - or
+			# the previous event was a call to bar
+			assert len(event.history) == 1 \
+				or event.prev.fn.bar.called
+		elif event.fn.bar.called:
+			# the bar function was called
+			# assert that previous event
+			# was a call to foo
+			assert event.prev.fn.foo.called
+		else:
+			# this will never happen
+			assert False, "Neither foo nor bar was called"
+	\end{lstlisting}
+	\end{minipage}
+	\end{center}
+
+	\caption{A specification that monitors two functions, \texttt{mymodule.foo}
+	and \texttt{mymodule.bar}. It asserts that calls to the two functions
+alternate; that no two calls to \texttt{foo} occurs without a call to
+\texttt{bar} in between, and vice versa. The first call has to be to
+\texttt{foo}.}
+	\label{figure-syntax-example-2}
+\end{figure}
+
+Figure~\ref{figure-syntax-example-2} shows how a specification can monitor two
+functions. The specification function will be called whenever either of the
+monitored functions is called. Which function was called can be determined from
+the \texttt{event} argument, as is done on lines 6 and 9. It is the
+\texttt{called} attribute of a function in the \texttt{event.fn} structure
+allows for this.
+
+The example also shows how the specification can access a history of previous
+events - events that it has handled in the past. \texttt{event.history} is a
+list of all events that has occurred - that this specification monitors. The
+last element is the current event, and the next-to-last element is the previous
+element, which can also be accessed as \texttt{event.prev}.
+
+\begin{figure}[h!]
+
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+	\begin{lstlisting}
+	from pythonrv import rv
+	import mymodule
+
+	@rv.monitor(foo=mymodule.foo,
+		bar=mymodule.bar,
+		baz=mymodule.baz)
+	def spec(event):
+		if event.fn.foo.called:
+			# add function to be called on next event
+			event.fn.foo.next(followup)
+			event.finish()
+		else:
+			# verification has failed
+			# same as assert False
+			event.failure()
+
+	def followup(event):
+		if event.fn.bar.called:
+			event.success()
+		elif event.fn.baz.called:
+			assert event.fn.baz.inputs[0] == true
+			# call this function on next event as well
+			event.fn.foo.next(followup)
+		else:
+			event.failure()
+	\end{lstlisting}
+	\end{minipage}
+	\end{center}
+
+	\caption{A more complex example: A specification function that monitors three
+		functions, \texttt{foo}, \texttt{bar} and \texttt{baz}, and makes sure that
+		\texttt{foo} is called first, then any number calls to \texttt{bar} with
+		the first argument as \texttt{True}, and then finally a call to
+	\texttt{bar}. After that, any calls are allowed - the specification function
+won't be verified any longer.}
+	\label{figure-syntax-example-3}
+\end{figure}
+
+Figure~\ref{figure-syntax-example-3} shows a more advanced example.
+
+\todo{write here}
+
+
 \subsection{Capabilities and Limitations}
 
 asdf
@@ -930,8 +1030,9 @@ presentation is quite ugly, unfortunately.
 		def null_spec():
 			pass
 		\end{lstlisting}
+		\subcaption{The \textit{null specification}, in python function format.}
 	\end{minipage}
-	% comment to prevent newline between figures
+	~
 	\begin{minipage}{0.45\textwidth}
 		\centering
 		\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto,scale=.5]
@@ -939,6 +1040,7 @@ presentation is quite ugly, unfortunately.
 			\path[->]
 				(q0) edge [loop right] node {$\Sigma$} (q0);
 		\end{tikzpicture}
+		\subcaption{The \textit{null specification}, as an automaton.}
 	\end{minipage}
 
 	\caption{The \textit{null specification} - the simplest of specifications.}
@@ -956,8 +1058,9 @@ presentation is quite ugly, unfortunately.
 		def assert_spec():
 			assert P
 		\end{lstlisting}
+		\subcaption{The \textit{assert specification}, in python function format.}
 	\end{minipage}
-	% comment to prevent newline between figures
+	~
 	\begin{minipage}{0.45\textwidth}
 		\centering
 		\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto,scale=.5]
@@ -966,6 +1069,7 @@ presentation is quite ugly, unfortunately.
 			\path[->]
 				(q0) edge node {$P$} (q1);
 		\end{tikzpicture}
+		\subcaption{The \textit{assert specification}, as an automaton.}
 	\end{minipage}
 
 	\caption{The \textit{assert specification} - the simplest specification that
@@ -985,8 +1089,9 @@ presentation is quite ugly, unfortunately.
 			next(any_spec)
 
 		\end{lstlisting}
+		\subcaption{The \textit{next specification}, in python function format.}
 	\end{minipage}
-	% comment to prevent newline between figures
+	~
 	\begin{minipage}{0.45\textwidth}
 		\centering
 		\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto,scale=.5]
@@ -996,6 +1101,7 @@ presentation is quite ugly, unfortunately.
 			\path[->]
 				(q0) edge node {$\Sigma$} (q1);
 		\end{tikzpicture}
+		\subcaption{The \textit{next specification}, as an automaton.}
 	\end{minipage}
 
 	\caption{The \textit{next specification} - the specification that deals with
@@ -1013,29 +1119,35 @@ presentation is quite ugly, unfortunately.
 		\begin{lstlisting}
 		def if_spec():
 			if P0:
-				inner_spec0() # next or null spec
+				innerspec_0() # next or null spec
 			# optional additional conditionals, 1 to n-1
 			else if Pi:
-				inner_speci() # next or null spec
+				innerspec_i() # next or null spec
 			# optional else clause
 			else:
-				inner_specn() # next or null spec
+				innerspec_n() # next or null spec
 
 		\end{lstlisting}
+		\centering
+		\subcaption{The \textit{if specification}, in python function format.}
 	\end{minipage}
+
+
 
 	\begin{minipage}{0.45\textwidth}
 		\centering
 		\begin{tikzpicture}[shorten >=1pt,node distance=6cm,on grid,auto,scale=.5]
 			\node[state,initial] (q0)									{$q_0$};
-			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (q1) [right of=q0] {$A(inner\_spec0)$};
-			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (q2) [below right of=q0] {$A(inner\_speci)$};
-			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (q3) [below of=q0] {$A(inner\_specn)$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (q1) [right of=q0] {$A(innerspec_0)$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (q2) [below right of=q0] {$A(innerspec_i)$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (q3) [below of=q0] {$A(innerspec_n)$};
 			\path[->]
 				(q0) edge node {$P0$} (q1)
 				(q0) edge node {$Pi \wedge \forall_{j=0}^{i-1} \bar{P_j}$} (q2)
-				(q0) edge node {$\forall_{j=0}^{n} \bar{P_j}$} (q3);
+				(q0) edge node {$\forall_{j=0}^{n-1} \bar{P_j}$} (q3);
 		\end{tikzpicture}
+		\centering
+		\subcaption{The \textit{if specification}, as an automaton.}
 	\end{minipage}
 
 	\caption{The \textit{if specification} - the most complex specification.}
