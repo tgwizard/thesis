@@ -836,14 +836,7 @@ exposited.
 
 	\begin{center}
 	\begin{minipage}{0.7\textwidth}
-	\begin{lstlisting}
-	from pythonrv import rv
-	import fibmodule
-
-	@rv.monitor(func=fibmodule.fib)
-	def spec(event):
-		assert event.fn.func.inputs[0] > 0
-	\end{lstlisting}
+	\lstinputlisting{figures/syntax_example_1.py}
 	\end{minipage}
 	\end{center}
 
@@ -876,29 +869,7 @@ called upon every invocation to \texttt{fibmodule.fib}.
 
 	\begin{center}
 	\begin{minipage}{0.7\textwidth}
-	\begin{lstlisting}
-	from pythonrv import rv
-	import mymodule
-
-	@rv.monitor(foo=mymodule.foo,
-		bar=mymodule.bar)
-	def spec(event):
-		if event.fn.foo.called:
-			# the foo function was called
-			# either the size of the event history
-			# is 1 - this is the first event - or
-			# the previous event was a call to bar
-			assert len(event.history) == 1 \
-				or event.prev.fn.bar.called
-		elif event.fn.bar.called:
-			# the bar function was called
-			# assert that previous event
-			# was a call to foo
-			assert event.prev.fn.foo.called
-		else:
-			# this will never happen
-			assert False, "Neither foo nor bar was called"
-	\end{lstlisting}
+	\lstinputlisting{figures/syntax_example_2.py}
 	\end{minipage}
 	\end{center}
 
@@ -927,33 +898,7 @@ element, which can also be accessed as \texttt{event.prev}.
 
 	\begin{center}
 	\begin{minipage}{0.7\textwidth}
-	\begin{lstlisting}
-	from pythonrv import rv
-	import mymodule
-
-	@rv.monitor(foo=mymodule.foo,
-		bar=mymodule.bar,
-		baz=mymodule.baz)
-	def spec(event):
-		if event.fn.foo.called:
-			# add function to be called on next event
-			event.fn.foo.next(followup)
-			event.finish()
-		else:
-			# verification has failed
-			# same as assert False
-			event.failure()
-
-	def followup(event):
-		if event.fn.bar.called:
-			event.success()
-		elif event.fn.baz.called:
-			assert event.fn.baz.inputs[0] == true
-			# call this function on next event as well
-			event.fn.foo.next(followup)
-		else:
-			event.failure()
-	\end{lstlisting}
+	\lstinputlisting{figures/syntax_example_3.py}
 	\end{minipage}
 	\end{center}
 
