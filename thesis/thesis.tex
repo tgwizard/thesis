@@ -38,7 +38,7 @@ Ranvinge\\Supervisor CSC: title Narges Khakpour\\Examiner: title Johan Håstad}
 \begin{document}
 
 \lstset{basicstyle=\ttfamily, tabsize=2, showspaces=false,
-showstringspaces=false}
+showstringspaces=false, numbersep=20pt}
 
 \frontmatter
 \pagestyle{empty}
@@ -67,7 +67,7 @@ Keywords: Runtime Verification, Unit Testing
 Sammanfattning på svenska. Skrivs sist.
 
 \bigskip\noindent
-Keywords (Sökord? Nyckelord?): 
+Keywords (Sökord? Nyckelord?):
 \end{foreignabstract}
 \clearpage
 
@@ -799,16 +799,21 @@ need to address:
 		inspiration from?
 	\item How should the program be instrumented to monitor the system, to expose
 		the appropriate events and data, and to build the system model?
-	\item How can it be provided with a formal foundation?
 	\item How will this be used to verify the system against the
 		specification? Online or offline verification? E.g.\ which techniques
 		should be used to verify the monitored system against the specification?
+	\item How can it be provided with a formal foundation?
 \end{enumerate}
 
 This report is a documentation on how to solve these issues. The following
 sections are each dedicated to one issue, and shows a proof-of-concept of these
 ideas. The implementation, called \textit{pythonrv}, can be found
 online\footnote{\texttt{https://github.com/tgwizard/pythonrv}}.
+
+\section{Definitions}
+
+Define some stuff first? Instrumentation? "The function to be monitored"?
+Specification function? Specification?
 
 \section{Syntax}
 
@@ -840,9 +845,9 @@ exposited.
 	\end{minipage}
 	\end{center}
 
-	\caption{A specification that monitors the function \textit{fib} in the
-		module \textit{fibmodule}. The monitored function is, locally to the
-		specification, aliased as \textit{func}. The specification asserts that the
+	\caption{A specification that monitors the function \texttt{fib} in the
+		module \texttt{fibmodule}. The monitored function is, locally to the
+		specification, aliased as \texttt{func}. The specification asserts that the
 		first input to the monitored function is always greater than zero.}
 	\label{figure-syntax-example-1}
 \end{figure}
@@ -852,15 +857,18 @@ pythonrv specification. Line 1 imports the rv module from the pythonrv package.
 On line 2 it imports the module(s) containing the function(s) we wish to
 monitor. Line 5 defines the specification as an ordinary python function called
 \texttt{spec}, taking one argument, \texttt{event}. The instrumentation is done
-line 4 by using the \textit{function decorator} \texttt{rv.monitor}.
-\texttt{rv.monitor} declares that the function \texttt{fib} in
-\texttt{fibmodule} should be monitored, and, whenever \texttt{fib} is called,
-\texttt{spec} should be called as well.
+line 4 by using the \textit{function decorator}\footnote{See
+Section~\ref{section-method-instrumentation} for an explanation.}
+\texttt{rv.monitor}. \texttt{rv.monitor} declares that the function
+\texttt{fib} in \texttt{fibmodule} should be monitored, and, whenever
+\texttt{fib} is called, \texttt{spec} should be called as well.
+
 
 The specification itself consists of any valid python code. It has access to a
-special argument, \texttt{event}, which gives the specification access to data
-about the current event. On line 6, the array of input arguments used to call
-\texttt{fib} is accessed to check that the first argument is greater than zero.
+special argument, \texttt{event}, which gives the specification function access
+to data about the current event. On line 6, the array of input arguments used
+to call \texttt{fib} is accessed to check that the first argument is greater
+than zero.
 
 The specification function in Figure~\ref{figure-syntax-example-1} will be
 called upon every invocation to \texttt{fibmodule.fib}.
@@ -911,18 +919,145 @@ won't be verified any longer.}
 	\label{figure-syntax-example-3}
 \end{figure}
 
-Figure~\ref{figure-syntax-example-3} shows a more advanced example.
+Figure~\ref{figure-syntax-example-3} shows a more advanced example, in which
+the \texttt{next} function of the \texttt{event} argument is used.
+\texttt{next} allows the specification function to add more specification
+functions (possibly implemented as closures or lambdas) to be executed when the
+next event occurs.
 
-\todo{write here}
+On line 9 the function \texttt{followup} is added to be executed on the next
+event. Since \texttt{followup} is added in this way - as a "oneshot"
+specification - it needs to add it self using \texttt{next} for verification on
+multiple events. This is done on line 22.
+
+Figure~\ref{figure-syntax-example-3} also shows how a specification function
+can turn its verification off - unsubscribe from future events.
+\texttt{event.finish} and \texttt{event.success} are essentially the same, and
+unsubscribes without further errors. \texttt{event.failure} can be thought of
+as a combination of \texttt{event.finish} and \texttt{assert False} (which
+always fails).
 
 
 \subsection{Capabilities and Limitations}
 
-asdf
+\todo{}
+
+Write about the details of the \texttt{rv.monitor} and \texttt{rv.spec}
+function decorators, and about the uses of the \texttt{event} argument. Also
+shortly describe how one can configure custom error handlers to take action
+when verification fails (or do this in the verification section).
 
 \section{Instrumentation} \label{section-method-instrumentation}
 
-dfgh
+The three examples in the previous section showed how pythonrv specification
+functions can be written. This section will describe how these functions can
+jack themselves into the ordinary control flow of the program and gain access
+to the function call events and their arguments.
+
+The instrumentation is performed through the \texttt{rv.monitor}
+\textit{function decorator} in pythonrv. A python function decorator is similar
+to attributes in .Net and annotations in Java. It is essentially a function
+that takes a function, possibly modifies it, or uses it in some way (decorates
+it), and then returns it - or some other function. This is used throughout
+python to make static and class methods, for instance.
+Figure~\ref{figure-function-decorator} shows an example function decorator
+definition, and Figure~\ref{figure-function-decorator-usages} shows how to use
+it.
+
+\begin{figure}[h!]
+
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+	\lstinputlisting{figures/function_decorator.py}
+	\end{minipage}
+	\end{center}
+
+	\caption{An example of how to define a function decorator.}
+	\label{figure-function-decorator}
+\end{figure}
+
+\begin{figure}[h!]
+
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+	\lstinputlisting{figures/function_decorator_usages.py}
+	\end{minipage}
+	\end{center}
+
+	\caption{An example of how to use the function decorator in
+	Figure~\ref{figure-function-decorator}.}
+	\label{figure-function-decorator-usages}
+\end{figure}
+
+\texttt{rv.monitor} first takes arguments specifying what functions should be
+monitored, and then the specification function itself.
+
+In python, almost all\footnotemark\ functions belong to a container of some
+sorts - a class, an object, or a module. In
+Figure~\ref{figure-function-decorator-usages} the functions \texttt{func\_a}
+and \texttt{func\_b} belong to the module \texttt{test} (the module's name is
+the same as that of the file containing the code). These containers are
+essentially dictionaries (\textit{dicts} in python parlance) of key-value
+pairs, where the keys in this case are function names and the values are
+objects representing the function code. (There are other types of values in
+these containers as well, which we can ignore).
+
+\footnotetext[3]{This is not true of closures - function defined inside other
+functions. These functions cannot be directly referenced outside the defining
+function. pythonrv does not (as of writing) support monitoring of closures.}
+
+The instrumentation in pythonrv works as follows. First, a wrapper function is
+defined for each function to be monitored. This wrapper function's main purpose
+is to call the specifications attached to the monitored function, and then call
+the monitored function itself. The wrapper also does some argument copying and
+such, to prevent side-effects in the specifications from interfering with the
+monitored function. The container of the monitored function is then extracted,
+and the reference to the monitored function is overwritten with a reference to
+the wrapper. See Figure~\ref{instrumentation-overview} for a pseudo-python
+overview.
+
+The implementation of the instrumentation code in pythonrv is more optimized
+than this - for instance, only ever one wrapper per monitoree is created,
+independent of the number of specifications that want to monitor it.
+
+\begin{figure}[h!]
+
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+	\begin{lstlisting}
+# rv.py
+def monitor(monitorees, specification):
+	for monitoree in monitorees:
+		# define a wrapper for each monitoree
+		def wrapper(*args, **kwargs)
+			event = create_event(...)
+
+			# call specification
+			specification(event)
+
+			# call the actual function - the
+			# monitoree
+			return monitoree(*args, **kwargs)
+
+		# overwrite the monitoree in its container
+		container = get_container(monitoree)
+		setattr(container, monitoree.name, wrapper)
+	\end{lstlisting}
+	\end{minipage}
+	\end{center}
+
+	\caption{An overview of the pythonrv instrumentation process, in
+	pseudo-python. This is just for illustrative purposes and not how pythonrv
+actually does the instrumentation.}
+	\label{figure-instrumentation-overview}
+\end{figure}
+
+
+\section{Verification}
+
+Veriaofsdjfaoisdjfaoisdfjalöskdfjalksfhaklsjdhflaksjhdf löadjsf ölaksdhf
+öajksdhf lkasdhf kashdf öashf lkajshf ölaksdhf öaklsdf aölksdf öalksdjf aölsdjf
+aölsdjf alöksdfj aölsdkfj 
 
 
 \section{Formal Foundation} \label{section-method-syntax}
@@ -1098,11 +1233,6 @@ presentation is quite ugly, unfortunately.
 	\caption{The \textit{if specification} - the most complex specification.}
 	\label{label-spec-if}
 \end{figure}
-
-
-\section{Verification}
-
-fghj
 
 
 
