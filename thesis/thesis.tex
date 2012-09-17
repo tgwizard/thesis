@@ -19,6 +19,10 @@
 \usepackage{tikz}
 \usetikzlibrary{automata,positioning,shapes.symbols}
 
+% prevent latex from splitting footnotes over multiple pages
+% http://www.tex.ac.uk/cgi-bin/texfaq2html?label=splitfoot
+\interfootnotelinepenalty=10000
+
 \newcommand{\todo}[1]{\textbf{todo: #1}}
 \newcommand{\rephrase}{\textbf{(rephrase)} }
 
@@ -778,6 +782,11 @@ Ludibrio\footnote{\texttt{https://github.com/nsigustavo/ludibrio/}} for Python.
 \pagestyle{newchap}
 \chapter{Method} \label{chapter-method}
 
+This chapter describes the proof-of-concept implementation of this report.
+
+
+\section{Introduction}
+
 As stated in Section~\ref{section-problem-statement}, the objective of this
 thesis is to investigate whether it is possible to do runtime verification with
 specifications written in the target program's programming language, structured
@@ -802,10 +811,12 @@ sections are each dedicated to one issue, and shows a proof-of-concept of these
 ideas. The implementation, called \textit{pythonrv}, can be found
 online\footnote{\texttt{https://github.com/tgwizard/pythonrv}}.
 
-\section{Definitions}
+\subsection{Definitions}
 
 Define some stuff first? Instrumentation? "The function to be monitored"?
 Specification function? Specification?
+
+
 
 \section{Syntax}
 
@@ -822,9 +833,9 @@ add new miscellaneous features, and better test reporting. The original
 structure of the unit tests is still prevalent. unittest2 builds on the xUnit
 style, discussed in Section~\ref{section-unit-testing}.
 
-A few simple example below will introduce the syntax of pythonrv. After that
-the capabilities and limitations of the current implementation will be
-exposited.
+A few simple example below will introduce the syntax of \textit{pythonrv}.
+After that the capabilities and limitations of the current implementation will
+be exposited.
 
 \subsection{Three Examples}
 \lstset{language=Python,numbers=left}
@@ -845,16 +856,16 @@ exposited.
 \end{figure}
 
 The example in Figure~\ref{figure-syntax-example-1} shows the basics of a
-pythonrv specification. Line 1 imports the rv module from the pythonrv package.
-On line 2 it imports the module(s) containing the function(s) we wish to
-monitor. Line 5 defines the specification as an ordinary python function called
-\texttt{spec}, taking one argument, \texttt{event}. The instrumentation is done
-line 4 by using the \textit{function decorator}\footnote{See
-Section~\ref{section-method-instrumentation} for an explanation.}
-\texttt{rv.monitor}. \texttt{rv.monitor} declares that the function
-\texttt{fib} in \texttt{fibmodule} should be monitored, and, whenever
-\texttt{fib} is called, \texttt{spec} should be called as well.
-
+\textit{pythonrv} specification. Line 1 imports the rv module from the
+\textit{pythonrv} package.  On line 2 it imports the module(s) containing the
+function(s) we wish to monitor. Line 5 defines the specification as an ordinary
+python function called \texttt{spec}, taking one argument, \texttt{event}. The
+instrumentation is done line 4 by using the \textit{function
+decorator}\footnote{See Section~\ref{section-method-instrumentation} for an
+explanation of function decorators.} \texttt{rv.monitor}. \texttt{rv.monitor}
+declares that the function \texttt{fib} in \texttt{fibmodule} should be
+monitored, and, whenever \texttt{fib} is called, \texttt{spec} should be called
+as well.
 
 The specification itself consists of any valid python code. It has access to a
 special argument, \texttt{event}, which gives the specification function access
@@ -930,6 +941,7 @@ as a combination of \texttt{event.finish} and \texttt{assert False} (which
 always fails).
 
 
+
 \subsection{Capabilities and Limitations}
 
 \todo{}
@@ -939,19 +951,21 @@ function decorators, and about the uses of the \texttt{event} argument. Also
 shortly describe how one can configure custom error handlers to take action
 when verification fails (or do this in the verification section).
 
+
+
 \section{Instrumentation} \label{section-method-instrumentation}
 
-The three examples in the previous section showed how pythonrv specification
-functions can be written. This section will describe how these functions can
-jack themselves into the ordinary control flow of the program and gain access
-to the function call events and their arguments.
+The three examples in the previous section showed how \textit{pythonrv}
+specification functions can be written. This section will describe how these
+functions can jack themselves into the ordinary control flow of the program and
+gain access to the function call events and their arguments.
 
 The instrumentation is performed through the \texttt{rv.monitor}
-\textit{function decorator} in pythonrv. A python function decorator is similar
-to attributes in .Net and annotations in Java. It is essentially a function
-that takes a function, possibly modifies it, or uses it in some way (decorates
-it), and then returns it - or some other function. This is used throughout
-python to make static and class methods, for instance.
+\textit{function decorator} in \textit{pythonrv}. A python function decorator
+is similar to attributes in .Net and annotations in Java. It is essentially a
+function that takes a function, possibly modifies it, or uses it in some way
+(decorates it), and then returns it - or some other function. This is used
+throughout python to turn functions into static or class methods, for instance.
 Figure~\ref{figure-function-decorator} shows an example function decorator
 definition, and Figure~\ref{figure-function-decorator-usages} shows how to use
 it.
@@ -996,21 +1010,22 @@ these containers as well, which we can ignore).
 
 \footnotetext[3]{This is not true of closures - function defined inside other
 functions. These functions cannot be directly referenced outside the defining
-function. pythonrv does not (as of writing) support monitoring of closures.}
+function. \textit{pythonrv} does not (as of writing) support monitoring of
+closures.}
 
-The instrumentation in pythonrv works as follows. First, a wrapper function is
-defined for each function to be monitored. This wrapper function's main purpose
-is to call the specifications attached to the monitored function, and then call
-the monitored function itself. The wrapper also does some argument copying and
-such, to prevent side-effects in the specifications from interfering with the
-monitored function. The container of the monitored function is then extracted,
-and the reference to the monitored function is overwritten with a reference to
-the wrapper. See Figure~\ref{instrumentation-overview} for a pseudo-python
-overview.
+The instrumentation in \textit{pythonrv} works as follows. First, a wrapper
+function is defined for each function to be monitored. This wrapper function's
+main purpose is to call the specifications attached to the monitored function,
+and then call the monitored function itself. The wrapper also does some
+argument copying and such, to prevent side-effects in the specifications from
+interfering with the monitored function. The container of the monitored
+function is then extracted, and the reference to the monitored function is
+overwritten with a reference to the wrapper. See
+Figure~\ref{instrumentation-overview} for a pseudo-python overview.
 
-The implementation of the instrumentation code in pythonrv is more optimized
-than this - for instance, only ever one wrapper per monitoree is created,
-independent of the number of specifications that want to monitor it.
+The implementation of the instrumentation code in \textit{pythonrv} is more
+optimized than this - for instance, only ever one wrapper per monitoree is
+created, independent of the number of specifications that want to monitor it.
 
 \begin{figure}[h!]
 
@@ -1038,11 +1053,12 @@ def monitor(monitorees, specification):
 	\end{minipage}
 	\end{center}
 
-	\caption{An overview of the pythonrv instrumentation process, in
-	pseudo-python. This is just for illustrative purposes and not how pythonrv
-actually does the instrumentation.}
+	\caption{An overview of the \textit{pythonrv} instrumentation process, in
+	pseudo-python. This is just for illustrative purposes and not how
+\textit{pythonrv} actually does the instrumentation.}
 	\label{figure-instrumentation-overview}
 \end{figure}
+
 
 
 \section{Verification}
@@ -1050,6 +1066,7 @@ actually does the instrumentation.}
 Veriaofsdjfaoisdjfaoisdfjalöskdfjalksfhaklsjdhflaksjhdf löadjsf ölaksdhf
 öajksdhf lkasdhf kashdf öashf lkajshf ölaksdhf öaklsdf aölksdf öalksdjf aölsdjf
 aölsdjf alöksdfj aölsdkfj 
+
 
 
 \section{Formal Foundation} \label{section-method-syntax}
@@ -1225,6 +1242,7 @@ presentation is quite ugly, unfortunately.
 	\caption{The \textit{if specification} - the most complex specification.}
 	\label{label-spec-if}
 \end{figure}
+
 
 
 
