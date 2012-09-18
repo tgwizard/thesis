@@ -138,7 +138,7 @@ the structure of unit tests?
 
 Checking that a program works correctly is of great interest to software
 developers, and formal verification techniques can often help. As mentioned
-above, traditional approaches can be impractical with larger programs, and
+above, traditional methods can be impractical with larger programs, and
 verification by testing is informal and incomplete. Runtime verification can
 here be a lightweight addition to the list \rephrase of verification
 techniques.
@@ -180,7 +180,7 @@ What will this report \textbf{not} discuss?
 \chapter{Background} \label{chapter-background}
 
 Runtime verification is a new area of research, but the research on
-verification and formal methods goes back several decades. Research of interest
+verification and formal approachs goes back several decades. Research of interest
 include the early work on formal methods, e.g.\ by Hoare \cite{hoare69} and
 Floyd \cite{floyd67}, and work on logics suitable for runtime verification,
 e.g. LTL by Pnueli \cite{pnueli77}. The seminal work done by Hoare, Floyd and
@@ -358,7 +358,7 @@ Section~\ref{section-instrumentation}
 The design of unit test syntax is discussed in
 Section~\ref{section-unit-testing}. The combination of the two, runtime
 verification and unit testing, will be the main subject in
-Chapters~\ref{chapter-method} and~\ref{chapter-results}.
+Chapters~\ref{chapter-approach} and~\ref{chapter-results}.
 
 
 \section{Specifications} \label{section-specifications}
@@ -776,11 +776,11 @@ Ludibrio\footnote{\texttt{https://github.com/nsigustavo/ludibrio/}} for Python.
 
 
 %================================================
-%====== Chapter 4, Method
+%====== Chapter 4, Approach
 %================================================
 
 \pagestyle{newchap}
-\chapter{Method} \label{chapter-method}
+\chapter{Approach} \label{chapter-approach}
 
 This chapter describes the proof-of-concept implementation of this report.
 
@@ -816,13 +816,31 @@ online\footnote{\texttt{https://github.com/tgwizard/pythonrv}}.
 Define some stuff first? Instrumentation? "The function to be monitored"?
 Specification function? Specification?
 
+\begin{itemize}
+	\item A \textit{specification} is an entity \rephrase that determines the
+		correct behaviour of a program. It could be a document, describing the
+		programs functionality, or a set of inputs and outputs, showing the results
+		of the programs computation on some given inputs. It could be a reference
+		implementation. A \textit{formal specification} is a mathematical construct
+		that can be used in verification proofs to show that a program works
+		correctly.
 
+	\item \textit{Instrumentation} is the act of rewriting, intercepting, or
+		patching the program to gain access to its internal state and execution
+		flow.
+
+	\item In \textit{pythonrv} a \textit{specification function} is a function
+		describing a specification, which \textit{pythonrv} can use for
+		verification of the program. A specification function \textit{monitors}
+		points \rephrase of the programs (functions), and the points being
+		monitored are called \textit{monitorees} \rephrase.
+\end{itemize}
 
 \section{Syntax}
 
 During the development of this proof-of-concept, the biggest factor in deciding
 what language to use was how it would assist in instrumentation.
-Instrumentation is discussed in Section~\ref{section-method-instrumentation}.
+Instrumentation is discussed in Section~\ref{section-approach-instrumentation}.
 Python was chosen as the implementation language.
 
 The canonical framework for doing unit testing in Python is the unittest2
@@ -861,7 +879,7 @@ The example in Figure~\ref{figure-syntax-example-1} shows the basics of a
 function(s) we wish to monitor. Line 5 defines the specification as an ordinary
 python function called \texttt{spec}, taking one argument, \texttt{event}. The
 instrumentation is done line 4 by using the \textit{function
-decorator}\footnote{See Section~\ref{section-method-instrumentation} for an
+decorator}\footnote{See Section~\ref{section-approach-instrumentation} for an
 explanation of function decorators.} \texttt{rv.monitor}. \texttt{rv.monitor}
 declares that the function \texttt{fib} in \texttt{fibmodule} should be
 monitored, and, whenever \texttt{fib} is called, \texttt{spec} should be called
@@ -953,7 +971,7 @@ when verification fails (or do this in the verification section).
 
 
 
-\section{Instrumentation} \label{section-method-instrumentation}
+\section{Instrumentation} \label{section-approach-instrumentation}
 
 The three examples in the previous section showed how \textit{pythonrv}
 specification functions can be written. This section will describe how these
@@ -1021,7 +1039,7 @@ argument copying and such, to prevent side-effects in the specifications from
 interfering with the monitored function. The container of the monitored
 function is then extracted, and the reference to the monitored function is
 overwritten with a reference to the wrapper. See
-Figure~\ref{instrumentation-overview} for a pseudo-python overview.
+Figure~\ref{figure-instrumentation-overview} for a pseudo-python overview.
 
 The implementation of the instrumentation code in \textit{pythonrv} is more
 optimized than this - for instance, only ever one wrapper per monitoree is
@@ -1063,20 +1081,20 @@ def monitor(monitorees, specification):
 
 \section{Verification}
 
-Veriaofsdjfaoisdjfaoisdfjalöskdfjalksfhaklsjdhflaksjhdf löadjsf ölaksdhf
-öajksdhf lkasdhf kashdf öashf lkajshf ölaksdhf öaklsdf aölksdf öalksdjf aölsdjf
-aölsdjf alöksdfj aölsdkfj 
+Verification is just executing the specification functions. The verification is
+therefore realtime.
+
+\todo{Talk about how offline verification could be implemented.}
 
 
-
-\section{Formal Foundation} \label{section-method-syntax}
+\section{Formal Foundation} \label{section-approach-syntax}
 
 This is the most difficult part, and I really figured it out yet. What follows
 is an early attempt at it.
 
 A seemingly insurmountable problem quickly arises when attempting to give a
 formal foundation to the specifications described in
-Section~\ref{section-method-syntax}. The specifications are written as ordinary
+Section~\ref{section-approach-syntax}. The specifications are written as ordinary
 python functions and, as such, are difficult to formalize. Python as a language
 is rather informal - one implementation of it, CPython, serves as the reference
 implementation.
@@ -1107,6 +1125,13 @@ the automaton is also continued.
 
 Next follows the four specification modules I think are required. Their
 presentation is quite ugly, unfortunately.
+
+\todo{From the discussion with Narges:}
+
+Define rules for the composition of the specifications. Show $M \models
+\varphi$. Do the product of the System Model $M$ and the automaton of the
+composed specifications.
+
 
 %%%%
 %% null spec
@@ -1208,13 +1233,13 @@ presentation is quite ugly, unfortunately.
 		\begin{lstlisting}
 		def if_spec():
 			if P0:
-				innerspec_0() # next or null spec
+				next(any_spec_0)
 			# optional additional conditionals, 1 to n-1
 			else if Pi:
-				innerspec_i() # next or null spec
+				next(any_spec_i)
 			# optional else clause
 			else:
-				innerspec_n() # next or null spec
+				next(any_spec_n)
 
 		\end{lstlisting}
 		\centering
@@ -1227,9 +1252,9 @@ presentation is quite ugly, unfortunately.
 		\centering
 		\begin{tikzpicture}[shorten >=1pt,node distance=6cm,on grid,auto,scale=.5]
 			\node[state,initial] (q0)									{$q_0$};
-			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (q1) [right of=q0] {$A(innerspec_0)$};
-			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (q2) [below right of=q0] {$A(innerspec_i)$};
-			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (q3) [below of=q0] {$A(innerspec_n)$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (q1) [right of=q0] {$A(any_spec_0)$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (q2) [below right of=q0] {$A(any_spec_i)$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (q3) [below of=q0] {$A(any_spec_n)$};
 			\path[->]
 				(q0) edge node {$P0$} (q1)
 				(q0) edge node {$Pi \wedge \forall_{j=0}^{i-1} \bar{P_j}$} (q2)
@@ -1265,8 +1290,20 @@ Mm.
 
 \pagestyle{newchap}
 \chapter{Conclusions}
-Yay, it worked!
 
+This report, and the proof-of-concept implementation, has shown that it is
+possible to write specifications in the target programs programming language
+(python) and in a manner more similar to unit testing.
+
+There are some reservations however. The specification functions use of time
+and the actual execution flow leads to some inherent divergences from ordinary
+unit testing styles.
+
+Also, giving the specifications a formal foundation, and doing formal
+verification with them, is different, and perhaps more difficult, than with
+specifications already written in formal languages. The fact that the chosen
+programming language, python, doesn't have a formal semantics defined makes the
+task quite a bit larger.
 
 \section{Discussion}
 
@@ -1278,14 +1315,6 @@ Some speculation? Recommendations?
 
 \section{Future Work}
 
-
-Some temporary citations:
-\cite{hoare69}, \cite{floyd67}, \cite{pnueli77}, \cite{leucker09abriefaccount},
-\cite{bauer06monitoring}, \cite{bauer08goodbadugly}, \cite{delgado04taxonomy},
-\cite{meyer92applyingdbc}, \cite{rosenblum95practicalassertions},
-\cite{bartetzko01jass}, \cite{bodden04lightweightltl},
-\cite{bodden05efficientrv}, \cite{becksmalltalktesting}, \cite{fowlerxunit},
-\cite{matusiak09aoppy}
 
 
 
