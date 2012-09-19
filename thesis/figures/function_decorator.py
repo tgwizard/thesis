@@ -3,10 +3,10 @@
 def decorator(decoratee):
 	# define the closure ("inner function")
 	def wrapper():
-		print "before"
+		print "before",
 		# call the decorated function
 		ret = decoratee()
-		print "after"
+		print "after",
 		return ret
 	# return the closure
 	return wrapper

@@ -90,7 +90,9 @@ Institute of Technology (KTH), Stocholm. The work was done at Valtech Sweden,
 an IT Consultancy. It was supervised by Erland Ranvinge (Valtech) and Dr.
 (\todo{check}) Narges Khakpour (CSC KTH).
 
-\todo{Thanks to people}
+\todo{Thanks to people.}. Narges, Erland. Valtech. Proof readers.
+
+Any errors contained in the report are mine and mine alone \rephrase.
 \clearpage
 
 \pagestyle{newchap}
@@ -157,17 +159,24 @@ use of runtime verification for checking the correctness of software systems.
 
 \section{Disposition}
 
-Perhaps: Discuss the sectioning of this report.
-
-The rest of this report is structured in as follows. Chapter 2 gives a
-background to the subject of verifying program correctness. Chapter 3 continues
+The rest of this report is structured in as follows.
+Chapter~\ref{chapter-background} gives a
+background to the subject of verifying program correctness.
+Chapter~\ref{chapter-previous-research} continues
 by describing the previous research on runtime verification and the syntax of
 specification languages. It also gives an overview of the current ideas in unit
 testing.
 
-What will this report discuss? What problems? Why is this interesting?
+Chapter~\ref{chapter-approach} describes the approach this work takes to
+solving the problem described here. It describes the syntax, instrumentation
+and verification techniques used in a proof-of-concept implementation, and
+gives a formal foundation to a subset of the syntax.
+Chapter~\ref{chapter-evaluation} then gives an evaluation of this work...
+\todo{}.
 
-What will this report \textbf{not} discuss?
+Conclusions and a discussion of this and future work is done in
+Chapter~\ref{chapter-conclusions}.
+
 
 
 
@@ -424,14 +433,13 @@ sometime, the state $S$ will hold before it. This is shown in
 Figure~\ref{figure-ltl}.
 
 \begin{figure}[h!]
+	\[
+	\boldsymbol{G} \, P \rightarrow (\neg P \, \boldsymbol{U} \, (S \wedge \neg P)
+	\]
 
-\[
-\boldsymbol{G} \, P \rightarrow (\neg P \, \boldsymbol{U} \, (S \wedge \neg P)
-\]
-
-\caption{An example of an LTL formula. This can be read as: Globally, if $P$
-holds, then, while $P$ didn't hold, $S$ held at some point.}
-\label{figure-ltl}
+	\caption{An example of an LTL formula. This can be read as: Globally, if $P$
+	holds, then, while $P$ didn't hold, $S$ held at some point.}
+	\label{figure-ltl}
 \end{figure}
 
 There is a counterpart to LTL in the real-time setting called Timed Linear
@@ -580,45 +588,45 @@ first, implementation, I'll use it for a short demonstration. See
 Figure~\ref{figure-junit}.
 
 \begin{figure}[h!]
-\lstset{language=Java}
-\begin{lstlisting}
-// required imports removed for brevity
+	\lstset{language=Java}
+	\begin{lstlisting}
+	// required imports removed for brevity
 
-public class TestSomeClass extends TestCase {
-	private Environment;
+	public class TestSomeClass extends TestCase {
+		private Environment;
 
-	@Before
-	public void setUp() {
-		// setup the fixture for each test
-		Environment = new Environment();
+		@Before
+		public void setUp() {
+			// setup the fixture for each test
+			Environment = new Environment();
+		}
+
+		@After
+		public void tearDown() {
+			// clean up the fixture, free memory, etc.
+		}
+
+		@Test
+		public void testSimpleAddition() {
+			// use the language assertion construct
+			assert 1+1 == 2
+			// use JUnit's assertion functions
+			assertEquals(4+7, 11)
+		}
+
+		@Test
+		public void testThatDoWorkReturnsX() {
+			// do setup for this test
+			Target t = new Target(...);
+			// exercise the object under test
+			t.doWork(...);
+			// do verification
+			assert t.getValues() == x;
+		}
 	}
-
-	@After
-	public void tearDown() {
-		// clean up the fixture, free memory, etc.
-	}
-
-	@Test
-	public void testSimpleAddition() {
-		// use the language assertion construct
-		assert 1+1 == 2
-		// use JUnit's assertion functions
-		assertEquals(4+7, 11)
-	}
-
-	@Test
-	public void testThatDoWorkReturnsX() {
-		// do setup for this test
-		Target t = new Target(...);
-		// exercise the object under test
-		t.doWork(...);
-		// do verification
-		assert t.getValues() == x;
-	}
-}
-\end{lstlisting}
-\caption{An example of unit testing syntax, written as a test case for JUnit.}
-\label{figure-junit}
+	\end{lstlisting}
+	\caption{An example of unit testing syntax, written as a test case for JUnit.}
+	\label{figure-junit}
 \end{figure}
 
 In JUnit, and xUnit, you run a \textit{test suite} of \textit{test cases},
@@ -705,38 +713,37 @@ what actions we expect to be taken upon them. This is called writing
 expectations is shown in Figure~\ref{figure-expectations}.
 
 \begin{figure}[h!]
+	\lstset{language=Java}
+	\begin{lstlisting}
+	public class OrderInteractionTester extends MockObjectTestCase {
+		private static String TALISKER = "Talisker";
 
-\lstset{language=Java}
-\begin{lstlisting}
-public class OrderInteractionTester extends MockObjectTestCase {
-	private static String TALISKER = "Talisker";
+		public void testFillingRemovesInventoryIfInStock() {
+			// setup - data
+			Order order = new Order(TALISKER, 50);
+			Mock warehouseMock = new Mock(Warehouse.class);
 
-	public void testFillingRemovesInventoryIfInStock() {
-		// setup - data
-		Order order = new Order(TALISKER, 50);
-		Mock warehouseMock = new Mock(Warehouse.class);
+			// setup - expectations
+			warehouseMock.expects(once()).method("hasInventory")
+				.with(eq(TALISKER),eq(50))
+				.will(returnValue(true));
+			warehouseMock.expects(once()).method("remove")
+				.with(eq(TALISKER), eq(50))
+				.after("hasInventory");
 
-		// setup - expectations
-		warehouseMock.expects(once()).method("hasInventory")
-			.with(eq(TALISKER),eq(50))
-			.will(returnValue(true));
-		warehouseMock.expects(once()).method("remove")
-			.with(eq(TALISKER), eq(50))
-			.after("hasInventory");
+			// exercise
+			order.fill((Warehouse) warehouseMock.proxy());
 
-		// exercise
-		order.fill((Warehouse) warehouseMock.proxy());
-
-		// verify
-		warehouseMock.verify();
-		assertTrue(order.isFilled());
+			// verify
+			warehouseMock.verify();
+			assertTrue(order.isFilled());
+		}
 	}
-}
-\end{lstlisting}
+	\end{lstlisting}
 
-\caption{An example of expectations, written using jMock and JUnit.
-Example taken from \cite{fowler07expectations}.}
-\label{figure-expectations}
+	\caption{An example of expectations, written using jMock and JUnit.
+	Example taken from \cite{fowler07expectations}.}
+	\label{figure-expectations}
 \end{figure}
 
 Figure~\ref{figure-expectations} shows a test of a fictional shop. The test
@@ -836,12 +843,21 @@ Specification function? Specification?
 		monitored are called \textit{monitorees} \rephrase.
 \end{itemize}
 
-\section{Syntax}
+\subsection{Choice of Language}
 
 During the development of this proof-of-concept, the biggest factor in deciding
 what language to use was how it would assist in instrumentation.
 Instrumentation is discussed in Section~\ref{section-approach-instrumentation}.
-Python was chosen as the implementation language.
+The language should also be in wide use, support quick development, and have an
+active testing culture.
+
+Easy access to a non-trivial and actively used system for real-world testing
+would be a plus.
+
+Python, among several languages, fits these criteria, and was chosen as the
+implementation language.
+
+\section{Syntax}
 
 The canonical framework for doing unit testing in Python is the unittest2
 framework that is included in all modern versions. Not much development has
@@ -859,7 +875,6 @@ be exposited.
 \lstset{language=Python,numbers=left}
 
 \begin{figure}[h!]
-
 	\begin{center}
 	\begin{minipage}{0.7\textwidth}
 	\lstinputlisting{figures/syntax_example_1.py}
@@ -895,7 +910,6 @@ The specification function in Figure~\ref{figure-syntax-example-1} will be
 called upon every invocation to \texttt{fibmodule.fib}.
 
 \begin{figure}[h!]
-
 	\begin{center}
 	\begin{minipage}{0.7\textwidth}
 	\lstinputlisting{figures/syntax_example_2.py}
@@ -924,7 +938,6 @@ last element is the current event, and the next-to-last element is the previous
 element, which can also be accessed as \texttt{event.prev}.
 
 \begin{figure}[h!]
-
 	\begin{center}
 	\begin{minipage}{0.7\textwidth}
 	\lstinputlisting{figures/syntax_example_3.py}
@@ -973,6 +986,9 @@ when verification fails (or do this in the verification section).
 
 \section{Instrumentation} \label{section-approach-instrumentation}
 
+As this section shows, doing instrumentation for runtime verification is a
+quite simple task in python.
+
 The three examples in the previous section showed how \textit{pythonrv}
 specification functions can be written. This section will describe how these
 functions can jack themselves into the ordinary control flow of the program and
@@ -989,7 +1005,6 @@ definition, and Figure~\ref{figure-function-decorator-usages} shows how to use
 it.
 
 \begin{figure}[h!]
-
 	\begin{center}
 	\begin{minipage}{0.7\textwidth}
 	\lstinputlisting{figures/function_decorator.py}
@@ -1001,14 +1016,13 @@ it.
 \end{figure}
 
 \begin{figure}[h!]
-
 	\begin{center}
 	\begin{minipage}{0.7\textwidth}
 	\lstinputlisting{figures/function_decorator_usages.py}
 	\end{minipage}
 	\end{center}
 
-	\caption{An example of how to use the function decorator in
+	\caption{An example of how to use the function decorator from
 	Figure~\ref{figure-function-decorator}.}
 	\label{figure-function-decorator-usages}
 \end{figure}
@@ -1046,7 +1060,6 @@ optimized than this - for instance, only ever one wrapper per monitoree is
 created, independent of the number of specifications that want to monitor it.
 
 \begin{figure}[h!]
-
 	\begin{center}
 	\begin{minipage}{0.7\textwidth}
 	\begin{lstlisting}
@@ -1130,13 +1143,13 @@ presentation is quite ugly, unfortunately.
 
 Define rules for the composition of the specifications. Show $M \models
 \varphi$. Do the product of the System Model $M$ and the automaton of the
-composed specifications.
+composed specifications. (function-call-event, state-of-args-and-world) is the
+system model.
 
 
 %%%%
 %% null spec
 \begin{figure}[h!]
-
 	\begin{minipage}{0.45\textwidth}
 		\centering
 		\lstset{language=Python}
@@ -1164,7 +1177,6 @@ composed specifications.
 %%%%
 %% assert spec
 \begin{figure}[h!]
-
 	\begin{minipage}{0.45\textwidth}
 		\centering
 		\lstset{language=Python}
@@ -1194,7 +1206,6 @@ composed specifications.
 %%%%
 %% next spec
 \begin{figure}[h!]
-
 	\begin{minipage}{0.45\textwidth}
 		\centering
 		\lstset{language=Python}
@@ -1226,7 +1237,6 @@ composed specifications.
 %%%%
 %% if spec
 \begin{figure}[h!]
-
 	\begin{minipage}{0.45\textwidth}
 		\centering
 		\lstset{language=Python}
@@ -1273,11 +1283,11 @@ composed specifications.
 
 
 %================================================
-%====== Chapter 5, Results
+%====== Chapter 5, Evaluation
 %================================================
 
 \pagestyle{newchap}
-\chapter{Results} \label{chapter-results}
+\chapter{Evaluation} \label{chapter-evaluation}
 
 Mm.
 
@@ -1289,7 +1299,7 @@ Mm.
 %================================================
 
 \pagestyle{newchap}
-\chapter{Conclusions}
+\chapter{Conclusions} \label{chapter-conclusions}
 
 This report, and the proof-of-concept implementation, has shown that it is
 possible to write specifications in the target programs programming language
@@ -1315,6 +1325,19 @@ Some speculation? Recommendations?
 
 \section{Future Work}
 
+Expectations, as described in Chapter~\ref{chapter-previous-research} could fit
+quite well with the \textit{pythonrv} style of writing specifications.
+
+The performance of the implementation hasn't been measured or considered in
+much detail. Benchmark tests for \textit{pythonrv} would be interesting, as
+would attempts to introduce it as a correctness verification approach for more
+programs.
+
+\textit{pythonrv} is freely available on the
+web\footnote{\texttt{https://github.com/tgwizard/pythonrv}} as free, open
+source software. People are free to try it, incorporate it into their programs,
+and extend it, as they see fit. With enough interest, \textit{pythonrv} might
+develop into a mature framework for runtime verification.
 
 
 
