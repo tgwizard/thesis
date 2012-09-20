@@ -1,3 +1,4 @@
+% :autocmd BufWritePost * !pdflatex thesis.tex
 \documentclass[a4paper,11pt]{kth-mag}
 \usepackage[T1]{fontenc}
 \usepackage{textcomp}
@@ -837,10 +838,12 @@ Specification function? Specification?
 		flow.
 
 	\item In \textit{pythonrv} a \textit{specification function} is a function
-		describing a specification, which \textit{pythonrv} can use for
-		verification of the program. A specification function \textit{monitors}
-		points \rephrase of the programs (functions), and the points being
-		monitored are called \textit{monitorees} \rephrase.
+		describing a specification, which \textit{pythonrv} can
+		use for verification of the program.
+
+	\item A specification function
+		\textit{monitors} points \rephrase of the programs (functions), and the
+		points being monitored are called \textit{monitorees} \rephrase.
 \end{itemize}
 
 \subsection{Choice of Language}
@@ -854,18 +857,19 @@ active testing culture.
 Easy access to a non-trivial and actively used system for real-world testing
 would be a plus.
 
-Python, among several languages, fits these criteria, and was chosen as the
-implementation language.
+Python\footnote{\texttt{http://www.python.org}}, among several languages, fits
+these criteria, and was chosen as the implementation language.
 
 \section{Syntax}
 
-The canonical framework for doing unit testing in Python is the unittest2
-framework that is included in all modern versions. Not much development has
-happened on it in the last years. Many new frameworks have have spawned, such
-as PyUnit, Nose and py.test. They build upon the style of unittest2, and mostly
-add new miscellaneous features, and better test reporting. The original
-structure of the unit tests is still prevalent. unittest2 builds on the xUnit
-style, discussed in Section~\ref{section-unit-testing}.
+The canonical framework for doing unit testing in Python is the
+\textit{unittest} framework that is included in all modern versions. Not much
+development has happened on it in the last years. Many new frameworks have have
+spawned, such as PyUnit, Nose and py.test. They build upon the style of
+unittest,and mostly add new miscellaneous features, such as better test
+reporting. The original structure of the unit tests is still prevalent.
+unittest builds on the xUnit style, discussed in
+Section~\ref{section-unit-testing}.
 
 A few simple example below will introduce the syntax of \textit{pythonrv}.
 After that the capabilities and limitations of the current implementation will
@@ -882,23 +886,23 @@ be exposited.
 	\end{center}
 
 	\caption{A specification that monitors the function \texttt{fib} in the
-		module \texttt{fibmodule}. The monitored function is, locally to the
-		specification, aliased as \texttt{func}. The specification asserts that the
-		first input to the monitored function is always greater than zero.}
+	module \texttt{fibmodule}. The monitored function is, locally to the
+specification function, aliased as \texttt{func}. The specification asserts
+that the first input to the monitored function is always greater than zero.}
 	\label{figure-syntax-example-1}
 \end{figure}
 
 The example in Figure~\ref{figure-syntax-example-1} shows the basics of a
-\textit{pythonrv} specification. Line 1 imports the rv module from the
-\textit{pythonrv} package.  On line 2 it imports the module(s) containing the
-function(s) we wish to monitor. Line 5 defines the specification as an ordinary
-python function called \texttt{spec}, taking one argument, \texttt{event}. The
-instrumentation is done line 4 by using the \textit{function
-decorator}\footnote{See Section~\ref{section-approach-instrumentation} for an
-explanation of function decorators.} \texttt{rv.monitor}. \texttt{rv.monitor}
-declares that the function \texttt{fib} in \texttt{fibmodule} should be
-monitored, and, whenever \texttt{fib} is called, \texttt{spec} should be called
-as well.
+\textit{pythonrv} specification, written as a specification function. Line 1
+imports the \texttt{rv} module from the \textit{pythonrv} package. On line 2 it
+imports the module containing the function we wish to monitor. Line 5 defines
+the specification as an ordinary python function called \texttt{spec}, taking
+one argument, \texttt{event}. The instrumentation is done line 4 by using the
+\textit{function decorator}\footnote{See
+Section~\ref{section-approach-instrumentation} for an explanation of function
+decorators.} \texttt{rv.monitor}. \texttt{rv.monitor} declares that the
+function \texttt{fib} in \texttt{fibmodule} should be monitored, and, whenever
+\texttt{fib} is called, \texttt{spec} should be called as well.
 
 The specification itself consists of any valid python code. It has access to a
 special argument, \texttt{event}, which gives the specification function access
@@ -926,15 +930,15 @@ alternate; that no two calls to \texttt{foo} occurs without a call to
 
 Figure~\ref{figure-syntax-example-2} shows how a specification can monitor two
 functions. The specification function will be called whenever either of the
-monitored functions is called. Which function was called can be determined from
-the \texttt{event} argument, as is done on lines 6 and 9. It is the
-\texttt{called} attribute of a function in the \texttt{event.fn} structure
+monitored functions are called. Which function was called can be determined
+from the \texttt{event} argument, as is done on lines 6 and 9. It is the
+\texttt{called} attribute of a function in the \texttt{event.fn} structure that
 allows for this.
 
 The example also shows how the specification can access a history of previous
 events - events that it has handled in the past. \texttt{event.history} is a
-list of all events that has occurred - that this specification monitors. The
-last element is the current event, and the next-to-last element is the previous
+list of all events that has occurred that this specification monitors. The last
+element is the current event, and the next-to-last element is the previous
 element, which can also be accessed as \texttt{event.prev}.
 
 \begin{figure}[h!]
@@ -949,7 +953,7 @@ element, which can also be accessed as \texttt{event.prev}.
 		\texttt{foo} is called first, then any number calls to \texttt{bar} with
 		the first argument as \texttt{True}, and then finally a call to
 	\texttt{bar}. After that, any calls are allowed - the specification function
-won't be verified any longer.}
+won't be used in verification any longer.}
 	\label{figure-syntax-example-3}
 \end{figure}
 
@@ -962,10 +966,10 @@ next event occurs.
 On line 9 the function \texttt{followup} is added to be executed on the next
 event. Since \texttt{followup} is added in this way - as a "oneshot"
 specification - it needs to add it self using \texttt{next} for verification on
-multiple events. This is done on line 22.
+subsequent events. This is done on line 22.
 
 Figure~\ref{figure-syntax-example-3} also shows how a specification function
-can turn its verification off - unsubscribe from future events.
+can turn its verification off - i.e. unsubscribe from future events.
 \texttt{event.finish} and \texttt{event.success} are essentially the same, and
 unsubscribes without further errors. \texttt{event.failure} can be thought of
 as a combination of \texttt{event.finish} and \texttt{assert False} (which
@@ -997,9 +1001,9 @@ gain access to the function call events and their arguments.
 The instrumentation is performed through the \texttt{rv.monitor}
 \textit{function decorator} in \textit{pythonrv}. A python function decorator
 is similar to attributes in .Net and annotations in Java. It is essentially a
-function that takes a function, possibly modifies it, or uses it in some way
-(decorates it), and then returns it - or some other function. This is used
-throughout python to turn functions into static or class methods, for instance.
+function that takes in a function and returns a function, possibly modifies it,
+or uses it in some way (decorates it) in the processs. This is used throughout
+python to turn functions into static or class methods, for instance.
 Figure~\ref{figure-function-decorator} shows an example function decorator
 definition, and Figure~\ref{figure-function-decorator-usages} shows how to use
 it.
@@ -1040,10 +1044,10 @@ pairs, where the keys in this case are function names and the values are
 objects representing the function code. (There are other types of values in
 these containers as well, which we can ignore).
 
-\footnotetext[3]{This is not true of closures - function defined inside other
-functions. These functions cannot be directly referenced outside the defining
-function. \textit{pythonrv} does not (as of writing) support monitoring of
-closures.}
+\footnotetext[4]{This is not true of closures - function defined inside other
+	functions. These functions cannot be directly referenced or modified from
+	outside the defining function. \textit{pythonrv} does not (as of writing)
+	support monitoring of closures.}
 
 The instrumentation in \textit{pythonrv} works as follows. First, a wrapper
 function is defined for each function to be monitored. This wrapper function's
@@ -1092,13 +1096,42 @@ def monitor(monitorees, specification):
 
 
 
-\section{Verification}
+\section{Verification} \label{section-approach-verification}
 
-Verification is just executing the specification functions. The verification is
-therefore realtime.
+In \textit{pythonrv}, verification is quite simple. The specification functions
+are executable, and executing them on the correct events, providing access to
+the appropriate data, verifies that the specification they represent is
+followed.
 
-\todo{Talk about how offline verification could be implemented.}
+Specification functions notifies verification violations, that the
+specifications are not followed, by raising exceptions of the type
+\texttt{AssertionError}. These exceptions are raised when the \texttt{assert}
+statement fails. They can also be raised manually: \texttt{raise
+AssertionError('error message')}.
 
+The verification is performed online, during the program execution.
+Specifications are verified for all calls to function they monitor unless they
+explicitly remove themselves by calling one \texttt{event.finish},
+\texttt{event.success} or \texttt{event.failure} (described in
+Section~\ref{section-approach-syntax}).
+
+\subsection{Dealing with Errors}
+
+Whenever a specification violation occurs, and a \texttt{AssertionError} is
+raised, it is passed to a \textit{error handler}. There are two built-in error
+handlers: One, the default, that re-raises the exception, and thus crashes the
+program (unless some other part of the code suppresses the exception), and a
+second which just logs the error message to a file.
+
+\subsection{Offline Verification}
+
+The current verification approach in \textit{pythonrv} is to perform it online.
+This obviously affects the performance of the program under test. Offline
+verification could be used to mitigate this.
+
+To do offline verification in \textit{pythonrv} the events and their associated
+data would need to be saved (serialized) and replayed outside the context of
+the running program.
 
 \section{Formal Foundation} \label{section-approach-syntax}
 
@@ -1305,7 +1338,7 @@ This report, and the proof-of-concept implementation, has shown that it is
 possible to write specifications in the target programs programming language
 (python) and in a manner more similar to unit testing.
 
-There are some reservations however. The specification functions use of time
+There are some reservations however. The specification functions' use of time
 and the actual execution flow leads to some inherent divergences from ordinary
 unit testing styles.
 
@@ -1315,29 +1348,39 @@ specifications already written in formal languages. The fact that the chosen
 programming language, python, doesn't have a formal semantics defined makes the
 task quite a bit larger.
 
-\section{Discussion}
-
-What do we see in the future? How can this be extended, continued?
-
-Results (un)expected? Larger context.
-
-Some speculation? Recommendations?
+\todo{Results (un)expected? Larger context.}
 
 \section{Future Work}
 
-Expectations, as described in Chapter~\ref{chapter-previous-research} could fit
-quite well with the \textit{pythonrv} style of writing specifications.
+The testing tool called expectations, as described in
+Chapter~\ref{chapter-previous-research} could fit quite well with the
+\textit{pythonrv} style of writing specifications.
 
 The performance of the implementation hasn't been measured or considered in
 much detail. Benchmark tests for \textit{pythonrv} would be interesting, as
 would attempts to introduce it as a correctness verification approach for more
 programs.
 
-\textit{pythonrv} is freely available on the
-web\footnote{\texttt{https://github.com/tgwizard/pythonrv}} as free, open
-source software. People are free to try it, incorporate it into their programs,
-and extend it, as they see fit. With enough interest, \textit{pythonrv} might
-develop into a mature framework for runtime verification.
+Offline verification, discussed in Section~\ref{section-rv} and
+Section~\ref{section-approach-verification} would be interesting.
+
+\todo{What do we see in the future? How can this be extended, continued?}
+
+\section{Discussion}
+
+The trend of software systems in general seems to be toward
+larges and more complex entities \rephrase. This makes the automated
+verification of program correctness, formal or not, every more important and an
+essential part of software development. Runtime verification could have a place
+there, if it becomes more popular, and simpler to integrate and use in ordinary
+software.
+
+The implementation described in this report, \textit{pythonrv}, is freely
+available on the web\footnote{\texttt{https://github.com/tgwizard/pythonrv}} as
+free, open source software. People are free to try it, incorporate it into
+their programs, and extend it, as they see fit. With enough interest,
+\textit{pythonrv} might develop into a mature framework for runtime
+verification.
 
 
 
