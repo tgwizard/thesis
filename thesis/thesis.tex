@@ -392,8 +392,8 @@ Chapters~\ref{chapter-approach} and~\ref{chapter-evaluation}.
 
 \section{Specifications} \label{section-specifications}
 
-Specifications come in many forms, from the informal ones like "I want it have
-cool buttons", to the contractual ones written between companies and their
+Specifications come in many forms, from the informal ones like ``I want it have
+cool buttons'', to the contractual ones written between companies and their
 clients, to tests, and to formal specifications, written in formal languages,
 specifying properties that should verifiably hold for the program. It is these
 last two types of specifications that we are interested in here, and which play
@@ -556,9 +556,9 @@ For verification to work, the verifier needs access to events happening in the
 program. Such events can be functions called, statements executed, variables
 assigned, etc., depending on the system model of the specification language.
 The program needs to be instrumented for it to emit such events. This often
-means wrapping function calls and variable assignments in a "recording layer",
-which performs the desired action after logging the event. The events can then
-be passed on to the verification tools.
+means wrapping function calls and variable assignments in a ``recording
+layer'', which performs the desired action after logging the event. The events
+can then be passed on to the verification tools.
 
 There are four major approaches used for program instrumentation.
 
@@ -660,7 +660,7 @@ There is a style of writing tests called behaviour-driven development
 \cite{north06bdd}. It originated from test-driven development, and is built on
 the idea that the tests you write should test the behaviour of the program. The
 simplest example is that you write your unit tests after the behaviour you
-desire, perhaps naming your tests according to "X should do Y". A more radical
+desire, perhaps naming your tests according to ``X should do Y''. A more radical
 example is shown in Figure~\ref{figure-bdd}.
 
 \begin{figure}[h!]
@@ -810,8 +810,8 @@ Here follows some definition that will be used in the following sections.
 		functionality, or a set of inputs and outputs, describing the correct
 		results of the program's computation on that set. It could be a reference
 		implementation\footnote{For instance, the only specification for python is
-		the canonical CPython implementation. Python is defined as "what CPython
-		does".}. A \textit{formal specification} is a mathematical construct that
+		the canonical CPython implementation. Python is defined as ``what CPython
+		does''.}. A \textit{formal specification} is a mathematical construct that
 		can be used in verification proofs to show that a program works correctly,
 		i.e.\ according to its specification.
 
@@ -946,7 +946,7 @@ functions (possibly implemented as closures or lambdas) to be executed when the
 next event occurs.
 
 On line 9 the function \texttt{followup} is added to be executed on the next
-event. Since \texttt{followup} is added in this way - as a "oneshot"
+event. Since \texttt{followup} is added in this way - as a ``oneshot''
 specification function - it needs to add itself using \texttt{next} for
 verification on subsequent events. This is done on line 22.
 
@@ -1325,6 +1325,25 @@ system model.
 
 \pagestyle{newchap}
 \chapter{Evaluation} \label{chapter-evaluation}
+
+To see how \textit{pythonrv} would work in a real-world setting it was
+incorporated into a real-time web application for Valtech Sweden, a
+medium-sized Swedish company.
+
+
+\subsection{Technical Perspective}
+
+The web application is written in Python 2.7 using the
+Django\footnote{\texttt{https://www.djangoproject.com/}} web framework. It has
+approximately 10000 lines of code.
+
+\todo{}
+
+Talk about cString-arg-copy-problems. Talk about the structure of the app, with
+``view-functions'', templates, models etc. Talk about where specifications would
+be suitable.
+
+\subsection{Potential Value}
 
 Mm.
 
