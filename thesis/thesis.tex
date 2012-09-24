@@ -29,8 +29,7 @@
 
 \title{Test-inspired runtime verification}
 
-\subtitle{Using a unit test-like
-specification syntax for runtime verification}
+\subtitle{Using a unit test-like specification syntax for runtime verification}
 
 \foreigntitle{"TODO: Test-inspirerad runtime-verifiering"}
 
@@ -42,8 +41,15 @@ Ranvinge\\Supervisor CSC: title Narges Khakpour\\Examiner: title Johan Håstad}
 
 \begin{document}
 
-\lstset{basicstyle=\ttfamily, tabsize=2, showspaces=false,
-showstringspaces=false, numbersep=20pt}
+\lstset{
+	basicstyle=\ttfamily,
+	keywordstyle=\bfseries,
+	commentstyle=\color{gray},
+	columns=fixed,
+	tabsize=2,
+	showspaces=false,
+	showstringspaces=false,
+	numbersep=20pt}
 
 \frontmatter
 \pagestyle{empty}
@@ -63,7 +69,7 @@ showstringspaces=false, numbersep=20pt}
 Abstract in English. Write when most of the report is written.
 
 \bigskip\noindent
-Keywords: Runtime Verification, Unit Testing
+Keywords: Runtime Verification, Unit Testing, Program Correctness
 \end{abstract}
 \clearpage
 
@@ -113,22 +119,24 @@ Any errors contained in the report are mine and mine alone \rephrase.
 Due to the increasing size and complexity of computer software it has become
 increasingly difficult, if not impossible, to convince oneself that the
 software works as desired. This is where verification tools can be used to
-great effect. Of these tools, testing is the one known by most and in wide
-spread use.  The spread of agile development practices and test-driven
-development has also popularized the concept of \textit{unit testing}, in which
-small modules of a program or system are tested individually.
+great effect. Of these tools, testing is the one familiar to most developers,
+and in wide spread use. The proliferation of agile development practices and
+test-driven development has also popularized the concept of \textit{unit
+testing}, in which small modules of a program or system are tested
+individually.
 
 While testing is popular and often works well, it is incomplete and informal,
-and thus yields no proof that the program does what it should - follow its
-specification. Formal verification techniques, such as theorem proving, model
-checking (and its bounded variant), can give such proofs, but they often suffer
-from complexity problems (incompleteness, undecidability) and practical issues,
-such as the so-called state explosion problem, and not being fully automated.
+and thus yields no proof that the program does what it should - i.e. follows
+its specification. Formal verification techniques, such as theorem proving,
+model checking (and its bounded variant), can give such proofs. However, they
+suffer from complexity problems (incompleteness, undecidability) and practical
+issues, such as the so-called state explosion problem. Often they cannot be
+fully automated.
 
-A relatively \rephrase new approach in this area is runtime verification, in
-which the program \textit{execution} is verified against its specification.
-With the specification written in a suitably formal language, the program can
-be monitored to check that the specification is followed.
+A relatively new approach in this area is runtime verification, in which the
+program \textit{execution} is verified against its specification. With the
+specification written in a suitably formal language, the program can be given a
+mathematical proof that its specification is followed.
 
 
 \section{Problem Statement} \label{section-problem-statement}
@@ -137,26 +145,30 @@ How can runtime verification specifications be written in a manner that uses
 the syntax of the target program's programming language, and resembles
 the structure of unit tests?
 
+
 \section{Motivation}
 
 Checking that a program works correctly is of great interest to software
-developers, and formal verification techniques can often help. As mentioned
-above, traditional methods can be impractical with larger programs, and
-verification by testing is informal and incomplete. Runtime verification can
-here be a lightweight addition to the list \rephrase of verification
-techniques.
+developers. Formal verification techniques are helpful, but as mentioned above,
+traditional methods can be impractical with larger programs, and verification
+by testing is informal and incomplete. Runtime verification can here be a
+lightweight addition to the toolbox of verification techniques.
 
 The specification languages used by runtime verification approaches are often
-based on formal languages/formalisms (e.g.\ logic or algebra) and not written in
-the target program's programming language.  This means that writing the
-specifications requires specific knowledge and expertise in mathematics.  It
-also requires mental context-switching and special tools to support this
-specialised language's syntax. In contrast, unit testing frameworks often
-utilise the programming language to great effect, and their use is wide spread.
+based on formal languages/formalisms (e.g.\ logic or algebra) and not written
+in the target program's programming language. This means that writing the
+specifications requires specific knowledge and expertise in mathematics. It
+also requires mental context-switching, between writing the program and writing
+the specification, and special tools to support this specialised language's
+syntax.
+
+In contrast, unit testing frameworks often utilise the programming language to
+great effect, and they are a common part of the software development process.
 
 If runtime verification specifications more resembled unit tests, and were
 written in the target program's programming language, it might popularise the
-use of runtime verification for checking the correctness of software systems.
+use of runtime verification for checking the correctness of programs.
+
 
 \section{Disposition}
 
@@ -169,10 +181,11 @@ specification languages. It also gives an overview of the current ideas in unit
 testing.
 
 Chapter~\ref{chapter-approach} describes the approach this work takes to
-solving the problem described here. It describes the syntax, instrumentation
-and verification techniques used in a proof-of-concept implementation, and
-gives a formal foundation to a subset of the syntax.
-Chapter~\ref{chapter-evaluation} then gives an evaluation of this work...
+solving the problem stated in Section~\ref{section-problem-statement}. It
+describes the syntax, instrumentation and verification techniques used in a
+proof-of-concept implementation, and gives a formal foundation to a subset of
+the syntax. Chapter~\ref{chapter-evaluation} then gives an evaluation of this
+work...
 \todo{}.
 
 Conclusions and a discussion of this and future work is done in
@@ -195,22 +208,23 @@ include the early work on formal methods, e.g.\ by Hoare \cite{hoare69} and
 Floyd \cite{floyd67}, and work on logics suitable for runtime verification,
 e.g. LTL by Pnueli \cite{pnueli77}. The seminal work done by Hoare, Floyd and
 Pnueli lay the foundation for many interesting approaches used for runtime
-verification. LTL is one of the common formal languages used for formal
-specifications in runtime verification.
+verification. LTL is one of the common formal languages used for specifications
+in runtime verification.
 
 This chapter gives a short overview of the background to the concepts of this
 report. It starts with laying out what we mean by proving the correctness of
 programs in Section~\ref{section-proving-correctness}. Section~\ref{section-rv}
 describes runtime verification and its place in proving correctness. And
-finally, Section~\ref{section-testing} discusses testing.
+finally, Section~\ref{section-testing} discusses testing - syntax, style and
+other concepts.
 
 
 \section{Proving Correctness} \label{section-proving-correctness}
 
 A correctness proof is a certificate, based in mathematics and logics, that a
 program/system/function follows its specifications, i.e.\ does what it is
-supposed to do. There are several approaches, with their advantages and
-disadvantages.
+supposed to do. There are several approaches, with their respective advantages
+and disadvantages.
 
 \textit{Theorem proving}, as started by Hoare \cite{hoare69}, Floyd
 \cite{floyd67} and others, is the manual, semi-automated, or (not so often)
@@ -219,83 +233,90 @@ specification. There are many ways of doing such proofs.
 
 One way is to prove that at all points in the program, given inputs satisfying
 some pre-conditions, the outputs will satisfy the post-conditions. By
-formulating the post-conditions of the exit point(s) so that they follow the
-specification, and by linking together the pre-conditions of program points
-with their preceding program points' post-conditions, we now know that correct
-indata will yield correct results.
+formulating post-conditions for the exit point(s) of the program so that they
+follow the specification, and by linking together the pre-conditions of program
+points with their preceding program points' post-conditions, we know that
+correct indata will yield correct results.
 
 This way of proving correctness often yields the best results. But it is slow,
 hard to automate, and therefore requires much manual labor. Wading through
 large programs thus often becomes impractical.
 
 \textit{Model checking} is the concept of verifying that a \textit{model} of a
-system follows its specification. This requires that both the model and the
-specification is written in a mathematical formalism. Given this, the task
-becomes to see if the model satisfies a logical formula. It is often simpler
-than theorem proving, and can be automated.
+system (the \textit{system model}) follows its specification. This requires
+that both the model and the specification is written in a mathematical
+formalism.  Given this, the task becomes to see if the model satisfies the
+logical formula of the specification. It is often simpler than theorem proving,
+and can be automated.
 
-The model of the system is usually structured as a finite state machine, and
-verification means visiting all accessible states, checking that they follow
-the specification. This can be problematic, especially when the state space
-becomes very big, something known as the \textit{state explosion problem}.
-There are approaches to address this issue, such as \textit{bounded model
-checking}, or by using higher-level abstractions.
+The model of the system is usually structured as a finite state machine (FSM),
+and verification means visiting all accessible states, checking that they
+follow the specification (which also can be represented as an FSM). This can be
+problematic, especially when the state space becomes very big, something known
+as the \textit{state explosion problem}. There are approaches to address this
+issue, such as \textit{bounded model checking}, or by using higher-level
+abstractions.
 
 Proving that a model of a system is correct can be very useful, but it suffers
 from the inherent flaw of only verifying the model, not the actual system. The
-model can be difficult to construct, or deviate too far from the system.
+model can be difficult to construct, or deviate too far from the system. It can
+not take the dynamic properties and configuration of the executing code into
+account.
+
 Runtime verification attempts to solve this by dealing directly with the
-system, creating its model during runtime.
+system, creating its model at runtime.
 
 
 \section{Runtime Verification} \label{section-rv}
 
-Much in common with model checking. Only current execution. Finite traces.
-Dynamic environment.
-
 Runtime verification (RV) is a dynamic approach to checking program
 correctness, in contrast to the more traditional formal static analysis
-techniques discussed above. These are often very useful, but suffer from severe
-problems such as the state explosion problem, incompleteness, undecidability
-etc., when they are used for verification of large-scale systems.  Moreover,
-static analysis usually verifies an abstract model of the program, and cannot
-guarantee the correctness of the implementation or the dynamic properties of
-the executing code.
+techniques discussed above.
 
 Runtime verification aspires to be a light-weight formal verification
 technique, see e.g.\ \cite{leucker09abriefaccount,delgado04taxonomy}. It
-verifies whether some specified properties hold during the execution of a
-program.
+verifies whether properties of a specification hold \textit{during the
+execution} of a program.
 
 The specification that should be verified is often written in a formal
-language, often a logic/calculus, such as linear temporal logic
-\cite{pnueli77}. To build a \emph{system model} for verifying the properties of
-the specification, the target program needs to emit and expose certain events
-and data. The collected events and data are used to build the system model.
-Many RV frameworks use \textit{code instrumentation} to generate
-\textit{monitors} for this end.
+language, a logic or a calculus, such as linear temporal logic \cite{pnueli77}.
+To build a system model for verifying the properties of the specification, the
+target program needs to emit or expose certain events and data. The collected
+events and data are used to build the system model. RV frameworks typically
+use \textit{code instrumentation} to generate \textit{monitors} for this end.
 
-There are two types of monitoring: \emph{online} and \emph{offline}. In online
-monitoring, the analysis and verification is done during the execution, in a
-synchronous manner with the observed system. In offline monitoring, a log of
-events is analysed at a later time.
+A monitor is either just part of a recording layer added to the program, which
+stores the events and data needed for verification, or also the part of the
+machinery that performs verification.
+
+There are two types of verification: \emph{online} and \emph{offline}. In
+online verification, the analysis and verification is done during the
+execution, in a synchronous manner with the observed system. In offline
+verification, a log of events is analysed at a later time. Online verification
+allows actions to be taken immediately when violations against the
+specifications are detected, but with considerable performance cost. Offline
+verification only impacts the performance by collecting data.
 
 When a violation of the specification occurs, simple actions can be taken
-(e.g.\ log the error, send emails, etc.), or more complex responses initiated,
-resulting in a \textit{self-healing} or \textit{self-adapting} system (see
-e.g.\ \cite{huebscher08survey}).
+(e.g.\ crash the program, log the error, send emails, etc.), or more complex
+responses initiated, resulting in a \textit{self-healing} or
+\textit{self-adapting} system (see e.g.\ \cite{huebscher08survey}).
 
 Relevant work on runtime verification include \cite{bauer06monitoring}, in
 which Bauer et al.\ use a three-valued boolean logic (true, false and ?) to
 reflect that a specification can not only be satisfied (true) or violated
 (false), but also neither yet, or, in the future it may be either. Bauer et
-al.\ also show how they transform specifications into automata (i.e.\ runtime
-monitors). Bodden presents in \cite{bodden05efficientrv} a framework for RV
-implemented through \emph{aspect-oriented programming} \cite{aspectj} in Java,
-with specifications written as code annotations.
+al.\ also show how they transform specifications into automata (which they call
+\textit{runtime monitors}).
+
+Bodden presents in \cite{bodden05efficientrv} a framework for RV implemented
+through \emph{aspect-oriented programming} using
+\textit{aspectj}\footnote{\texttt{http://www.eclipse.org/aspectj/}} in Java,
+with specifications written as code annotations. Aspect-oriented programming is
+described in more detail in Section~\ref{section-aspects}.
 
 Leucker et al.\ present a definition of RV in \cite{leucker09abriefaccount},
-together with an exposition on the advantages and disadvantages, similarities
+together with an exposition of the advantages and disadvantages, similarities
 and differences, with other verification approaches. In
 \cite{delgado04taxonomy}, Delgado et al.\ classify and review several different
 approaches and frameworks to runtime verification.
@@ -304,46 +325,45 @@ approaches and frameworks to runtime verification.
 \section{Testing} \label{section-testing}
 On the other end of the program-correctness-checking spectrum is
 \emph{testing}, which is the practical approach of checking that the program,
-given a certain input, produces the correct output.  Testing is not complete,
-and lacks a formal foundation, so it cannot be used for formal verification.
-Testing can be a complement to more formal techniques, such as RV (but is in
-many cases the sole correctness-checking tool).
-
-Unit testing is quite young, perhaps having begun in earnest in the 90s, and it
-was popularized by the extreme programming (XP) movement \todo{cite someone}.
-Testing in general is very old.
-
-Kent Beck introduced the style of the modern unit testing framework in his work
-on a testing framework  for Smalltalk \cite{becksmalltalktesting}.  Together
-with Eric Gamma he later ported it to Java, resulting in JUnit \cite{junit}.
-Today, this has lead to frameworks in several programming languages, and they
-are collectively called xUnit \cite{fowlerxunit}.
+given a certain input, produces the correct/acceptable output. Testing is not
+complete (for all but the most trivial programs, it is impossible to write
+complete tests), and lacks a formal foundation, so it cannot be used for formal
+verification. Testing can be a complement to more formal techniques, such as
+RV. It is in many cases the sole correctness-checking tool.
 
 \textit{Unit testing} is the concept of writing small tests, or test suites,
 for the units in a program, such as functions, classes, etc. These tests are
-used during development to test the functionality of the units. They aim to
-reduce the risk of breaking existing functionality when developing new features
-or modifying existing code (by preventing regression).
+used during development to test the functionality of the units. The aim is to
+reduce the risk of breaking existing functionality when developing new
+features, or modifying existing code, by preventing regression.
+
+Unit testing is quite young, perhaps having begun in earnest in the 90s, and it
+was popularized by the extreme programming (XP)
+movement\footnote{\texttt{http://www.extremeprogramming.org/}}. Testing in
+general is very old.
+
+Kent Beck introduced the style of the modern unit testing framework in his work
+on a testing framework for Smalltalk \cite{becksmalltalktesting}. Together
+with Eric Gamma he later ported it to Java, resulting in
+\textit{JUnit}\footnote{\texttt{http://www.junit.org/}}.
+Today, this has lead to frameworks in several programming languages, and they
+are collectively called xUnit \cite{fowlerxunit}.
 
 Writing unit tests, often using unit testing \textit{frameworks} such as JUnit
-\cite{junit} for Java and unittest \cite{python-unittest} for Python, is a
-common practice on many development teams.
-
-Testing is not formal - it doesn't prove anything except that the program works
-for the provided test cases. Testing is also not complete - for all but the
-most trivial programs, it is impossible to write tests for all cases.
+for Java and
+\textit{unittest}\footnote{\texttt{http://docs.python.org/library/unittest.html}}
+for Python, is a common practice on many development teams.
 
 Testing is often a manual process, taking up a large part of development time
-(see e.g.\ \cite{brooks75mythicalmanmonth}). Still, there are tools to automatically
-generate tests.
+(see e.g.\ \cite{brooks75mythicalmanmonth}). Still, there are tools to
+automatically generate tests.
 
 When discussing testing, and unit testing in particular, we must mention the
 concept of test-driven development (TDD). Also made popular by XP, it consists
 of the cycle: (1) write a failing test, (2) make it pass by writing the
-simplest code you can, and (3) refactor, rewrite the code so that it is good.
-Tests here play the part of specifications for the units of the program.
+simplest code you can, and (3) refactor - rewrite the code so that it becomes
+good. Tests here play the part of specifications for the units of the program.
 
-\todo{Find correct places to cite. Original book on TDD?}
 
 
 
@@ -355,37 +375,37 @@ Tests here play the part of specifications for the units of the program.
 \pagestyle{newchap}
 \chapter{Previous Research} \label{chapter-previous-research}
 
-As we saw in Section~\ref{section-rv}, runtime verification is the technique of
+As we saw in Section~\ref{section-rv}, runtime verification is a technique for
 verifying a program's compliance against a specification during runtime. These
 specifications need to be written somehow, which will be discussed in
 Section~\ref{section-specifications}. Approaches for verification are discussed
 in Section~\ref{section-verification}. For verification to work, during
-runtime,
-the program usually needs to be instrumented in such a way that the
+runtime, the program usually needs to be instrumented in such a way that the
 verification process can access all pertinent data. This is discussed in
 Section~\ref{section-instrumentation}
 
 The design of unit test syntax is discussed in
 Section~\ref{section-unit-testing}. The combination of the two, runtime
 verification and unit testing, will be the main subject in
-Chapters~\ref{chapter-approach} and~\ref{chapter-results}.
+Chapters~\ref{chapter-approach} and~\ref{chapter-evaluation}.
 
 
 \section{Specifications} \label{section-specifications}
 
-Specifications come in many forms, from the informal ones like "I want it to be
-easy to use", to the contractual ones written by companies and clients, to the
-ones written in formal languages, specifying properties that should verifiably
-hold about the program. It is this last type of specifications we are
-interested in here, and which play an important role in runtime verification.
+Specifications come in many forms, from the informal ones like "I want it have
+cool buttons", to the contractual ones written between companies and their
+clients, to tests, and to formal specifications, written in formal languages,
+specifying properties that should verifiably hold for the program. It is these
+last two types of specifications that we are interested in here, and which play
+an important role in runtime verification.
 
 In general, specifications should be abstract, written in a high-level
 language, and succinctly capture the desired property. Writing erroneous
-specifications is still possible; specifications need to be easier for humans
-to verify than the program's implementation. There is little point to have a
-specification as complex as the program itself, except as a point of reference.
-A program can, of course, be seen as a all-encompassing, perfect, always-true,
-specification of itself.
+specifications is of course a possibility; specifications need to be easier for
+humans to verify than the program's implementation. There is little point in
+having a specification as complex as the program itself, except for as a point
+of reference. A program can be seen as an all-encompassing, perfect,
+always-true, specification of itself.
 
 
 \subsection{Formalisms for Specifications}
@@ -399,38 +419,29 @@ a formal proof for the program. Hoare elaborated on this idea by basing his
 proofs on a few axioms of the programming language and target computer
 architecture, and building the proof from there.
 
+
 \subsubsection{Linear Temporal Logic}
 
 Linear Temporal Logic (LTL) was first discussed by Pnueli in \cite{pnueli77},
 and has since been popular in many areas dealing with a system model containing
 a temporal dimension. As Pnueli describes it, it is simpler than other logics,
 but expressive enough to describe many problems of interest for verification.
-This has been "confirmed" \rephrase by the diverse use of LTL by many
-researchers \todo{citations}.
+This has been affirmed by the diverse use of LTL by many researchers.
 
-LTL uses a system model of infinite execution traces, or histories, of the
-states of the execution. LTL specifications are formulas that operate on these
-states. An LTL formula consists of \textit{propositional variables} that work
-on the domain model of the state (checking variables, global state, etc.), the
-normal logical operators such as negation and disjunction, and some temporal
-operators. The most basic and common temporal operators are $\boldsymbol{X}$,
-\textit{next}, and $\boldsymbol{U}$, \textit{until}. Other operators can be
-derived from these, such as $\boldsymbol{G}$, \textit{globally}, and
-$\boldsymbol{F}$, \textit{eventually}.
-
-Bauer et al.\ introduce a three-valued boolean logic LTL$_3$ in
-\cite{bauer06monitoring}, taking the values (true, false and ?). This logic is
-arguably more suited for the finite nature of runtime verification, whereas LTL
-was designed with infinite traces in mind. The semantics of LTL$_3$ reflect the
-fact that when verifying runtime verification specifications, can not only
-be satisfied or violated, but inconclusive. For satisfied or violated
-specifications, no further verification is required - we already know the
-outcome. For inconclusive verification, we need to continue verification, as,
-with future events, the result could be either or.
+LTL uses a system model of \textit{infinite execution traces}, or
+\textit{histories}, of the states of the execution. LTL specifications are
+formulas that operate on these states. An LTL formula consists of
+\textit{propositional variables} that work on the domain model of the state
+(checking variables, inputs, global state, etc.), the normal logical operators
+such as negation and disjunction, and some temporal operators. The most basic
+and common temporal operators are $\boldsymbol{X}$, \textit{next}, and
+$\boldsymbol{U}$, \textit{until}. Other operators can be derived from these,
+such as $\boldsymbol{G}$, \textit{globally}, and $\boldsymbol{F}$,
+\textit{eventually}.
 
 An example LTL formula, taken from a list of common specification patterns
-\cite{dwyer99patterns}, could be: $S$ precedes $P$, i.e.\, if the state $P$ holds
-sometime, the state $S$ will hold before it. This is shown in
+\cite{dwyer99patterns}, could be: $S$ precedes $P$, i.e.\ if the state $P$
+holds sometime, the state $S$ will hold before it. This is shown in
 Figure~\ref{figure-ltl}.
 
 \begin{figure}[h!]
@@ -439,27 +450,40 @@ Figure~\ref{figure-ltl}.
 	\]
 
 	\caption{An example of an LTL formula. This can be read as: Globally, if $P$
-	holds, then, while $P$ didn't hold, $S$ held at some point.}
+	holds, then, before $P$, $S$ held at some point.}
 	\label{figure-ltl}
 \end{figure}
 
+In \cite{bauer06monitoring} Bauer et al.\ introduce a three-valued boolean
+semantics for LTL, calling it LTL$_3$, which takes the values (true, false and
+?).  This logic is arguably more suited for the finite nature of runtime
+verification, whereas LTL was designed with infinite traces in mind. The
+semantics of LTL$_3$ reflect the fact that when verifying runtime verification
+specifications, the result can not only be that the specification is satisfied
+or violated; it can be inconclusive as well. For satisfied or violated
+specifications, no further verification is required - we already know the
+outcome. For inconclusive results, we need to continue with the verification,
+as, with future events, the result could change into either satisfied or
+violated.
+
 There is a counterpart to LTL in the real-time setting called Timed Linear
-Temporal Logic \todo{cite someone}. It introduces clocks to make specifications
+Temporal Logic (TLTL). It introduces clocks to make specifications
 of real-time properties possible. It is of great interest to runtime
-verification, but won't be discussed further here. \todo{See [] and [] for more
-on TLTL}.
+verification, but will not be discussed further here. See e.g.\
+\cite{bauer06monitoring} for more.
 
 
 \subsubsection{Design by Contract}
 
-Design by Contract was introduced by Bertrand Meyer in \todo{where}, and has
-been fully implemented in the Eiffel programming language. A contract is the
-idea that functions, and methods on objects, promise to fulfill certain
-post-conditions (or promises) if the inputs they are given fulfill the
-pre-conditions (or requirements) in the contract. Design by Contract also
-contains constructs for specifying loop-invariants and class-invariants,
-properties that should always hold during loops and for objects of a class,
-respectively. Assertions (see below) are also usually available.
+Design by Contract was introduced by Bertrand Meyer in
+\cite{meyer92applyingdbc}, and has been fully implemented in the Eiffel
+programming language. A contract is the idea that functions, and methods on
+objects, promise to fulfill certain post-conditions (or promises) if the inputs
+they are given fulfill the pre-conditions (or requirements) specified in the
+contract.  Design by Contract also contains constructs for specifying
+loop-invariants and class-invariants, properties that should always hold during
+loops and for objects of a class, respectively. Assertions (see below) are also
+usually available.
 
 Design by Contract is inspired by Hoare logic, and is essentially Hoare logic
 written in a certain style.
@@ -468,164 +492,149 @@ written in a certain style.
 \subsubsection{Assertions}
 
 A common construct that is part of many popular programming languges, like C,
-Java, Python, is the assertion statement. It is a way to assert that some
-predicate holds at a point in the program. Usually the predicate is an
-expression of the programming language, and is not supposed to alter the
+Java and Python, is the \texttt{assert} statement. It is a way to state that
+some predicate should hold at a point in the program. Usually the predicate is
+an expression in the programming language, and is not supposed to alter the
 program state.
 
-Assertions are distinct from the normal program flow, and not to be confused
-\rephrase with exceptions. Assertions check for properties that should always
-be true, anything else would be a programming error.
+Assertions are distinct from the normal program flow, and not to be conflated
+with exceptions. Assertions check for properties that should always be true,
+anything else would be a programming error.
 
 
 \subsection{Writing Specifications}
 
 For verification in general, specifications can be written and used externally
 to the program. They can be used in specialized model-checking tools, in tools
-for theorem proving etc.
+for theorem proving, etc.
 
 Runtime verification requires that the specifications are accessible when
 building and running the program. At the very least, the program needs to be
-instrumented \rephrase to expose the correct system model so that the
-specification can be verified. It is often \rephrase desired in runtime
-verification to do online verification, and then the specifications need to be
-available and embedded into the system. A few approaches have been taken to
-enable this.
+instrumented to expose the correct system model so that the specification can
+be verified. It is sometimes desired in runtime verification to do online
+verification, and then the specifications need to be available and embedded
+into the system. A few different approaches have been tried to support this.
 
 Approaches to writing specifications can be divided into two parts: those that
 require you to manually mark code for verification, and those that inject the
 verification code from external specifications.
 
 Rosuenblum \cite{rosenblum95practicalassertions} uses specially annotated
-comments. Bodden \cite{bodden05efficientrv} uses Java annotations, which are
-written at function and variable definitions, to mark code for verification.
-\todo{more, and rephrase}. The programming language Eiffel has full language
+comments, written directly in the code. Bodden \cite{bodden05efficientrv} uses
+Java annotations, which are written at function and variable definitions, to
+mark code for verification. The programming language Eiffel has full language
 support for Design by Contract, with pre- and post-conditions, invariants, and
-more. Other approaches \todo{who?} use external specification files. For simple
-cases it is common to write assertions in the program, checking boolean
-expressions under runtime \todo{cite jass}.
+more. These are written in direct proximity to the code to be verified. For
+simple cases it is common to write assertions in the program
+\cite{bartetzko01jass}.
+
+Other approaches, such as the ones taken by Jalili et al.\ in
+\cite{jalili07rverl} and Barringer et al.\ in \cite{barringer03eagle}, use
+external specification files.
+
 
 
 \section{Verification against Specifications} \label{section-verification}
 
-Formal specifications are written so that programs can be verified against them
-- to see whether they follow the specification, or violate parts of it.
+Specifications for runtime verification are written so that programs can be
+verified against them - to see whether they follow the specification, or
+violate parts of it.
 
 There are several ways to verify a program against its specification. A common
-one, used in \cite{bauer06monitoring,bodden05efficientrv} among others, is to
-generate state machines from the specification. These state machines, often
-called \textit{monitors}, operate with the input language of events emitted by
-the program.
+one, used in
+\cite{bauer06monitoring,bodden05efficientrv,jalili07rverl,barringer03eagle}
+among others, is to generate state machines from the specification. These state
+machines, sometimes called \textit{runtime monitors}, operate with the input
+language of events emitted by the program.
 
-\todo{Monitors. Büchi Automatons.}
+\todo{Write more on this.}
 
 
 \section{Code Instrumentation} \label{section-instrumentation}
 
-For verification to work, the verifier (such as a monitor) needs access to
-events happening in the program. Such events can be functions called,
-statements executed, variables assigned, etc., depending on the system model of
-the specification language \rephrase. The program needs to be instrumented for
-it to emit such events. This often means wrapping function calls and variable
-assignments in a "recording layer", which performs the desired action after
-logging the event. The events can then be "sent" to the verification tools.
+For verification to work, the verifier needs access to events happening in the
+program. Such events can be functions called, statements executed, variables
+assigned, etc., depending on the system model of the specification language.
+The program needs to be instrumented for it to emit such events. This often
+means wrapping function calls and variable assignments in a "recording layer",
+which performs the desired action after logging the event. The events can then
+be passed on to the verification tools.
+
+There are four major approaches used for program instrumentation.
 
 
 \subsection{Pre-processing the Code}
 
-Rosuenblum \cite{rosenblum95practicalassertions} uses a pre-processor step in
-the C compilation setup instrument code, where the specifications (called
-assertions there) are written adjacent to the code under watch.
+Rosenblum \cite{rosenblum95practicalassertions} uses a pre-processor step in
+the C compilation setup to instrument code, where the specifications (called
+assertions by Rosenblum) are transformed from comments into regular C code. The
+verification code is then compiled together with the program.
 
 
 \subsection{Post-processing the Code}
 
 It is also possible to rewrite the compiled program, instrumenting the code
 after compilation. This way, the program needs no knowledge of the verification
-framework.
+framework. Depending on the compiled objects, this can be more or less
+difficult. Binary executables and intermediate formats, such as Java Bytecode
+or Common Intermediate Language for the Common Language Infrastructure used by
+.Net, require somewhat different approaches.
 
 
 \subsection{Dynamic Code Rewriting}
 
 In many dynamic languages, such as Python, Ruby or Javascript, it is possible
-to rewrite the code during runtime, which is sometimes called monkey patching.
-A function to be monitored could be rewritten, adding a lightweight wrapper
-that records all calls to it, and then delegates to it.
+to rewrite the code during runtime, which is sometimes called \textit{monkey
+patching}. A function to be monitored could be rewritten, adding a lightweight
+wrapper that records all calls to it, and then passes on the call to the actual
+function.
 
 
-\subsection{Aspects}
+\subsection{Aspects} \label{section-aspects}
 
-An interesting approach to external injection is to use aspect-oriented
-programming. In aspect-oriented theory, a program is divided into modules, each
-only dealing with their own \textit{concern}. Logging, for instance, is a
-\textit{crosscutting concern}, as it is used by all modules. The goal is to not
-scatter all logging code across all modules, and to not tangle it with the
-modules' logic. This can be done by defining the logging code as
-\textit{aspects}, which consists of the logging code, called the
-\textit{advice}, and the \textit{point cut}, which is a formula describing when
-the advice should be executed. The possible execution points \rephrase for a
-point cut are called \textit{join points}.
+An interesting approach to code instrumentation is to use aspect-oriented
+programming. In aspect-oriented theory, a program should be divided into
+modules, each only dealing with their own \textit{concern}. Logging, however,
+is a \textit{crosscutting concern}, as it is used by several unrelated modules.
+The goal is to not scatter logging code across the modules, and to not tangle
+it with the modules' own logic. This can be done by defining the logging code
+as \textit{aspects}, which consists of the logging code, called the
+\textit{advice}, and a \textit{point cut}, which is a formula describing when
+the advice should be executed. The possible execution points for a point cut
+are called \textit{join points}.
+AspectJ\footnote{\texttt{http://www.eclipse.org/aspectj/}} is the canonical
+framework for aspect-oriented programming.
 
 Runtime verification is a typical case of a cross-cutting concern. Bodden
-\cite{bodden05efficientrv} uses it in his runtime verification implementation.
+\cite{bodden05efficientrv} uses AspectJ in his runtime verification
+implementation.
 
-Aspects are often implemented as a post-processing step in the compilation
-process, adding code for handling the aspects.
+Aspects in AspectJ are implemented as a post-processing step in the compilation
+process, adding wrapper code for handling the aspects.
 
 
 \section{Unit Testing} \label{section-unit-testing}
 
 We discussed testing and unit testing in general in
-Section~\ref{section-testing}. How does unit testing work? What is the
-syntaxes? This section mostly concerns the language and syntax used for writing
-unit tests.
+Section~\ref{section-testing}. Here we'll discuss how it works, and what the
+syntax is like.
+
 
 \subsection{xUnit}
 
 The xUnit style of unit testing \cite{fowlerxunit} has given rise to unit
 testing frameworks for many programming languages. Their structure are all
-based on the same concept, and since JUnit is the canonical, and one of the
-first, implementation, I'll use it for a short demonstration. See
+based on the same concept, and since JUnit is the canonical implementation, and
+one of the first, implementation, we will use it for a short demonstration. See
 Figure~\ref{figure-junit}.
 
 \begin{figure}[h!]
-	\lstset{language=Java}
-	\begin{lstlisting}
-	// required imports removed for brevity
-
-	public class TestSomeClass extends TestCase {
-		private Environment;
-
-		@Before
-		public void setUp() {
-			// setup the fixture for each test
-			Environment = new Environment();
-		}
-
-		@After
-		public void tearDown() {
-			// clean up the fixture, free memory, etc.
-		}
-
-		@Test
-		public void testSimpleAddition() {
-			// use the language assertion construct
-			assert 1+1 == 2
-			// use JUnit's assertion functions
-			assertEquals(4+7, 11)
-		}
-
-		@Test
-		public void testThatDoWorkReturnsX() {
-			// do setup for this test
-			Target t = new Target(...);
-			// exercise the object under test
-			t.doWork(...);
-			// do verification
-			assert t.getValues() == x;
-		}
-	}
-	\end{lstlisting}
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+		\lstset{language=Java}
+		\lstinputlisting{figures/junit_example.java}
+	\end{minipage}
+	\end{center}
 	\caption{An example of unit testing syntax, written as a test case for JUnit.}
 	\label{figure-junit}
 \end{figure}
@@ -633,32 +642,17 @@ Figure~\ref{figure-junit}.
 In JUnit, and xUnit, you run a \textit{test suite} of \textit{test cases},
 which contain tests. The example in Figure~\ref{figure-junit}, the test suite
 is implicitly created by JUnit, although it is possible to create it and
-control it your self. A \textit{test runner} runs the test suite, showing
-progress to the user.  When the tests are finished, any errors are shown to the
-user.
+control it your self. A \textit{test runner} runs the test suite, reporting
+progress to the user.  When the tests are finished, any errors are displayed.
 
-The example in Figure~\ref{figure-junit} has two tests, and methods to set up
-and tear down the tests \textit{fixture}. The fixture is the surrounding set of
-objects (environment) that the object under test requires to work properly.
-These functions are usually called \textit{setUp} and \textit{tearDown},
-respectively.
+In the example in Figure~\ref{figure-junit} has two tests, and methods to set
+up and tear down the tests \textit{fixture}. These functions are usually called
+\textit{setUp} and \textit{tearDown}, respectively, and are called before and
+after each test. The fixture is the surrounding set of objects (environment)
+that the object under test requires to work properly.
 
-The order in which tests are executed is arbitrary in JUnit. One possible
-ordering of the relevant methods in the example is:
+Test written in this style are traditional unit tests.
 
-\begin{enumerate}
-	\item \textit{setUp}
-	\item \textit{testSimpleAddition}
-	\item \textit{tearDown}
-
-	\item \textit{setUp}
-	\item \textit{testThatDoWorkReturnsX}
-	\item \textit{tearDown}
-\end{enumerate}
-
-Test written in this style are traditional unit tests. 
-
-\todo{Mocking? This is "TDD"-style}
 
 \subsection{Behaviour-driven Development}
 
@@ -670,7 +664,8 @@ desire, perhaps naming your tests according to "X should do Y". A more radical
 example is shown in Figure~\ref{figure-bdd}.
 
 \begin{figure}[h!]
-
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
 \begin{alltt}
 +Scenario 1: Account is in credit+
 \textit{Given} the account is in credit
@@ -681,16 +676,19 @@ example is shown in Figure~\ref{figure-bdd}.
 \textit{And} ensure cash is dispensed
 \textit{And} ensure the card is returned
 \end{alltt}
+	\end{minipage}
+	\end{center}
 
 \caption{An example scenario describing a behaviour, as written in BDD.
 Scenario taken from \cite{north06bdd}.}
 \label{figure-bdd}
 \end{figure}
 
-The test runner parses each scenario, and for each line finds a matching unit
-of code that does what the line describes. This way of writing tests, or
-describing behaviours, leads to a outside-in, or top-down, way of writing and
-thinking about your program.
+A test runner for the test in Figure~\ref{figure-bdd} would parse each
+scenario, and for each line find a matching unit of code that does what the
+line describes. This way of writing tests, or describing behaviours, leads to a
+outside-in, or top-down, way of writing and thinking about your program.
+
 
 \subsection{Mocking and Faking}
 
@@ -700,11 +698,13 @@ objects/data/configuration Z. Z might be something simple, which we can easily
 create in the test. It might also be a network or database connection, or
 something doing heavy calculation, or just something complex.
 
-One way to work around this is to create fake/mock/dummy, objects. A fake
+One way to work around this is to create fake/mock/dummy objects. A fake
 network connection has the same interface as a real network connection, but
-calling it doesn't actually transmit anything anywhere, and it might return
-hard coded data. Fake objects could save what actions are taken upon them, and
-the test could then verify that these are according to expectations.
+calling it does not actually transmit anything anywhere, and it might return
+pre-defined, hard coded data. Fake objects could save what actions are taken
+upon them, and the test could then verify that these are according to
+expectations.
+
 
 \subsection{Expectations}
 
@@ -714,33 +714,12 @@ what actions we expect to be taken upon them. This is called writing
 expectations is shown in Figure~\ref{figure-expectations}.
 
 \begin{figure}[h!]
-	\lstset{language=Java}
-	\begin{lstlisting}
-	public class OrderInteractionTester extends MockObjectTestCase {
-		private static String TALISKER = "Talisker";
-
-		public void testFillingRemovesInventoryIfInStock() {
-			// setup - data
-			Order order = new Order(TALISKER, 50);
-			Mock warehouseMock = new Mock(Warehouse.class);
-
-			// setup - expectations
-			warehouseMock.expects(once()).method("hasInventory")
-				.with(eq(TALISKER),eq(50))
-				.will(returnValue(true));
-			warehouseMock.expects(once()).method("remove")
-				.with(eq(TALISKER), eq(50))
-				.after("hasInventory");
-
-			// exercise
-			order.fill((Warehouse) warehouseMock.proxy());
-
-			// verify
-			warehouseMock.verify();
-			assertTrue(order.isFilled());
-		}
-	}
-	\end{lstlisting}
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+		\lstset{language=Java}
+		\lstinputlisting{figures/expectations_example.java}
+	\end{minipage}
+	\end{center}
 
 	\caption{An example of expectations, written using jMock and JUnit.
 	Example taken from \cite{fowler07expectations}.}
@@ -756,13 +735,14 @@ what they should return.
 An expectation follows a simple pattern:
 
 \begin{itemize}
-	\item Object (optional) and function.
-	\item Invocation count, how often is the function expected to be called
-	\item Expected arguments. Can be explicit values, or generic types, or
-		ignored.
-	\item What should happen, e.g.\ what the function should return.
-	\item When this should happen, e.g.\ in what sequence of function calls, in
-		what global state.
+	\item A function, with an optional object, which is expected to be called.
+	\item An invocation count of how often the function is expected to be called.
+	\item Expected arguments for the function call. These can be explicit values,
+		or generic types, or rules defining the acceptable values.
+	\item The return value and modifications to the global state; what should
+		happen when the function is called.
+	\item When the function call should happen, e.g.\ in what sequence of
+		function calls, in what global state.
 \end{itemize}
 
 There are two common ways of specifying expectations: recording and explicit
@@ -776,7 +756,7 @@ expectations, and verify that they occur correctly.
 
 There are several frameworks for working with expectations, such as
 jMock\footnote{\texttt{http://www.jmock.org/}} for Java, Rhino
-Mocks\footnote{\texttt{http://ayende.com/wiki/Rhino+Mocks.ashx}} and
+Mocks\footnote{\texttt{http://ayende.com/wiki/Rhino+Mocks.ashx}} for .Net and
 Ludibrio\footnote{\texttt{https://github.com/nsigustavo/ludibrio/}} for Python.
 
 
@@ -798,20 +778,20 @@ This chapter describes the proof-of-concept implementation of this report.
 As stated in Section~\ref{section-problem-statement}, the objective of this
 thesis is to investigate whether it is possible to do runtime verification with
 specifications written in the target program's programming language, structured
-similar to unit tests. To find a solution to this, there are four issues we
+similar to unit tests. To find a solution for this, there are four issues we
 need to address:
 
 \begin{enumerate}
-	\item How should the syntax for the specification be defined, so that it
-		looks similar to that for unit tests, but works for runtime verification?
-		Which language could be used? Which unit testing framework to take
+	\item How should the syntax for the specifications be defined, so that it
+		looks similar to that of unit tests, but works for runtime verification?
+		Which language should be used? Which unit testing framework to take
 		inspiration from?
 	\item How should the program be instrumented to monitor the system, to expose
 		the appropriate events and data, and to build the system model?
 	\item How will this be used to verify the system against the
 		specification? Online or offline verification? E.g.\ which techniques
 		should be used to verify the monitored system against the specification?
-	\item How can it be provided with a formal foundation?
+	\item How can the resulting approach be provided with a formal foundation?
 \end{enumerate}
 
 This report is a documentation on how to solve these issues. The following
@@ -819,31 +799,33 @@ sections are each dedicated to one issue, and shows a proof-of-concept of these
 ideas. The implementation, called \textit{pythonrv}, can be found
 online\footnote{\texttt{https://github.com/tgwizard/pythonrv}}.
 
+
 \subsection{Definitions}
 
-Define some stuff first? Instrumentation? "The function to be monitored"?
-Specification function? Specification?
+Here follows some definition that will be used in the following sections.
 
 \begin{itemize}
-	\item A \textit{specification} is an entity \rephrase that determines the
-		correct behaviour of a program. It could be a document, describing the
-		programs functionality, or a set of inputs and outputs, showing the results
-		of the programs computation on some given inputs. It could be a reference
-		implementation. A \textit{formal specification} is a mathematical construct
-		that can be used in verification proofs to show that a program works
-		correctly.
+	\item A \textit{specification} is an construct that determines the correct
+		behaviour of a program. It could be a document, describing the programs
+		functionality, or a set of inputs and outputs, describing the correct
+		results of the program's computation on that set. It could be a reference
+		implementation\footnote{For instance, the only specification for python is
+		the canonical CPython implementation. Python is defined as "what CPython
+		does".}. A \textit{formal specification} is a mathematical construct that
+		can be used in verification proofs to show that a program works correctly,
+		i.e.\ according to its specification.
 
 	\item \textit{Instrumentation} is the act of rewriting, intercepting, or
 		patching the program to gain access to its internal state and execution
 		flow.
 
-	\item In \textit{pythonrv} a \textit{specification function} is a function
-		describing a specification, which \textit{pythonrv} can
-		use for verification of the program.
+	\item In \textit{pythonrv} a \textit{specification function} is a python
+		function describing a specification, which \textit{pythonrv} can use for
+		verification of the program.
 
 	\item A specification function
-		\textit{monitors} points \rephrase of the programs (functions), and the
-		points being monitored are called \textit{monitorees} \rephrase.
+		\textit{monitors} points (functions) of the program, and the points being
+		monitored are called \textit{monitorees}.
 \end{itemize}
 
 \subsection{Choice of Language}
@@ -855,25 +837,24 @@ The language should also be in wide use, support quick development, and have an
 active testing culture.
 
 Easy access to a non-trivial and actively used system for real-world testing
-would be a plus.
+would be a plus. More on this in Chapter~\ref{chapter-evaluation}.
 
 Python\footnote{\texttt{http://www.python.org}}, among several languages, fits
 these criteria, and was chosen as the implementation language.
 
-\section{Syntax}
+\section{Syntax} \label{section-approach-syntax}
 
 The canonical framework for doing unit testing in Python is the
-\textit{unittest} framework that is included in all modern versions. Not much
-development has happened on it in the last years. Many new frameworks have have
-spawned, such as PyUnit, Nose and py.test. They build upon the style of
-unittest,and mostly add new miscellaneous features, such as better test
-reporting. The original structure of the unit tests is still prevalent.
-unittest builds on the xUnit style, discussed in
+\textit{unittest} framework that is included in all modern versions of python.
+Not much development has happened on it in the last years. Many new frameworks
+have have spawned, such as PyUnit, Nose and py.test. They build upon the style
+of unittest and mostly add new miscellaneous features, such as better test
+reporting. The original structure of the unit tests is still prevalent -
+unittest builds on the xUnit style of unit testing, discussed in
 Section~\ref{section-unit-testing}.
 
-A few simple example below will introduce the syntax of \textit{pythonrv}.
-After that the capabilities and limitations of the current implementation will
-be exposited.
+The next section will illustrate the syntax of \textit{pythonrv}.
+
 
 \subsection{Three Examples}
 \lstset{language=Python,numbers=left}
@@ -894,21 +875,22 @@ that the first input to the monitored function is always greater than zero.}
 
 The example in Figure~\ref{figure-syntax-example-1} shows the basics of a
 \textit{pythonrv} specification, written as a specification function. Line 1
-imports the \texttt{rv} module from the \textit{pythonrv} package. On line 2 it
-imports the module containing the function we wish to monitor. Line 5 defines
+imports the \texttt{rv} module from the \texttt{pythonrv} package. On line 2 it
+imports the module containing the function to be monitored. Line 5 defines
 the specification as an ordinary python function called \texttt{spec}, taking
 one argument, \texttt{event}. The instrumentation is done line 4 by using the
 \textit{function decorator}\footnote{See
 Section~\ref{section-approach-instrumentation} for an explanation of function
-decorators.} \texttt{rv.monitor}. \texttt{rv.monitor} declares that the
-function \texttt{fib} in \texttt{fibmodule} should be monitored, and, whenever
-\texttt{fib} is called, \texttt{spec} should be called as well.
+decorators and \texttt{rv.monitor}.} \texttt{rv.monitor}. \texttt{rv.monitor}
+declares that the function \texttt{fib} in \texttt{fibmodule} should be
+monitored, and, whenever \texttt{fib} is called, \texttt{spec} should be called
+as well.
 
-The specification itself consists of any valid python code. It has access to a
-special argument, \texttt{event}, which gives the specification function access
-to data about the current event. On line 6, the array of input arguments used
-to call \texttt{fib} is accessed to check that the first argument is greater
-than zero.
+The specification function itself consists of any valid python code. It is
+passed a special argument, \texttt{event}, which gives the specification
+function access to data about the current event. On line 6, the array of input
+arguments used to call \texttt{fib} is accessed to check that the first
+argument is greater than zero.
 
 The specification function in Figure~\ref{figure-syntax-example-1} will be
 called upon every invocation to \texttt{fibmodule.fib}.
@@ -921,19 +903,19 @@ called upon every invocation to \texttt{fibmodule.fib}.
 	\end{center}
 
 	\caption{A specification that monitors two functions, \texttt{mymodule.foo}
-	and \texttt{mymodule.bar}. It asserts that calls to the two functions
-alternate; that no two calls to \texttt{foo} occurs without a call to
-\texttt{bar} in between, and vice versa. The first call has to be to
-\texttt{foo}.}
+		and \texttt{mymodule.bar}. It asserts that calls to the two functions
+		alternate; that no two calls to \texttt{foo} occurs without a call to
+		\texttt{bar} in between, and vice versa. The first call has to be to
+		\texttt{foo}.}
 	\label{figure-syntax-example-2}
 \end{figure}
 
-Figure~\ref{figure-syntax-example-2} shows how a specification can monitor two
-functions. The specification function will be called whenever either of the
-monitored functions are called. Which function was called can be determined
-from the \texttt{event} argument, as is done on lines 6 and 9. It is the
-\texttt{called} attribute of a function in the \texttt{event.fn} structure that
-allows for this.
+Figure~\ref{figure-syntax-example-2} shows how a specification function can
+monitor two functions. The specification function will be called whenever
+either of the monitored functions are called. Which function was called can be
+determined from the \texttt{event} argument, as is done on lines 7 and 14. It
+is the \texttt{called} attribute of a function in the \texttt{event.fn}
+structure that allows for this.
 
 The example also shows how the specification can access a history of previous
 events - events that it has handled in the past. \texttt{event.history} is a
@@ -953,20 +935,20 @@ element, which can also be accessed as \texttt{event.prev}.
 		\texttt{foo} is called first, then any number calls to \texttt{bar} with
 		the first argument as \texttt{True}, and then finally a call to
 	\texttt{bar}. After that, any calls are allowed - the specification function
-won't be used in verification any longer.}
+will not be used in verification any longer.}
 	\label{figure-syntax-example-3}
 \end{figure}
 
 Figure~\ref{figure-syntax-example-3} shows a more advanced example, in which
 the \texttt{next} function of the \texttt{event} argument is used.
-\texttt{next} allows the specification function to add more specification
+\texttt{event.next} allows the specification function to add more specification
 functions (possibly implemented as closures or lambdas) to be executed when the
 next event occurs.
 
 On line 9 the function \texttt{followup} is added to be executed on the next
 event. Since \texttt{followup} is added in this way - as a "oneshot"
-specification - it needs to add it self using \texttt{next} for verification on
-subsequent events. This is done on line 22.
+specification function - it needs to add itself using \texttt{next} for
+verification on subsequent events. This is done on line 22.
 
 Figure~\ref{figure-syntax-example-3} also shows how a specification function
 can turn its verification off - i.e. unsubscribe from future events.
@@ -976,34 +958,29 @@ as a combination of \texttt{event.finish} and \texttt{assert False} (which
 always fails).
 
 
-
 \subsection{Capabilities and Limitations}
 
-\todo{}
-
-Write about the details of the \texttt{rv.monitor} and \texttt{rv.spec}
-function decorators, and about the uses of the \texttt{event} argument. Also
-shortly describe how one can configure custom error handlers to take action
-when verification fails (or do this in the verification section).
-
+The examples above show the main capabilities of \textit{pythonrv}
+specifications. A few minor details were left out, such as how to specify how
+much history should be saved for a specification, or how to label
+specifications with error levels, so that different actions can be taken
+depending on which specification function fails. This is described on the website for
+\textit{pythonrv}.
 
 
 \section{Instrumentation} \label{section-approach-instrumentation}
 
-As this section shows, doing instrumentation for runtime verification is a
-quite simple task in python.
+The previous section showed how \textit{pythonrv} specification functions can
+be written. This section will describe how these functions can jack themselves
+into the ordinary control flow of the program and gain access to the function
+call events and their arguments and associated state.
 
-The three examples in the previous section showed how \textit{pythonrv}
-specification functions can be written. This section will describe how these
-functions can jack themselves into the ordinary control flow of the program and
-gain access to the function call events and their arguments.
-
-The instrumentation is performed through the \texttt{rv.monitor}
-\textit{function decorator} in \textit{pythonrv}. A python function decorator
-is similar to attributes in .Net and annotations in Java. It is essentially a
-function that takes in a function and returns a function, possibly modifies it,
-or uses it in some way (decorates it) in the processs. This is used throughout
-python to turn functions into static or class methods, for instance.
+Instrumentation is done through the \texttt{rv.monitor} \textit{function
+decorator} in \textit{pythonrv}. A python function decorator is similar to
+attributes in .Net and annotations in Java. It is essentially a function that
+takes in a function and returns a function, possibly modifies it, or uses it in
+some way (decorates it) in the processs. This is used throughout python to, for
+instance, turn functions into static or class methods.
 Figure~\ref{figure-function-decorator} shows an example function decorator
 definition, and Figure~\ref{figure-function-decorator-usages} shows how to use
 it.
@@ -1035,7 +1012,7 @@ it.
 monitored, and then the specification function itself.
 
 In python, almost all\footnotemark\ functions belong to a container of some
-sorts - a class, an object, or a module. In
+sort - a class, an object, or a module. In
 Figure~\ref{figure-function-decorator-usages} the functions \texttt{func\_a}
 and \texttt{func\_b} belong to the module \texttt{test} (the module's name is
 the same as that of the file containing the code). These containers are
@@ -1044,20 +1021,20 @@ pairs, where the keys in this case are function names and the values are
 objects representing the function code. (There are other types of values in
 these containers as well, which we can ignore).
 
-\footnotetext[4]{This is not true of closures - function defined inside other
+\footnotetext[5]{This is not true of closures - function defined inside other
 	functions. These functions cannot be directly referenced or modified from
 	outside the defining function. \textit{pythonrv} does not (as of writing)
 	support monitoring of closures.}
 
 The instrumentation in \textit{pythonrv} works as follows. First, a wrapper
-function is defined for each function to be monitored. This wrapper function's
-main purpose is to call the specifications attached to the monitored function,
-and then call the monitored function itself. The wrapper also does some
-argument copying and such, to prevent side-effects in the specifications from
-interfering with the monitored function. The container of the monitored
-function is then extracted, and the reference to the monitored function is
-overwritten with a reference to the wrapper. See
-Figure~\ref{figure-instrumentation-overview} for a pseudo-python overview.
+function is defined for each function to be monitored (for each monitoree).
+This wrapper function's main purpose is to call the specifications attached to
+the monitored function, and then call the monitored function itself. The
+wrapper also does some argument copying and such, to prevent side-effects in
+the specifications from interfering with the monitored function. The container
+of the monitored function is then extracted, and the reference to the monitored
+function is overwritten with a reference to the wrapper. See
+Figure~\ref{figure-instrumentation-overview} for an overview.
 
 The implementation of the instrumentation code in \textit{pythonrv} is more
 optimized than this - for instance, only ever one wrapper per monitoree is
@@ -1088,9 +1065,9 @@ def monitor(monitorees, specification):
 	\end{minipage}
 	\end{center}
 
-	\caption{An overview of the \textit{pythonrv} instrumentation process, in
-	pseudo-python. This is just for illustrative purposes and not how
-\textit{pythonrv} actually does the instrumentation.}
+	\caption{An overview of the \textit{pythonrv} instrumentation process,
+		written in pseudo-python. This is just for illustrative purposes and not
+		how \textit{pythonrv} actually does the instrumentation.}
 	\label{figure-instrumentation-overview}
 \end{figure}
 
@@ -1099,44 +1076,71 @@ def monitor(monitorees, specification):
 \section{Verification} \label{section-approach-verification}
 
 In \textit{pythonrv}, verification is quite simple. The specification functions
-are executable, and executing them on the correct events, providing access to
-the appropriate data, verifies that the specification they represent is
+are executable, and executing them on the appropriate events, providing access
+to the current data, verifies that the specification they represent is
 followed.
 
-Specification functions notifies verification violations, that the
-specifications are not followed, by raising exceptions of the type
-\texttt{AssertionError}. These exceptions are raised when the \texttt{assert}
-statement fails. They can also be raised manually: \texttt{raise
-AssertionError('error message')}.
+Specification functions notify verification violations, that the specifications
+are not followed, by raising exceptions of the type \texttt{AssertionError}.
+These exceptions are raised when the \texttt{assert} statement fails. They can
+also be raised manually: \texttt{raise AssertionError('error message')}.
 
 The verification is performed online, during the program execution.
 Specifications are verified for all calls to function they monitor unless they
-explicitly remove themselves by calling one \texttt{event.finish},
-\texttt{event.success} or \texttt{event.failure} (described in
+explicitly remove themselves by calling one of \texttt{event.finish},
+\texttt{event.success} and \texttt{event.failure} (described in
 Section~\ref{section-approach-syntax}).
+
 
 \subsection{Dealing with Errors}
 
-Whenever a specification violation occurs, and a \texttt{AssertionError} is
-raised, it is passed to a \textit{error handler}. There are two built-in error
+Whenever a specification violation occurs, and an \texttt{AssertionError} is
+raised, it is passed to an \textit{error handler}. There are two built-in error
 handlers: One, the default, that re-raises the exception, and thus crashes the
-program (unless some other part of the code suppresses the exception), and a
-second which just logs the error message to a file.
+program\footnote{Unless some other part of the program, higher up the call
+stack, suppresses the exception.}, and a second which just logs the error
+message, using the standard python logging module.
+
+It is possible to write custom error handlers for \textit{pythonrv}. See the
+website for how.
+
 
 \subsection{Offline Verification}
 
 The current verification approach in \textit{pythonrv} is to perform it online.
 This obviously affects the performance of the program under test. Offline
-verification could be used to mitigate this.
+verification could be used to mitigate this, removing all overhead but for the
+required recording layer.
 
 To do offline verification in \textit{pythonrv} the events and their associated
 data would need to be saved (serialized) and replayed outside the context of
 the running program.
 
-\section{Formal Foundation} \label{section-approach-syntax}
 
-This is the most difficult part, and I really figured it out yet. What follows
-is an early attempt at it.
+
+\section{Formal Foundation} \label{section-approach-formal-foundation}
+
+This is the most difficult part, and I haven't really figured it out yet.
+
+
+\subsection{Python Subset for Formal Specification Functions}
+
+Agh.
+
+
+\subsection{Rules for Composition}
+
+Brt.
+
+
+\subsection{Semantics}
+
+Qdo.
+
+
+\subsection{Previous Attempt}
+
+(This is old stuff, here for me to rewrite/remove/reuse.)
 
 A seemingly insurmountable problem quickly arises when attempting to give a
 formal foundation to the specifications described in
@@ -1334,21 +1338,26 @@ Mm.
 \pagestyle{newchap}
 \chapter{Conclusions} \label{chapter-conclusions}
 
-This report, and the proof-of-concept implementation, has shown that it is
-possible to write specifications in the target programs programming language
-(python) and in a manner more similar to unit testing.
+This report, and the proof-of-concept implementation \textit{pythonrv}, has
+shown that it is possible to write specifications in the target programs
+programming language (python) and in a manner more similar to unit testing.
 
-There are some reservations however. The specification functions' use of time
-and the actual execution flow leads to some inherent divergences from ordinary
-unit testing styles.
+However, a few reservations should be mentioned. The specification functions'
+explicit dealing with time and the actual execution flow leads to some inherent
+divergences from ordinary unit testing styles.
 
 Also, giving the specifications a formal foundation, and doing formal
 verification with them, is different, and perhaps more difficult, than with
 specifications already written in formal languages. The fact that the chosen
-programming language, python, doesn't have a formal semantics defined makes the
+programming language, python, does not have a formal semantics defined makes the
 task quite a bit larger.
 
-\todo{Results (un)expected? Larger context.}
+The formal foundation given in section~\ref{section-approach-formal-foundation}
+is thus for a small subset of python, which makes the math easier, but the
+resulting semantics less interesting.
+
+If the verification parts of \textit{pythonrv} is unwanted, it could be used as
+a simple framework for aspect-oriented programming.
 
 \section{Future Work}
 
@@ -1356,7 +1365,7 @@ The testing tool called expectations, as described in
 Chapter~\ref{chapter-previous-research} could fit quite well with the
 \textit{pythonrv} style of writing specifications.
 
-The performance of the implementation hasn't been measured or considered in
+The performance of the implementation has not been measured or considered in
 much detail. Benchmark tests for \textit{pythonrv} would be interesting, as
 would attempts to introduce it as a correctness verification approach for more
 programs.
@@ -1364,20 +1373,17 @@ programs.
 Offline verification, discussed in Section~\ref{section-rv} and
 Section~\ref{section-approach-verification} would be interesting.
 
-\todo{What do we see in the future? How can this be extended, continued?}
-
 \section{Discussion}
 
-The trend of software systems in general seems to be toward
-larges and more complex entities \rephrase. This makes the automated
-verification of program correctness, formal or not, every more important and an
-essential part of software development. Runtime verification could have a place
-there, if it becomes more popular, and simpler to integrate and use in ordinary
-software.
+The trend of software systems in general seems to be toward larger and more
+complex entities. This makes the automated verification of program
+correctness, formal or not, ever more important and an essential part of
+software development. Runtime verification could have a place there, if it
+becomes more popular and simpler to integrate and use in ordinary software.
 
-The implementation described in this report, \textit{pythonrv}, is freely
+The implementation described in this report, \textit{pythonrv}, is publicly
 available on the web\footnote{\texttt{https://github.com/tgwizard/pythonrv}} as
-free, open source software. People are free to try it, incorporate it into
+free, open source software. People are welcome to try it, incorporate it into
 their programs, and extend it, as they see fit. With enough interest,
 \textit{pythonrv} might develop into a mature framework for runtime
 verification.

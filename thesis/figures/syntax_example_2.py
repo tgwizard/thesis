@@ -16,7 +16,3 @@ def spec(event):
 		# assert that previous event
 		# was a call to foo
 		assert event.prev.fn.foo.called
-	else:
-		# this will never happen
-		assert False, "Neither foo nor bar was called"
-
