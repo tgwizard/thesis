@@ -1125,200 +1125,582 @@ This is the most difficult part, and I haven't really figured it out yet.
 A seemingly insurmountable problem quickly arises when attempting to give a
 formal foundation to the specifications described in
 Section~\ref{section-approach-syntax}. The specifications are written as
-ordinary Python functions and, as such, are difficult to formalize. Python as a
-language is rather informal - one implementation of it, CPython, serves as the
-reference implementation. There is no other specification or formal semantics
-for Python\footnote{The development of Python is organized mainly through the
-Python Enhancement Proposal (PEP) process. PEPs are design documents for new
-features, informally describing their rationales and how they work.}.
+ordinary Python functions and, as such, are difficult to formalize. The Python
+programming language is rather informal - one implementation of it, CPython,
+serves as the reference implementation. There are no other specifications or
+formal semantics for Python\footnote{The development of Python is organized
+  mainly through the Python Enhancement Proposal (PEP) process. PEPs are design
+documents for new features, informally describing their rationales and how they
+work.}.
 
 One way to go around this is to define a semantics for a subset of Python.
 Specifications written in this subset will have a formal semantics, and they
 will have a way to formally prove their correctness.
 
+
+\subsection{Definitions and Terms}
+
+We begin with some definitions and terms to make the following sections
+simpler.
+
+\begin{itemize}
+  \item A \textit{formal specification function} is one of four basic
+    functions described in section~\ref{section-approach-python-subset}, or a
+    set of them combined by composition into a composite function, as described
+    in section~\ref{section-approach-composition}.
+
+  \item Formal specification functions have \textit{composition points} where
+    they can be combined with other formal specification functions. A formal
+    specification function can have zero or more composition points. A
+    composition point can be \textit{open} or \textit{closed} - open
+    composition points can be used in composition, while closed have already
+    been used. Composition points can be \textit{required} or
+    \textit{optional}, where optional is the default
+
+  \item A formal specification function can be either \textit{complete} or
+    \textit{incomplete}. A complete formal specification function is a valid
+    specification. An incomplete formal specification function is not a valid
+    specification, but can, with composition, become complete. Complete formal
+    specification functions have no open required composition points;
+    incomplete formal specification functions have at least one.
+
+  \item Composition is described by the $\circ$ operator. Let $f$, $g$ and $h$
+    be formal specification functions. Let $f$ have one composition point, $g$
+    two, labeled $a$ and $b$, respectively, and $h$ none. A valid composition
+    would be: $s = f \, \circ \, ((g \, \circ_{a} \, h) \, \circ_{b} \, h)$.
+    $s$ would be a complete formal specification function, as it is composed of
+    formal specification functions, and it has no open composition points.
+\end{itemize}
+
+
 \subsection{Python Subset for Formal Specification Functions}
+\label{section-approach-python-subset}
+\lstset{language=Python,numbers=left}
 
 The subset of Python that will be provided with a formal semantics consists of
-four composable specification templates.
+four composable specification functions: \textit{null}, \textit{assert},
+\textit{next} and \textit{if}. See
+Figure~\ref{figure-basic-formal-specification-functions}.
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+	\begin{lstlisting}
+def null(event):
+  pass
+  # composition point 'after'
+
+def assert(event):
+  assert E
+  # composition point 'after'
+
+def next(event):
+  x = # required composition point 'next'
+  event.next(x)
+  # composition point 'after'
+
+def if(event):
+  if E:
+    # required composition point 'then'
+  else:
+    # composition point 'else'
+  # composition point 'after'
+	\end{lstlisting}
+	\end{minipage}
+	\end{center}
+
+	\caption{The four basic formal specification functions.}
+	\label{figure-basic-formal-specification-functions}
+\end{figure}
+
+The \textit{E} used in the assertion and if statement (lines 6 and 15) denotes
+any idempotent, immutable Python expression.
+
+\todo{Give example expressions for \textit{E}?}
+
+The four basic formal specification functions correspond to simple finite
+automata, which are depicted in
+Figure~\ref{figure-basic-formal-specification-automata}. For the system model
+used, and the semantics behind this, see
+section~\ref{section-approach-semantics}. For how to combine the automata, see
+the next section.
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% Automata for the four basic formal specification functions
+%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[h!]
+	\begin{minipage}{0.45\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=2cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial,accepting] (q0)   {$q_0$};
+			\path
+				(q0) edge [loop right] node {$\Sigma$} (q0);
+		\end{tikzpicture}
+    \subcaption{The \textit{null} specification.}
+	\end{minipage}
+  ~
+	\begin{minipage}{0.45\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=2cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0)									{$q_0$};
+			\node[state,accepting] (q1) [right of=q0]	{$q_1$};
+			\path
+				(q0) edge node {$E$} (q1);
+		\end{tikzpicture}
+    \subcaption{The \textit{assert} specification.}
+	\end{minipage}
+
+  \bigskip
+
+	\begin{minipage}{0.45\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=2.5cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0)	{$q_0$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (cloud) [right of=q0]
+      {\textit{next} spec};
+			\path
+				(q0) edge node {$\Sigma$} (cloud);
+		\end{tikzpicture}
+    \subcaption{The \textit{next} specification.}
+	\end{minipage}
+  ~
+	\begin{minipage}{0.45\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=2.5cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0)	{$q_0$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (cloud) [right of=q0] {\textit{then} spec};
+			\node[state,accepting] (q1) [below right of=q0]	{$q_1$};
+			\path
+				(q0) edge node {$E$} (cloud)
+        (q0) edge node {$\Sigma$} (q1);
+		\end{tikzpicture}
+    \subcaption{The \textit{if} specification.}
+	\end{minipage}
+
+	\caption{The automata for the four basic formal specification functions.}
+	\label{figure-basic-formal-specification-automata}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-\subsection{Rules for Composition}
+\subsection{Rules for Composition} \label{section-approach-composition}
+\lstset{language=Python,numbers=none}
 
-Brt.
+There are no implicit precedence rules for the $\circ$ composition operator;
+parentheses are required.
+
+In this section let $id$ be the \textit{null} specification, let
+$a$ be an
+\textit{assert} specification, let $n$ be a \textit{next} specifications and
+let $i$ be an \textit{if} specifications. Let $s$ be any specification.
+Appending subscripts and $'$ denotes different specifications of the same type.
 
 
-\subsection{Semantics}
+\subsubsection{Composition of the \textit{null} specification}
+
+The \textit{null} specification works as an identity function. Composing any
+function with it, or it with any function, yields the same -- see
+Figure~\ref{figure-null-composition}. Since composition with the \textit{null}
+specification is the same as applying an identity function, the \textit{after}
+composition point of the \textit{null} specification inherits the requiredness
+of the composition point with which it is attached, i.e. attaching the
+\textit{null} specification to the \textit{then} composition point of the
+\textit{if} specification will yield an \textit{if} specification with the
+\textit{then} composition point still required and open.
+
+\begin{figure}[h!]
+	\begin{minipage}{0.45\textwidth}
+		\centering
+    \[
+    s = s \, \circ \, id = id \, \circ \, s
+    \]
+	\end{minipage}
+  ~
+	\begin{minipage}{0.45\textwidth}
+		\centering
+	\begin{lstlisting}
+def compose_after(event):
+  pass
+  s(event)
+
+def compose_before(event):
+  s(event)
+  pass
+  \end{lstlisting}
+	\end{minipage}
+
+  \caption{Composition of a \textit{null} specification $id$ with an arbitrary
+    specification $s$.}
+	\label{figure-null-composition}
+\end{figure}
+
+Due to the identity-function nature of the \textit{null} specification, it will
+be left out of the composition rules below.
+
+
+\subsubsection{Composition of the \textit{assert} specification}
+
+Composing with an \textit{assert} specification $a$ is simple when $a$ is on
+the left-hand side of the composition. See
+Figures~\ref{figure-assert-composition-assert},~\ref{figure-assert-composition-next}
+and~\ref{figure-assert-composition-if}.
+
+The automata corresponding to the specifications created by the compositions
+from are quite simple. These are created by just taking the expression $E$ from
+$a$ and adding it (as part of a conjunctive) to any expressions on all
+transitions from the start state in the right-hand side automaton.
+
+For when an \textit{assert} specification is on the right-hand side, see the
+composition rules for \textit{next} and \textit{if} specifications.
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% Composition, assert o s, symbol-python-automata
+%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[h!]
+	\begin{minipage}{0.25\textwidth}
+		\centering
+    \[
+      s = a \, \circ \, a'
+    \]
+	\end{minipage}
+  ~
+	\begin{minipage}{0.25\textwidth}
+		\centering
+    \begin{lstlisting}
+def s(event):
+  assert E
+  assert E'
+    \end{lstlisting}
+	\end{minipage}
+  ~
+	\begin{minipage}{0.4\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=3cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0) {$q_0$};
+			\node[state,accepting] (q1) [right of=q0] {$q_1$};
+			\path
+				(q0) edge node {$E \wedge E'$} (q1);
+		\end{tikzpicture}
+	\end{minipage}
+  \caption{A composition of an \textit{assert} specification and another
+    \textit{assert} specification.}
+	\label{figure-assert-composition-assert}
+\end{figure}
+
+
+\begin{figure}[h!]
+	\begin{minipage}{0.25\textwidth}
+		\centering
+    \[
+      s = a \, \circ \, n
+    \]
+	\end{minipage}
+  ~
+	\begin{minipage}{0.25\textwidth}
+		\centering
+    \begin{lstlisting}
+def s(event):
+  assert E
+  next(...)
+    \end{lstlisting}
+	\end{minipage}
+  ~
+	\begin{minipage}{0.4\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=2.5cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0) {$q_0$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (cloud) [right of=q0]
+      {\textit{next} spec};
+			\path
+				(q0) edge node {$E$} (cloud);
+		\end{tikzpicture}
+	\end{minipage}
+  \caption{A composition of an \textit{assert} specification and an
+    \textit{next} specification, with the \textit{assert} specification on the
+    left-hand side.}
+	\label{figure-assert-composition-next}
+\end{figure}
+
+
+\begin{figure}[h!]
+	\begin{minipage}{0.25\textwidth}
+		\centering
+    \[
+      s = a \, \circ \, i
+    \]
+	\end{minipage}
+  ~
+	\begin{minipage}{0.25\textwidth}
+		\centering
+    \begin{lstlisting}
+def s(event):
+  assert E
+  if E':
+    ...
+    \end{lstlisting}
+	\end{minipage}
+  ~
+	\begin{minipage}{0.4\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=3cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0) {$q_0$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (cloud) [right of=q0] {\textit{then} spec};
+			\node[state,accepting] (q1) [below right of=q0]	{$q_1$};
+			\path
+				(q0) edge node {$E \wedge E'$} (cloud)
+        (q0) edge node {$E$} (q1);
+		\end{tikzpicture}
+	\end{minipage}
+
+  \caption{A composition of an \textit{assert} specification and an \textit{if}
+    specification, with the \textit{assert} specification on the left-hand
+    side. The optional else clause have been left out, but if it were added, we
+    would draw another transition from $q0$ to the automaton inserted at that
+    composition point labeled $E \wedge \bar{E'}$. $q1$ is the state
+    representing the "fallthrough" of the if statement, at the \textit{after}
+    composition point}
+	\label{figure-assert-composition-if}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\clearpage
+\subsubsection{Composition of the \textit{next} specification}
+
+\textit{next} specifications have two composition points: one appropriately
+called \textit{next}, which is required, and one called \textit{after}, which
+is optional. Compositions using the \textit{after} composition point are
+reflexive: $n \, \circ_{after} \, s = s \, \circ_{after} \, n$. For composition
+rules concerning $a \, \circ_{after} \, n$ and $i \, \circ_{after} \, n$, see
+the sections for \textit{assert} and \textit{if} specifications. Also note
+that:
+
+\[
+(n \, \circ_{next} \, s) \, \circ_{after} \, (n' \, \circ_{next} \, s')
+=
+n \, \circ_{next} (s \, \circ_{after} \, s')
+\]
+
+As described in section~\ref{section-approach-python-subset}, composition with
+a \textit{next} specification on the left hand side is simple. It is
+illustrated again in Figure~\ref{figure-next-composition-s}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% Composition, next o s, symbol-python-automata
+%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[h!]
+	\begin{minipage}{0.25\textwidth}
+		\centering
+    \[
+      s = n \, \circ_{next} \, s'
+    \]
+	\end{minipage}
+  ~
+	\begin{minipage}{0.25\textwidth}
+		\centering
+    \begin{lstlisting}
+def s(event):
+  event.next(s')
+    \end{lstlisting}
+	\end{minipage}
+  ~
+	\begin{minipage}{0.4\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=2.5cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0)	{$q_0$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (cloud) [right of=q0] {$s_2$};
+			\path
+				(q0) edge node {$\Sigma$} (cloud);
+		\end{tikzpicture}
+	\end{minipage}
+  \caption{A composition of a \textit{next} specification and an
+    \textit{assert} specification, with the \textit{next} specification on the
+    left-hand side.}
+	\label{figure-next-composition-s}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\subsubsection{Composition of the \textit{if} specification}
+
+\textit{if} specifications are the most complex of the four basic
+specifications, with three composition points: \textit{then}, \textit{else} and
+\textit{after}, with \textit{then} being required and the other optional. The
+different combinations with other specifications (\textit{assert},
+\textit{next} and \textit{if}) and composition points are quite many, so the
+figures below only show how each would behave when attached to both the
+\textit{then} and \textit{else} composition points. The different combinations
+are then trivial to calculate. See
+Figures~\ref{figure-if-composition-assert},~\ref{figure-if-composition-next}
+and~\ref{figure-if-composition-if} for the composition rules for \textit{if}
+specification on the left-hand side. Rules for \textit{if} specifications when
+they are on the right hand side are defined above.
+
+As can be seen in e.g.\ Figure~\ref{figure-if-composition-assert}, the
+"fall-through transition", which leads to the \textit{after} composition point,
+is labeled as the disjunction of the labels to the \textit{then} and
+\textit{else} composition points. This is due to the fact that if the
+expression guarding the \textit{then} composition point evaluates to true,
+whatever is asserted there must hold. If no formal specification function is
+attached to the optional \textit{else} composition point, a dummy
+\texttt{assert True} is inserted to generate the proper semantics for the
+fall-through.
+
+
+\todo{Rethink. if is just adding (conjunction) the E of the if to all
+transitions in its inner cloud.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% Composition, if o s, symbol-python-automata
+%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[h!]
+	\begin{minipage}{0.25\textwidth}
+		\centering
+    \[
+      s = (i \, \circ_{then} \, a_1) \, \circ_{else} \, a_2
+    \]
+	\end{minipage}
+  ~
+	\begin{minipage}{0.25\textwidth}
+		\centering
+    \begin{lstlisting}
+def s(event):
+  if E:
+    assert E1
+  else:
+    assert E2
+    \end{lstlisting}
+	\end{minipage}
+  ~
+	\begin{minipage}{0.4\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=2.5cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0) {$q_0$};
+			\node[state,accepting] (q1) [right of=q0] {$q_1$};
+			\node[state,accepting] (q2) [below of=q1] {$q_2$};
+			\node[state,accepting] (q3) [below of=q0] {$q_3$};
+			\path
+        (q0) edge node {$E \wedge E_1$} (q1)
+        (q0) edge node {$\bar{E} \wedge E_2$} (q2)
+        (q0) edge node [left] {$(E \wedge E_1) \vee (\bar{E} \wedge E_2)$} (q3);
+		\end{tikzpicture}
+	\end{minipage}
+  \caption{A composition of an \textit{if} specification and
+    \textit{assert} specifications, with the \textit{if} specification on the
+    left-hand side.}
+	\label{figure-if-composition-assert}
+\end{figure}
+
+
+\begin{figure}[h!]
+	\begin{minipage}{0.25\textwidth}
+		\centering
+    \[
+      s = (i \, \circ_{then} \, n_1) \, \circ_{else} \, n_2
+    \]
+	\end{minipage}
+  ~
+	\begin{minipage}{0.25\textwidth}
+		\centering
+    \begin{lstlisting}
+def s(event):
+  if E:
+    event.next(n1)
+  else:
+    event.next(n2)
+    \end{lstlisting}
+	\end{minipage}
+  ~
+	\begin{minipage}{0.4\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=2.5cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0) {$q_0$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (q1) [right of=q0] {$n_1$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (q2) [below of=q1] {$n_2$};
+			\node[state,accepting] (q3) [below of=q0] {$q_3$};
+			\path
+        (q0) edge node {$E$} (q1)
+        (q0) edge node {$\bar{E}$} (q2)
+        (q0) edge node [left] {$\Sigma$} (q3);
+		\end{tikzpicture}
+	\end{minipage}
+  \caption{A composition of an \textit{if} specification and
+    \textit{next} specifications, with the \textit{if} specification on the
+    left-hand side.}
+	\label{figure-if-composition-next}
+\end{figure}
+
+
+\begin{figure}[h!]
+	\begin{minipage}{0.25\textwidth}
+		\centering
+    \[
+      s = (i \, \circ_{then} \, i_1) \, \circ_{else} \, i_2
+    \]
+	\end{minipage}
+  ~
+	\begin{minipage}{0.25\textwidth}
+		\centering
+    \begin{lstlisting}
+def s(event):
+  if E:
+    if E1:
+      # then 1
+    else:
+      # else 1
+  else:
+    if E2:
+      # then 2
+    else:
+      # else 2
+    \end{lstlisting}
+	\end{minipage}
+  ~
+	\begin{minipage}{0.4\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=2.5cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0) {$q_0$};
+      \node[state] (q1) [right of=q0] {$q_1$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (cloud) [below of=q0] {\textit{then} spec};
+      \node[state,accepting] (q2) [right of=cloud] {$q_2$};
+			\path
+				(q0) edge node {$\Sigma$} (q1)
+        (q1) edge node {$E$} (cloud)
+        (q1) edge node {$\bar{E}$} (q2);
+		\end{tikzpicture}
+	\end{minipage}
+
+  \caption{A composition of a \textit{next} specification and an \textit{if}
+    specification, with the \textit{next} specification on the left-hand side.}
+	\label{figure-if-composition-if}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\subsection{Semantics} \label{section-approach-semantics}
 
 Qdo.
 
 
-\subsection{Previous Attempt}
-
-(This is old stuff, here for me to rewrite/remove/reuse.)
-
-
-
-One formal semantics that can quite easily be ascribed to Python code is that
-of finite automata. The Python code is translated into a finite automata. To
-make this more manageable, translations are shown for some small "types of
-Python specifications", which can be composed to yield more complex
-specifications. Proofs can thus use structural induction to prove general
-properties no specifications.
-
-The system model for the automata, the alphabet it works on, is the events of
-the function(s) that a specification monitors. \todo{Currently the
-specifications below only allow for one monitored function per specification.}
-
-The idea with the transitions in the automata is that either we always follow a
-transition, and we label it $\Sigma$, or we follow a transition only if the
-event that has occurred satisfies some predicate $P$. If no transition fits,
-the specification has been violated.
-
-One peculiarity should be noted: On each new event, a new "instance" of the
-automaton is spawned, starting from the beginning. All current "executions" of
-the automaton is also continued.
-
-Next follows the four specification modules I think are required. Their
-presentation is quite ugly, unfortunately.
-
-\todo{From the discussion with Narges:}
-
-Define rules for the composition of the specifications. Show $M \models
-\varphi$. Do the product of the System Model $M$ and the automaton of the
-composed specifications. (function-call-event, state-of-args-and-world) is the
-system model.
-
-
-%%%%
-%% null spec
-\begin{figure}[h!]
-	\begin{minipage}{0.45\textwidth}
-		\centering
-		\lstset{language=Python}
-		\begin{lstlisting}
-		def null_spec():
-			pass
-		\end{lstlisting}
-		\subcaption{The \textit{null specification}, in Python function format.}
-	\end{minipage}
-	~
-	\begin{minipage}{0.45\textwidth}
-		\centering
-		\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto,scale=.5]
-			\node[state,initial,accepting] (q0)   {$q_0$};
-			\path[->]
-				(q0) edge [loop right] node {$\Sigma$} (q0);
-		\end{tikzpicture}
-		\subcaption{The \textit{null specification}, as an automaton.}
-	\end{minipage}
-
-	\caption{The \textit{null specification} - the simplest of specifications.}
-	\label{label-spec-null}
-\end{figure}
-
-%%%%
-%% assert spec
-\begin{figure}[h!]
-	\begin{minipage}{0.45\textwidth}
-		\centering
-		\lstset{language=Python}
-		\begin{lstlisting}
-		def assert_spec():
-			assert P
-		\end{lstlisting}
-		\subcaption{The \textit{assert specification}, in Python function format.}
-	\end{minipage}
-	~
-	\begin{minipage}{0.45\textwidth}
-		\centering
-		\begin{tikzpicture}[shorten >=1pt,node distance=2cm,on grid,auto,scale=.5]
-			\node[state,initial] (q0)									{$q_0$};
-			\node[state,accepting] (q1) [right of=q0]	{$q_1$};
-			\path[->]
-				(q0) edge node {$P$} (q1);
-		\end{tikzpicture}
-		\subcaption{The \textit{assert specification}, as an automaton.}
-	\end{minipage}
-
-	\caption{The \textit{assert specification} - the simplest specification that
-	actually does something.}
-	\label{label-spec-assert}
-\end{figure}
-
-%%%%
-%% next spec
-\begin{figure}[h!]
-	\begin{minipage}{0.45\textwidth}
-		\centering
-		\lstset{language=Python}
-		\begin{lstlisting}
-		def next_spec():
-			next(any_spec)
-
-		\end{lstlisting}
-		\subcaption{The \textit{next specification}, in Python function format.}
-	\end{minipage}
-	~
-	\begin{minipage}{0.45\textwidth}
-		\centering
-		\begin{tikzpicture}[shorten >=1pt,node distance=3cm,on grid,auto,scale=.5]
-			\node[state,initial] (q0)									{$q_0$};
-			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (q1) [right of=q0]
-			{$A(any\_spec)$};
-			\path[->]
-				(q0) edge node {$\Sigma$} (q1);
-		\end{tikzpicture}
-		\subcaption{The \textit{next specification}, as an automaton.}
-	\end{minipage}
-
-	\caption{The \textit{next specification} - the specification that deals with
-	time.}
-	\label{label-spec-next}
-\end{figure}
-
-%%%%
-%% if spec
-\begin{figure}[h!]
-	\begin{minipage}{0.45\textwidth}
-		\centering
-		\lstset{language=Python}
-		\begin{lstlisting}
-		def if_spec():
-			if P0:
-				next(any_spec_0)
-			# optional additional conditionals, 1 to n-1
-			else if Pi:
-				next(any_spec_i)
-			# optional else clause
-			else:
-				next(any_spec_n)
-
-		\end{lstlisting}
-		\centering
-		\subcaption{The \textit{if specification}, in Python function format.}
-	\end{minipage}
-
-
-
-	\begin{minipage}{0.45\textwidth}
-		\centering
-		\begin{tikzpicture}[shorten >=1pt,node distance=6cm,on grid,auto,scale=.5]
-			\node[state,initial] (q0)									{$q_0$};
-			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (q1) [right of=q0] {$A(any_spec_0)$};
-			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (q2) [below right of=q0] {$A(any_spec_i)$};
-			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (q3) [below of=q0] {$A(any_spec_n)$};
-			\path[->]
-				(q0) edge node {$P0$} (q1)
-				(q0) edge node {$Pi \wedge \forall_{j=0}^{i-1} \bar{P_j}$} (q2)
-				(q0) edge node {$\forall_{j=0}^{n-1} \bar{P_j}$} (q3);
-		\end{tikzpicture}
-		\centering
-		\subcaption{The \textit{if specification}, as an automaton.}
-	\end{minipage}
-
-	\caption{The \textit{if specification} - the most complex specification.}
-	\label{label-spec-if}
-\end{figure}
 
 
 
@@ -1361,8 +1743,8 @@ the program, and the templates are the layer that constructs the display for
 the user. The view links the two together, fetching the correct models for
 specific requests, and then delegating to the appropriate templates.
 
-The application-specific configuration in Django are stored in settings files,
-which are ordinary Python files. These contain settings for database
+Application-specific configuration for Django programs are stored in settings
+modules, which are ordinary Python files. These contain settings for database
 connections, authentication, etc.. During startup, Django reads the settings
 files, starts up its internal machinery, and waits for the first request.
 
@@ -1386,8 +1768,14 @@ do not monitor code dependent on the settings, could be loaded before that.
 
 \subsection{Issues}
 
-\todo{}
-Talk about cString-arg-copy-problems.
+Early in the process of using \textit{pythonrv} in the program it was
+discovered that the copying of data, such as function arguments, that
+\textit{pythonrv} does would not work with Django. The latest version of
+Django, v1.4.1, uses a module called \texttt{cStringIO}, which produces objects
+that cannot be copied. All functions dealing with web requests are affected by
+this. This has been fixed in the development branch of Django, but in the
+meantime, \textit{pythonrv} has an option to disable argument copying, either
+for all specifications or for a subset of them, to work around this issue.
 
 
 \section{Potential Value}
