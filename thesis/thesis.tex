@@ -120,7 +120,7 @@ Due to the increasing size and complexity of computer software it has become
 increasingly difficult, if not impossible, to convince oneself that the
 software works as desired. This is where verification tools can be used to
 great effect. Of these tools, testing is the one familiar to most developers,
-and in wide spread use. The proliferation of agile development practices and
+and in widespread use. The introduction of agile development practices and
 test-driven development has also popularized the concept of \textit{unit
 testing}, in which small modules of a program or system are tested
 individually.
@@ -129,9 +129,9 @@ While testing is popular and often works well, it is incomplete and informal,
 and thus yields no proof that the program does what it should - i.e. follows
 its specification. Formal verification techniques, such as theorem proving,
 model checking (and its bounded variant), can give such proofs. However, they
-suffer from complexity problems (incompleteness, undecidability) and practical
-issues, such as the so-called state explosion problem. Often they cannot be
-fully automated.
+suffer from complexity problems (\textit{incompleteness},
+\textit{undecidability}) and practical issues, such as the so-called
+\textit{state explosion} problem. Often they cannot be fully automated.
 
 A relatively new approach in this area is runtime verification, in which the
 program \textit{execution} is verified against its specification. With the
@@ -170,9 +170,14 @@ written in the target program's programming language, it might popularise the
 use of runtime verification for checking the correctness of programs.
 
 
+
 \section{Disposition}
 
-The rest of this report is structured in as follows.
+The first time an important concept is introduced it is written in
+\textit{italics}. These words are briefly explained in
+Appendix~\ref{appendix-dictionary}.
+
+The rest of this report is structured as follows.
 Chapter~\ref{chapter-background} gives a
 background to the subject of verifying program correctness.
 Chapter~\ref{chapter-previous-research} continues
@@ -207,9 +212,8 @@ verification and formal approachs goes back several decades. Research of interes
 include the early work on formal methods, e.g.\ by Hoare \cite{hoare69} and
 Floyd \cite{floyd67}, and work on logics suitable for runtime verification,
 e.g. LTL by Pnueli \cite{pnueli77}. The seminal work done by Hoare, Floyd and
-Pnueli lay the foundation for many interesting approaches used for runtime
-verification. LTL is one of the common formal languages used for specifications
-in runtime verification.
+Pnueli lay the foundation for many interesting approaches. LTL is one of the
+common formal languages used for specifications in runtime verification.
 
 This chapter gives a short overview of the background to the concepts of this
 report. It starts with laying out what we mean by proving the correctness of
@@ -238,14 +242,14 @@ follow the specification, and by linking together the pre-conditions of program
 points with their preceding program points' post-conditions, we know that
 correct indata will yield correct results.
 
-This way of proving correctness often yields the best results. But it is slow,
-hard to automate, and therefore requires much manual labor. Wading through
-large programs thus often becomes impractical.
+This way of proving correctness often yields the best results \rephrase. But it
+is slow, hard to automate, and therefore requires much manual work. Wading
+through large programs thus often becomes impractical.
 
 \textit{Model checking} is the concept of verifying that a \textit{model} of a
 system (the \textit{system model}) follows its specification. This requires
 that both the model and the specification is written in a mathematical
-formalism.  Given this, the task becomes to see if the model satisfies the
+formalism. Given this, the task becomes to see if the model satisfies the
 logical formula of the specification. It is often simpler than theorem proving,
 and can be automated.
 
