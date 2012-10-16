@@ -658,42 +658,6 @@ that the object under test requires to work properly.
 Test written in this style are traditional unit tests.
 
 
-\subsection{Behaviour-driven Development}
-
-There is a style of writing tests called behaviour-driven development
-\cite{north06bdd}. It originated from test-driven development, and is built on
-the idea that the tests you write should test the behaviour of the program. The
-simplest example is that you write your unit tests after the behaviour you
-desire, perhaps naming your tests according to ``X should do Y''. A more radical
-example is shown in Figure~\ref{figure-bdd}.
-
-\begin{figure}[h!]
-	\begin{center}
-	\begin{minipage}{0.7\textwidth}
-\begin{alltt}
-+Scenario 1: Account is in credit+
-\textit{Given} the account is in credit
-\textit{And} the card is valid
-\textit{And} the dispenser contains cash
-\textit{When} the customer requests cash
-\textit{Then} ensure the account is debited
-\textit{And} ensure cash is dispensed
-\textit{And} ensure the card is returned
-\end{alltt}
-	\end{minipage}
-	\end{center}
-
-\caption{An example scenario describing a behaviour, as written in BDD.
-Scenario taken from \cite{north06bdd}.}
-\label{figure-bdd}
-\end{figure}
-
-A test runner for the test in Figure~\ref{figure-bdd} would parse each
-scenario, and for each line find a matching unit of code that does what the
-line describes. This way of writing tests, or describing behaviours, leads to a
-outside-in, or top-down, way of writing and thinking about your program.
-
-
 \subsection{Mocking and Faking}
 
 A common issue when writing unit tests is that, to instantiate some object X,
