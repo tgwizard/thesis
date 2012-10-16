@@ -1,0 +1,54 @@
+
+  vad vill/ska läsaren få ut av det här stycket?
+  hur hänger det ihop med resten av rapporten? problemformuleringen?
+
+
+# disposition
+
+en tratt.
+
+
+# introduction
+
+model - a model is an abstraction that captures the essence of the modeled
+property, and which is small and formal enough to use in one's calculations.
+
+ordlista
+
+"often they cannot be fully automated". why? explain. give examples.
+
+manuella tester, måste vara med.
+
+spectrum, från testning, det man gör nu, automatiseras, till det academiska,
+formella, på andra sidan. runtime verification ligger i mitten. kombination av
+de båda. ligger i tiden.
+
+problem statement, "kommer lite i ansiktet". kan vara längre.
+"programmerare skriver inte formella specificationer"
+slå på/av i prod, för mer info. flexibelt.
+
+introduction behöver inte vara så akademisk. varför det här är en bra idé, i
+laymans term.
+
+motivation - roller i utvecklingsproekt idag. "dessa människor" skriver absolut
+inte formella specifikationer idag.
+tooling, inte bara mental-context-swicthing.
+programmerare skrev inte tester innan verktygen blev tillräckligt bra
+devops och rv
+
+
+# background
+
+synopsis på kapitel
+
+gå igenom model tidigt
+ett nytt stycke "What is correctness".
+ett program kan vara en specification, kanske redan här.
+
+två olika sätt att bygga sin model. enhetstestning skär upp i silos, skapar
+avskilda, små modeller. formell verifiering skapar en model "av hela",
+abstraherar och förenklar.
+
+"Proving Correctness" -> heta något annat.
+
+automatisering eget stycke?
