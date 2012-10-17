@@ -1088,10 +1088,17 @@ the running program.
 
 \section{Formal Foundation} \label{section-approach-formal-foundation}
 
-This is the most difficult part, and I haven't really figured it out yet.
+The purpose of a formal foundation for the specifications is so that the
+specification writer can reason mathematically about the specification, showing
+their semantical correctness using proof techniques. To do this, the
+specification needs some sort of mathematical representation. This is often
+some sort of automata. A model of the system, a system model, is also required.
+In this case it is the events passed to the specification, with their
+associated data (arguments, object state, global state, etc.). This is
+described in more detail in section~\ref{section-approach-semantics}
 
 A seemingly insurmountable problem quickly arises when attempting to give a
-formal foundation to the specifications described in
+such a mathematical representation to the specifications described in
 Section~\ref{section-approach-syntax}. The specifications are written as
 ordinary Python functions and, as such, are difficult to formalize. The Python
 programming language is rather informal - one implementation of it, CPython,
@@ -1101,9 +1108,10 @@ formal semantics for Python\footnote{The development of Python is organized
 documents for new features, informally describing their rationales and how they
 work.}.
 
-One way to go around this is to define a semantics for a subset of Python.
-Specifications written in this subset will have a formal semantics, and there
-will be a way to formally prove their correctness.
+One way to go around this is to define automata for a subset of Python, which
+we do in section~\ref{section-approach-python-subset}. Specifications written
+in this subset will have a formal semantics, and there will be a way to reason
+with them mathematically.
 
 
 \subsection{Definitions and Terms}
@@ -1143,9 +1151,7 @@ simpler.
     nondeterministic finite automata $A(s) = (Q, P, q_0, F)$. Each such
     automata consists of a set of states $Q$ and transitions $P$ between
     them. An automata has one initial state $q_0$, where the verification
-    starts, and zero or more accepting states $F$. When an accepting state is
-    reached, verification of the specification is satisfied \rephrase
-    \todo{Rethink; this is not true}.
+    starts, and zero or more accepting states $F$.
 
   \item Each transition in the automata has a label - an expression - which is
     described in detail in section~\ref{section-approach-semantics}. The label
@@ -1187,19 +1193,19 @@ Figure~\ref{figure-basic-formal-specification-functions}.
 	\begin{lstlisting}
 def assert(event):
   assert E
-  # composition point 'tail'
+  # optional composition point 'tail'
 
 def next(event):
   x = # required composition point 'next'
   event.next(x)
-  # composition point 'tail'
+  # optional composition point 'tail'
 
 def if(event):
   if E:
     # required composition point 'then'
   else:
-    # composition point 'else'
-  # composition point 'tail'
+    # optional composition point 'else'
+  # optional composition point 'tail'
 	\end{lstlisting}
 	\end{minipage}
 	\end{center}
@@ -1214,12 +1220,12 @@ section~\ref{section-approach-semantics} for the semantics for this.
 
 The three basic formal specification functions correspond to simple,
 nondeterministic, finite automata, which are depicted in
-Figure~\ref{figure-basic-formal-specification-automata}.
-
-For the system model used, and the semantics behind this, see
-section~\ref{section-approach-semantics}. For how to combine the automata, see
-the next section. Note that all three basic formal specifications, and all
-compositions thereof, are valid \textit{pythonrv} specification functions.
+Figure~\ref{figure-basic-formal-specification-automata}. The basic formal
+specifications can be combined by composition into larges, more complex
+specifications. Details on the basic formal specifications and their
+composition is described in the next section. Note that all three
+basic formal specifications, and all compositions thereof, are valid
+\textit{pythonrv} specification functions.
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% Automata for the basic formal specification functions
@@ -1229,10 +1235,12 @@ compositions thereof, are valid \textit{pythonrv} specification functions.
 		\centering
 		\begin{tikzpicture}[->,shorten >=1pt,node distance=2cm,on
       grid,auto,scale=.5,semithick,>=stealth]
-			\node[state,initial] (q0)									{$q_0$};
-			\node[state,accepting] (q1) [right of=q0]	{$q_1$};
+			\node[state,initial] (q0) {$q_0$};
+			\node[state,accepting] (q1) [right of=q0] {$q_1$};
+			\node[state] (fail) [below right of=q0] {fail};
 			\path
-				(q0) edge node {$E$} (q1);
+				(q0) edge node {$E$} (q1)
+        (q0) edge node {$\bar{E}$} (fail);
 		\end{tikzpicture}
     \subcaption{The \textit{assert} specification.}
 	\end{minipage}
@@ -1279,30 +1287,13 @@ compositions thereof, are valid \textit{pythonrv} specification functions.
 \subsection{Rules for Composition} \label{section-approach-composition}
 \lstset{language=Python,numbers=none}
 
-All formal specification functions have at least one open composition point,
-the \textit{tail} composition point. Compositions using the \textit{tail}
-composition point are commutative: $s \, \circ_{tail} \, s' = s' \,
-\circ_{tail} \, s$. The composition rule for the \textit{tail} composition
-point is special for \textit{assert} specifications (see below). For
-\textit{next} and \textit{if} specification it is essentially just a merge of
-the initial states of the two specifications, making the initial transitions of
-both specifications go out from the same state $q_0$ and reusing the right-hand
-specification's accepting states. Given two specifications
-$s$ and $s'$, where $A(s) = (Q_s, T_s \cup P_s, q_{0s}, F_s)$ and $A(s') =
-(Q_{s'}, T_{s'} \cup P_{s'}, q_{0s'}, F_{s'})$. Then:
-
-\[
-  \begin{array}{rcl}
-    A(s \circ_{tail} s') & = & (\{q_0\} \cup Q_s \cup Q_{s'} - \{q_{0s}, q_{0s'}\}, T \cup (P_s \cup P_{s'}), q_0, F_{s'}) \\
-                     T   & = & \{(q_0, q', E) \, | \, (q, q', E) \in (T_s \cup T_{s'})\}
-  \end{array}
-\]
 
 There are no implicit precedence rules for the $\circ$ composition operator;
 parentheses are required.
 
 
-\subsubsection{Composition of the \textit{assert} specification}
+\subsubsection{Composition of the \textit{assert} specification, and
+composition with the \textit{tail} composition point}
 
 The \textit{assert} specifications are the only basic formal specification
 functions that are complete, without the need to compose them with other
@@ -1312,45 +1303,71 @@ Figure~\ref{figure-basic-formal-specification-automata}, is defined as:
 
 \[
   \begin{array}{rcl}
-    A(a_E) & = & (\{q_0, q_1\}, \{(q_0, q_1, E)\}, q_0, \{q_1\})
+    A(a_E) & = & (\{q_0, q_1, f\}, \{(q_0, q_1, E),(q_0, f, \bar{E})\}, q_0, \{q_1\})
   \end{array}
 \]
 
-The automata corresponding to specifications created by the compositions where
-an \textit{assert} specification $a_E$ is on the left-hand side of $\circ$ are
-quite simple. These are created by just taking the expression $E$ from $a_E$
-and adding it (as part of a conjunctive) to any expressions on all transitions
-from the start state in the right-hand side automaton. Given the specification
-$s$, where $A(s) = (Q, T \cup R, q_0, F)$ (remember, $T$ denotes the initial
-transitions, those starting in an automaton's initial state). Then:
+$f$ (\textit{fail}) is a failure state, from which no transitions lead. If
+$\bar{E}$ is true, the failure state will be reached, and no further
+verification can be done.
+
+\textit{assert} specifications, and all formal specification functions, have at
+least one open composition point, the \textit{tail} composition point.
+Compositions using the \textit{tail} composition point are commutative: $s \,
+\circ_{tail} \, s' = s' \, \circ_{tail} \, s$. Composition using the
+\textit{tail} composition point is essentially just a merge of the initial
+states of the two specifications, making the initial transitions of both
+specifications go out from the same state $q_0$, and merging the accepting
+states of the automata. Given two specifications $s$ and $s'$, where:
 
 \[
   \begin{array}{rcl}
-    A(a_E \circ s) & = & (Q, T' \cup R, q_0, F) \\
-               T'  & = & \{(q_0, q, E \wedge E') \, | \, (q_0, q, E') \in T\}
+    A(s) & = & (Q_s, T_s \cup P_s, q_{0s}, F_s) \\
+   A(s') & = & (Q_{s'}, T_{s'} \cup P_{s'}, q_{0s'}, F_s \cup F_{s'})
   \end{array}
 \]
 
-Composition of \textit{assert} specification is shown in the
-Figures~\ref{figure-assert-composition-assert},~\ref{figure-assert-composition-next}
-and~\ref{figure-assert-composition-if} for the basic formal specification
-functions.
+Then:
 
-For when an \textit{assert} specification is on the right-hand side, see the
-composition rules for \textit{next} and \textit{if} specifications.
+\[
+  \begin{array}{rcl}
+    A(s \circ_{tail} s') & = & (\{q_0\} \cup Q_s \cup Q_{s'} - \{q_{0s}, q_{0s'}\}, T \cup (P_s \cup P_{s'}), q_0, F_{s'}) \\
+                     T   & = & \{(q_0, q', E) \, | \, (q, q', E) \in (T_s \cup T_{s'})\}
+  \end{array}
+\]
+
+An example is shown for two \textit{assert} specifications in
+Figure~\ref{figure-assert-composition-example}. The resulting automata is
+unnecessarily complex, and can be simplified to a smaller automata with the
+same semantics, as seen in Figure~\ref{figure-assert-composition-simplified}.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% Composition, assert o s, symbol-python-automata
 %%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure}[h!]
-	\begin{minipage}{0.25\textwidth}
+	\begin{minipage}{0.90\textwidth}
 		\centering
     \[
-      s = a \, \circ \, a'
+      \begin{array}{rcl}
+        A(a_E) & = & (\{q_x, q_y, f\}, \{(q_x, q_y, E), (q_x, f, \bar{E})\}, q_x, \{q_y\}) \\
+    A(a'_{E'}) & = & (\{q_z, q_w, f'\}, \{(q_z, q_w, E') ,(q_z, f', \bar{E'})\}, q_z, \{q_w\})
+      \end{array}
+    \]
+		\centering
+    \[
+      \begin{array}{rcl}
+        A(a_E \circ_{tail} a'_{E'}) & = & (Q, P, q_0, F) \\
+                                 Q & = & \{q_0, q_y, f, q_w, f'\} \\
+                                 P & = & \{(q_0, q_y, E), (q_0, f, \bar{E}), (q_0, q_w, E), (q_0, f', \bar{E'})\} \\
+                                 F & = & \{q_y, q_w\}
+      \end{array}
     \]
 	\end{minipage}
-  ~
-	\begin{minipage}{0.25\textwidth}
+
+  \bigskip
+
+	\begin{minipage}{0.45\textwidth}
 		\centering
     \begin{lstlisting}
 def s(event):
@@ -1359,103 +1376,51 @@ def s(event):
     \end{lstlisting}
 	\end{minipage}
   ~
-	\begin{minipage}{0.4\textwidth}
+	\begin{minipage}{0.45\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=2cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0) {$q_0$};
+			\node[state,accepting] (qy) [right of=q0] {$q_y$};
+			\node[state] (f) [below of=qy] {$f$};
+			\node[state,accepting] (qw) [below of=q0] {$q_w$};
+			\node[state] (f') [left of=qw] {$f'$};
+			\path
+				(q0) edge node {$E$} (qy)
+				(q0) edge node {$E'$} (qw)
+        (q0) edge node {$\bar{E}$} (f)
+        (q0) edge node {$\bar{E'}$} (f');
+		\end{tikzpicture}
+	\end{minipage}
+  \caption{An example showing a composition of an \textit{assert} specification
+    $a_E$ with another \textit{assert} specification $a'_{E'}$. Only the
+    resulting $A(a_E \, \circ_{tail} \, a'_{E'})$ automata is shown.}
+	\label{figure-assert-composition-example}
+\end{figure}
+
+\begin{figure}[h!]
+	\begin{minipage}{0.9\textwidth}
 		\centering
 		\begin{tikzpicture}[->,shorten >=1pt,node distance=3cm,on
       grid,auto,scale=.5,semithick,>=stealth]
 			\node[state,initial] (q0) {$q_0$};
 			\node[state,accepting] (q1) [right of=q0] {$q_1$};
+			\node[state] (fail) [below right of=q0] {fail};
 			\path
-				(q0) edge node {$E \wedge E'$} (q1);
+				(q0) edge node {$E \wedge E'$} (q1)
+        (q0) edge node {$\bar{E} \vee \bar{E'}$} (fail);
 		\end{tikzpicture}
 	\end{minipage}
-  \caption{A composition of an \textit{assert} specification and another
-    \textit{assert} specification.}
-	\label{figure-assert-composition-assert}
+  \caption{A simplified version of the automata from
+    Figure~\ref{figure-assert-composition-example}.}
+	\label{figure-assert-composition-simplified}
 \end{figure}
 
-
-\begin{figure}[h!]
-	\begin{minipage}{0.25\textwidth}
-		\centering
-    \[
-      s = a \, \circ \, n
-    \]
-	\end{minipage}
-  ~
-	\begin{minipage}{0.25\textwidth}
-		\centering
-    \begin{lstlisting}
-def s(event):
-  assert E
-  next(...)
-    \end{lstlisting}
-	\end{minipage}
-  ~
-	\begin{minipage}{0.4\textwidth}
-		\centering
-		\begin{tikzpicture}[->,shorten >=1pt,node distance=2.5cm,on
-      grid,auto,scale=.5,semithick,>=stealth]
-			\node[state,initial] (q0) {$q_0$};
-			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (cloud) [right of=q0]
-      {\textit{next} spec};
-			\path
-				(q0) edge node {$E$} (cloud);
-		\end{tikzpicture}
-	\end{minipage}
-  \caption{A composition of an \textit{assert} specification and an
-    \textit{next} specification, with the \textit{assert} specification on the
-    left-hand side.}
-	\label{figure-assert-composition-next}
-\end{figure}
-
-
-\begin{figure}[h!]
-	\begin{minipage}{0.25\textwidth}
-		\centering
-    \[
-      s = a \, \circ \, i
-    \]
-	\end{minipage}
-  ~
-	\begin{minipage}{0.25\textwidth}
-		\centering
-    \begin{lstlisting}
-def s(event):
-  assert E
-  if E':
-    ...
-    \end{lstlisting}
-	\end{minipage}
-  ~
-	\begin{minipage}{0.4\textwidth}
-		\centering
-		\begin{tikzpicture}[->,shorten >=1pt,node distance=3cm,on
-      grid,auto,scale=.5,semithick,>=stealth]
-			\node[state,initial] (q0) {$q_0$};
-			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (cloud) [right of=q0] {\textit{then} spec};
-			\node[state,accepting] (q1) [below right of=q0]	{$q_1$};
-			\path
-				(q0) edge node {$E \wedge E'$} (cloud)
-        (q0) edge node {$E$} (q1);
-		\end{tikzpicture}
-	\end{minipage}
-
-  \caption{A composition of an \textit{assert} specification and an \textit{if}
-    specification, with the \textit{assert} specification on the left-hand
-    side. The optional else clause have been left out, but if it were added, we
-    would draw another transition from $q_0$ to the automaton inserted at that
-    composition point labeled $E \wedge \bar{E'}$. $q_1$ is the state
-    representing the "fallthrough" of the if statement, at the \textit{tail}
-    composition point}
-	\label{figure-assert-composition-if}
-\end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%
 
 
-\clearpage
 \subsubsection{Composition of the \textit{next} specification}
 
 \textit{next} specifications have two composition points: one appropriately
@@ -1581,7 +1546,6 @@ def t(event):
 
 \subsubsection{Composition of the \textit{if} specification}
 
-
 \textit{if} specifications have three composition points: \textit{then}, which
 is required, and two optional, \textit{else} and \textit{tail}. Composition
 using the \textit{tail} composition point was described above.
@@ -1590,26 +1554,32 @@ In an \textit{if} specification $i_E$ we consider the expression $E$ as a guard
 for the \textit{then} composition point, $\bar{E}$ as a guard for the
 \textit{else} composition point.
 
-The composition then becomes : Let $s_1$ be the specification attached to the
-\textit{then} composition point and an optional $s_2$ attached to the
-\textit{else} composition point,
-and $A(s_1) = (Q_1, T_1 \cup R_1, q_{10}, F_1)$, $A(s_2) = (Q_2, T_2 \cup R_2,
+The composition then becomes essentially to add the guard $E$ to the labels of
+all initial transitions for the automata at the \textit{then} composition
+point, and $\bar{E}$ to the labels of all initial transitions fro the automata
+at the \textit{else} composition point. The guards, $E$ and $\bar{E}$ are added
+as parts of a conjunctive.
+
+Let $s_1$ be the specification attached to the \textit{then} composition point
+and an optional $s_2$ attached to the \textit{else} composition point, and
+$A(s_1) = (Q_1, T_1 \cup R_1, q_{10}, F_1)$, $A(s_2) = (Q_2, T_2 \cup R_2,
 q_{20}, F_2)$. Then:
 
 \[
   \begin{array}{rcl}
-  A((i_E \circ_{then} s_1) \circ_{else} s_2) & = & (Q \cup {q_0, q_1}, T_1 \cup T_2 \cup X \cup R, q_0, F \cup {q_1}) \\
+  A((i_E \circ_{then} s_1) \circ_{else} s_2) & = & (Q \cup \{q_0, q_1\}, T_1 \cup T_2 \cup X \cup R, q_0, F \cup \{q_1\}) \\
                                         T_1  & = & \{(q_0, q, E       \wedge E') \, | \, (q_{10}, q, E') \in T_1\} \\
                                         T_2  & = & \{(q_0, q, \bar{E} \wedge E') \, | \, (q_{20}, q, E') \in T_2\} \\
-                                         X   & = & \{(q_0, q_1, \text{disjunction of all labels in $T_1$ and $T_2$})\}
+                                         X   & = & \{(q_0, q_1, \Sigma)\}
   \end{array}
 \]
 
 If $s_2$ is left out, a dummy \textit{assert} specification of the form
-\texttt{assert True} can be inserted instead, which would mean $A(s_2) =
+\texttt{assert True} is inserted instead, which would mean $A(s_2) =
 (\{a,b\}, (a, b, \Sigma), a, \{b\})$.
 
-\todo{}
+The fall-through to the \textit{tail} composition point is represented by the
+$X$ transitions.
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% Composition, if o s, symbol-python-automata
