@@ -1214,7 +1214,7 @@ def if(event):
 	\label{figure-basic-formal-specification-functions}
 \end{figure}
 
-The label \textit{E} used in the assertion and if statement (lines 6 and 15)
+The label \textit{E} used in the assertion and if statement (lines 2 and 11)
 denotes any idempotent, immutable, valid Python boolean expression. See
 section~\ref{section-approach-semantics} for the semantics for this.
 
@@ -1250,7 +1250,7 @@ basic formal specifications, and all compositions thereof, are valid
 		\begin{tikzpicture}[->,shorten >=1pt,node distance=2.5cm,on
       grid,auto,scale=.5,semithick,>=stealth]
 			\node[state,initial] (q0)	{$q_0$};
-			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (cloud) [right of=q0] {\textit{next} spec};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (cloud) [right of=q0] {$A(next)$};
 			\path
 				(q0) edge node {$\Sigma$} (cloud);
 		\end{tikzpicture}
@@ -1264,8 +1264,8 @@ basic formal specifications, and all compositions thereof, are valid
 		\begin{tikzpicture}[->,shorten >=1pt,node distance=2.5cm,on
       grid,auto,scale=.5,semithick,>=stealth]
 			\node[state,initial] (q0)	{$q_0$};
-			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (then) [right of=q0] {\textit{then} spec};
-			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (else) [below of=then] {\textit{else} spec};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (then) [right of=q0] {$A(then)$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (else) [below of=then] {$A(else)$};
 			\node[state,accepting] (q1) [below of=q0]	{$q_1$};
 			\path
 				(q0) edge node {$E$} (then)
@@ -1275,8 +1275,9 @@ basic formal specifications, and all compositions thereof, are valid
     \subcaption{The \textit{if} specification.}
 	\end{minipage}
 
-  \caption{Sketches of  automata for the three basic formal specification
-    functions.}
+  \caption{Sketches of automata for the three basic formal specification
+    functions. The squiggles around $A(next)$, $A(then)$ and $A(else)$ denote
+    that some composition is required there.}
 	\label{figure-basic-formal-specification-automata}
 \end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -1287,6 +1288,10 @@ basic formal specifications, and all compositions thereof, are valid
 \subsection{Rules for Composition} \label{section-approach-composition}
 \lstset{language=Python,numbers=none}
 
+The idea is to use composition to build more complex and interesting
+specifications from the three basic formal specification functions. Composition
+is defined formally, which preserves the semantics from
+section~\ref{section-approach-semantics}.
 
 There are no implicit precedence rules for the $\circ$ composition operator;
 parentheses are required.
@@ -1303,7 +1308,7 @@ Figure~\ref{figure-basic-formal-specification-automata}, is defined as:
 
 \[
   \begin{array}{rcl}
-    A(a_E) & = & (\{q_0, q_1, f\}, \{(q_0, q_1, E),(q_0, f, \bar{E})\}, q_0, \{q_1\})
+    A(a_E) & = & (\{q_0, q_1, f\}, \{(q_0, q_1, E), (q_0, f, \bar{E})\}, q_0, \{q_1\})
   \end{array}
 \]
 
@@ -1320,21 +1325,25 @@ states of the two specifications, making the initial transitions of both
 specifications go out from the same state $q_0$, and merging the accepting
 states of the automata. Given two specifications $s$ and $s'$, where:
 
+\medskip
 \[
   \begin{array}{rcl}
     A(s) & = & (Q_s, T_s \cup P_s, q_{0s}, F_s) \\
    A(s') & = & (Q_{s'}, T_{s'} \cup P_{s'}, q_{0s'}, F_s \cup F_{s'})
   \end{array}
 \]
+\medskip
 
 Then:
 
+\medskip
 \[
   \begin{array}{rcl}
     A(s \circ_{tail} s') & = & (\{q_0\} \cup Q_s \cup Q_{s'} - \{q_{0s}, q_{0s'}\}, T \cup (P_s \cup P_{s'}), q_0, F_{s'}) \\
                      T   & = & \{(q_0, q', E) \, | \, (q, q', E) \in (T_s \cup T_{s'})\}
   \end{array}
 \]
+\medskip
 
 An example is shown for two \textit{assert} specifications in
 Figure~\ref{figure-assert-composition-example}. The resulting automata is
@@ -1381,15 +1390,15 @@ def s(event):
 		\begin{tikzpicture}[->,shorten >=1pt,node distance=2cm,on
       grid,auto,scale=.5,semithick,>=stealth]
 			\node[state,initial] (q0) {$q_0$};
-			\node[state,accepting] (qy) [right of=q0] {$q_y$};
-			\node[state] (f) [below of=qy] {$f$};
-			\node[state,accepting] (qw) [below of=q0] {$q_w$};
+			\node[state,accepting] (qy) [below right of=q0] {$q_y$};
+			\node[state] (f) [right of=qy] {$f$};
+			\node[state,accepting] (qw) [below left of=q0] {$q_w$};
 			\node[state] (f') [left of=qw] {$f'$};
 			\path
-				(q0) edge node {$E$} (qy)
-				(q0) edge node {$E'$} (qw)
-        (q0) edge node {$\bar{E}$} (f)
-        (q0) edge node {$\bar{E'}$} (f');
+        (q0) edge node [pos=0.3, below] {$E$} (qy)
+        (q0) edge node [pos=0.3, below] {$E'$} (qw)
+        (q0) edge node [above] {$\bar{E}$} (f)
+        (q0) edge node [pos=0.5, above] {$\bar{E'}$} (f');
 		\end{tikzpicture}
 	\end{minipage}
   \caption{An example showing a composition of an \textit{assert} specification
@@ -1399,20 +1408,26 @@ def s(event):
 \end{figure}
 
 \begin{figure}[h!]
-	\begin{minipage}{0.9\textwidth}
+	\begin{minipage}{0.45\textwidth}
+		\centering
+    \[
+      (\{q_0, q_1, f\}, \{(q_0, q_1, E \wedge E'), (q_0, f, \bar{E} \vee \bar{E'})\}, q_0, \{q_1\})
+    \]
+	\end{minipage}
+	\begin{minipage}{0.45\textwidth}
 		\centering
 		\begin{tikzpicture}[->,shorten >=1pt,node distance=3cm,on
       grid,auto,scale=.5,semithick,>=stealth]
 			\node[state,initial] (q0) {$q_0$};
 			\node[state,accepting] (q1) [right of=q0] {$q_1$};
-			\node[state] (fail) [below right of=q0] {fail};
+			\node[state] (f) [below right of=q0] {f};
 			\path
 				(q0) edge node {$E \wedge E'$} (q1)
-        (q0) edge node {$\bar{E} \vee \bar{E'}$} (fail);
+        (q0) edge node {$\bar{E} \vee \bar{E'}$} (f);
 		\end{tikzpicture}
 	\end{minipage}
   \caption{A simplified version of the automata from
-    Figure~\ref{figure-assert-composition-example}.}
+    Figure~\ref{figure-assert-composition-example}, semantically identical.}
 	\label{figure-assert-composition-simplified}
 \end{figure}
 
@@ -1488,7 +1503,7 @@ def s'(event):
       \begin{array}{rcl}
         (n \, \circ_{next} \, s_1) \, \circ_{tail} \, (n' \, \circ_{next} \, s_2)
         & = & n \, \circ_{next} \, t \\
-        t & = & (s_1 \, \circ_{tail} \, s_2)
+        t & = & s_1 \, \circ_{tail} \, s_2
       \end{array}
     \]
 	\end{minipage}
@@ -1579,7 +1594,7 @@ If $s_2$ is left out, a dummy \textit{assert} specification of the form
 (\{a,b\}, (a, b, \Sigma), a, \{b\})$.
 
 The fall-through to the \textit{tail} composition point is represented by the
-$X$ transitions.
+$X$ transition.
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% Composition, if o s, symbol-python-automata
