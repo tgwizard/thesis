@@ -1148,19 +1148,27 @@ simpler.
     formal specification functions, and it has no open composition points.
 
   \item Every formal specification function $s$ can be represented by a
-    nondeterministic finite automata $A(s) = (Q, P, q_0, F)$. Each such
-    automata consists of a set of states $Q$ and transitions $P$ between
-    them. An automata has one initial state $q_0$, where the verification
-    starts, and zero or more accepting states $F$.
+    nondeterministic finite automata $A(s) = (Q, P, q_0, S, F)$. Each such
+    automata consists of a set of states $Q$ and transitions $(a, b, E) \in P$
+    between them, where $a$ is the start state, $b$ is the end state, and $E$
+    is a \textit{label}. An automata has one initial state $q_0$, where the
+    verification starts, a set of \textit{success states} $S$ and a set of
+    \textit{fail states} $F$.
+
+  \item A state cannot be in both $S$ and $F$: $S \cap F = \emptyset$. Both
+    fails and success states are marked as \textit{accepting states} in the
+    automata below. Fail states are usually called \textit{fail}, $f$ etc.
 
   \item Each transition in the automata has a label - an expression - which is
     described in detail in section~\ref{section-approach-semantics}. The label
     is taken from the expressions in the python functions, as shown in
-    section~\ref{section-approach-python-subset}. The label $\Sigma$ denotes
-    "any and all expressions". The set of \textit{initial transitions} $(q_0,
-    q', E) \in T$, $T \subseteq P$ are especially important for composition,
-    see section~\ref{section-approach-composition}. $q'$ is the target state of
-    the transition, and $E$ is the transition's label.
+    section~\ref{section-approach-python-subset}. The label $\top$ denotes "any
+    and all expressions".
+
+  \item The set of \textit{initial transitions} $(q_0, q', E) \in T$, $T
+    \subseteq P$ are especially important for composition, see
+    section~\ref{section-approach-composition}. All initial transitions start
+    from $q_0$, go to some state $q'$, and have some label $E$.
 \end{itemize}
 
 Notation: Let $a_E$ be an \textit{assert} specification asserting the
@@ -1193,12 +1201,55 @@ state, $\delta$. $\alpha_i = (\lambda_i, \delta_i)$. Since the system model is
 an abstraction of an execution of the system (the target program), it is
 necessarily finite, but of arbitrary and possibly not-yet complete length.
 
+The system model can be viewed as a directed graph (actually, a tree), where
+all nodes but the last have an edge. The first edge is labeled $\alpha_0$, the
+second is labeled $\alpha_1$, etc. See Figure~\ref{figure-deduction-example}
+(a).
 
-\subsubsection{Rules of deduction}
 
-Qdo. Figure~\ref{figure-deduction-example}.
+\subsubsection{The product of a system model and a specification}
+
+In the same way that the system model can be viewed as a graph, so can a
+specification automata, see Figure~\ref{figure-deduction-example} (b).
+Specification automata are defined and discussed more in
+sections~\ref{section-approach-python-subset}
+and~\ref{section-approach-composition}. The
+product $Z = M \times C$ of a system model $M$ and a specification automata $C$
+is the main construct used to reason about the correctness of the
+specification. An example can be seen in Figure~\ref{figure-deduction-example}
+(c).
+
+The product $Z$ will be a tree of depth $min(depth(M), depth(C))$ (where the
+depth of a specification automata containing cycles is considered infinite).
+
+First, the two initial states of $M$ and $C$ are merged, resulting in the state
+$(q_0, s_0)$. All transitions $T$ from $q_0$ are merged with the (single)
+transition $(s_0, s_1, \alpha_0)$ from $s_0$. This results in a new set of
+transitions from $(q_0, s_0)$:
+
+\medskip
+\[
+  \begin{array}{rcl}
+    T' & = & \{(q_0, s_0), (q, s_1), \alpha_0 \models E) | (q_0, q, E) \in T \}
+  \end{array}
+\]
+\medskip
+
+This results in a set of second-level states, $Q_2 = \{(q, s_1) | (x, (q, s_1), E)
+\in T'\}$, and the process continues. The transitions from all specification
+states $q$ from $Q_2$ are merged with the transition $(s_1, s_2, \alpha_1)$
+from $s_1$, generating a set of third-level states, $Q_3$. This terminates when
+the depth of either the specification or the system model is reached.
+
+A state $(q, s)$ of the product is a success state if $q$ is a success state,
+and a fail state if $q$ is a fail state.
+
+See Figure~\ref{figure-deduction-example} for an example.
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% Deduction example
+%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure}[h!]
 	\begin{minipage}{0.9\textwidth}
 		\centering
@@ -1235,7 +1286,8 @@ Qdo. Figure~\ref{figure-deduction-example}.
 		\end{tikzpicture}
     \subcaption{The specification automata $C$. This automata is designed to
       accept system models that consists of one call to $a$ followed by a call to
-      $b$. After that, any events are accepted.}
+      $b$. After that, any events are accepted. $f$ is a fail state and $q_2$
+      is a success state.}
 	\end{minipage}
 
   \bigskip
@@ -1261,6 +1313,67 @@ Qdo. Figure~\ref{figure-deduction-example}.
   \caption{Deduction example.}
 	\label{figure-deduction-example}
 \end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\subsubsection{Rules of deduction}
+
+A product $Z$ of a system model and a specification can be used to determine
+whether that specification would accept, reject or equivocate the system model.
+Start at the root node of $Z$ and follow all edges which labels evaluate to
+true. If a fail state is reached, the system model violates the specification.
+If all traversals reaches success states, the system model satisfies the
+specification. If some traversal ends in a state that is neither a fail or a
+success state, the system model can, if it were extended, either satisfy or
+violate the specification. \todo{Is this possible? Doesn't the construction
+below guarantee no such cases?}
+
+
+\subsubsection{Evaluating specification-model product label expressions}
+
+The transition labels for the product of a specification automata and a system
+model is of the form (the second line is a expanded form of the first):
+
+\medskip
+\[
+  \begin{array}{rcl}
+    \alpha & \models & \text{expression $E$ over $\alpha$} \\
+    (\lambda, \delta) & \models & \text{expression $E$ over $\lambda$ and $\delta$}
+  \end{array}
+\]
+\medskip
+
+The expression $E$ is translated directly from Python expressions in the
+specification function. A sketch of the translation procedure, shown in
+Figure~\ref{figure-semantics-translation}, is quite simple. The resulting
+specification expression has the same semantics as the Python expression. In
+the same way that the Python specification operates on an event, a
+specification expression is evaluated to true ($\top$) or false ($\bot$) using
+the values of an event $\alpha$.
+
+\begin{figure}[h!]
+	\begin{minipage}{0.9\textwidth}
+		\centering
+    \begin{tabular}{r c l}
+      $PE(\texttt{True)})$ & = & $\top$ \\
+      $PE(\texttt{False)})$ & = & $\bot$ \\
+      $PE(\texttt{event.fn.x.called})$ & = & $\lambda = x$ \\
+      $PE(\texttt{event.fn.x.called == x})$ & = & $\lambda = x$ \\
+      $PE(\texttt{not a)})$ & = & $\neg PE(\texttt{a})$ \\
+      $PE(\texttt{a == b)})$ & = & $PE(\texttt{a}) = PE(\texttt{b})$ \\
+      $PE(\texttt{a != b)})$ & = & $PE(\texttt{a}) \neq PE(\texttt{b})$ \\
+      $PE(\texttt{a and b)})$ & = & $PE(\texttt{a}) \wedge PE(\texttt{b})$ \\
+      $PE(\texttt{a or b)})$ & = & $PE(\texttt{a}) \vee PE(\texttt{b})$ \\
+      $PE(\textit{Accesing a Python function or property})$ & = & \textit{The return value} \\
+    \end{tabular}
+  \end{minipage}
+  \caption{A sketch of the translation procedure of Python expressions to
+    specification expressions. $PE$ is the mapping function.}
+  \label{figure-semantics-translation}
+\end{figure}
+
 
 \subsection{Python subset for formal specification functions}
 \label{section-approach-python-subset}
@@ -1321,12 +1434,13 @@ basic formal specifications, and all compositions thereof, are valid
       grid,auto,scale=.5,semithick,>=stealth]
 			\node[state,initial] (q0) {$q_0$};
 			\node[state,accepting] (q1) [right of=q0] {$q_1$};
-			\node[state] (fail) [below right of=q0] {fail};
+      \node[state,accepting] (fail) [below right of=q0] {\textit{fail}};
 			\path
 				(q0) edge node {$E$} (q1)
         (q0) edge node {$\bar{E}$} (fail);
 		\end{tikzpicture}
-    \subcaption{The \textit{assert} specification.}
+    \subcaption{The \textit{assert} specification. $q_1$ is a success state;
+      \textit{fail} is a fail state.}
 	\end{minipage}
   ~
 	\begin{minipage}{0.45\textwidth}
@@ -1336,7 +1450,7 @@ basic formal specifications, and all compositions thereof, are valid
 			\node[state,initial] (q0)	{$q_0$};
 			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (cloud) [right of=q0] {$A(next)$};
 			\path
-				(q0) edge node {$\Sigma$} (cloud);
+				(q0) edge node {$\top$} (cloud);
 		\end{tikzpicture}
     \subcaption{The \textit{next} specification.}
 	\end{minipage}
@@ -1354,7 +1468,7 @@ basic formal specifications, and all compositions thereof, are valid
 			\path
 				(q0) edge node {$E$} (then)
         (q0) edge node {$\bar{E}$} (else)
-        (q0) edge node {$\Sigma$} (q1);
+        (q0) edge node {$\top$} (q1);
 		\end{tikzpicture}
     \subcaption{The \textit{if} specification.}
 	\end{minipage}
@@ -1389,19 +1503,18 @@ The \textit{assert} specifications are the only basic formal specification
 functions that are complete, without the need to compose them with other
 specifications. The automata $A(a_E)$ for a standalone \textit{assert}
 specification $a_E$, shown in
-Figure~\ref{figure-basic-formal-specification-automata}, is defined as:
+Figure~\ref{figure-basic-formal-specification-automata} (a), is defined as:
 
 \medskip
 \[
   \begin{array}{rcl}
-    A(a_E) & = & (\{q_0, q_1, f\}, \{(q_0, q_1, E), (q_0, f, \bar{E})\}, q_0, \{q_1\})
+    A(a_E) & = & (\{q_0, q_1, f\}, \{(q_0, q_1, E), (q_0, f, \bar{E})\}, q_0, \{q_1\}, \{f\})
   \end{array}
 \]
 \medskip
 
-$f$ (\textit{fail}) is a failure state, from which no transitions lead. If
-$\bar{E}$ is true, the failure state will be reached, and no further
-verification can be done.
+$f$ is a fail state, from which no transitions lead. If $\bar{E}$ is true, the
+fail state will be reached, and the specification has been violated.
 
 \textit{assert} specifications, and all formal specification functions, have at
 least one open composition point, the \textit{tail} composition point.
@@ -1415,8 +1528,8 @@ states of the automata. Given two specifications $s$ and $s'$, where:
 \medskip
 \[
   \begin{array}{rcl}
-    A(s) & = & (Q_s, T_s \cup P_s, q_{0s}, F_s) \\
-   A(s') & = & (Q_{s'}, T_{s'} \cup P_{s'}, q_{0s'}, F_s \cup F_{s'})
+    A(s) & = & (Q_s, T_s \cup P_s, q_{0s}, S_s, F_s) \\
+   A(s') & = & (Q_{s'}, T_{s'} \cup P_{s'}, q_{0s'}, S_{s'}, F_{s'})
   \end{array}
 \]
 \medskip
@@ -1426,7 +1539,7 @@ Then:
 \medskip
 \[
   \begin{array}{rcl}
-    A(s \circ_{tail} s') & = & (\{q_0\} \cup Q_s \cup Q_{s'} - \{q_{0s}, q_{0s'}\}, T \cup (P_s \cup P_{s'}), q_0, F_{s'}) \\
+    A(s \circ_{tail} s') & = & (\{q_0\} \cup Q_s \cup Q_{s'} - \{q_{0s}, q_{0s'}\}, T \cup (P_s \cup P_{s'}), q_0, S_s \cup S_{s'}, F_s \cup F_{s'}) \\
                      T   & = & \{(q_0, q', E) \, | \, (q, q', E) \in (T_s \cup T_{s'})\}
   \end{array}
 \]
@@ -1446,17 +1559,18 @@ same semantics, as seen in Figure~\ref{figure-assert-composition-simplified}.
 		\centering
     \[
       \begin{array}{rcl}
-        A(a_E) & = & (\{q_x, q_y, f\}, \{(q_x, q_y, E), (q_x, f, \bar{E})\}, q_x, \{q_y\}) \\
-    A(a'_{E'}) & = & (\{q_z, q_w, f'\}, \{(q_z, q_w, E') ,(q_z, f', \bar{E'})\}, q_z, \{q_w\})
+        A(a_E) & = & (\{q_x, q_y, f\}, \{(q_x, q_y, E), (q_x, f, \bar{E})\}, q_x, \{q_y\}, \{f\}) \\
+    A(a'_{E'}) & = & (\{q_z, q_w, f'\}, \{(q_z, q_w, E') ,(q_z, f', \bar{E'})\}, q_z, \{q_w\}, \{f'\})
       \end{array}
     \]
 		\centering
     \[
       \begin{array}{rcl}
-        A(a_E \circ_{tail} a'_{E'}) & = & (Q, P, q_0, F) \\
+        A(a_E \circ_{tail} a'_{E'}) & = & (Q, P, q_0, S, F) \\
                                  Q & = & \{q_0, q_y, f, q_w, f'\} \\
                                  P & = & \{(q_0, q_y, E), (q_0, f, \bar{E}), (q_0, q_w, E), (q_0, f', \bar{E'})\} \\
-                                 F & = & \{q_y, q_w\}
+                                 S & = & \{q_y, q_w\} \\
+                                 F & = & \{f, f'\}
       \end{array}
     \]
 	\end{minipage}
@@ -1478,19 +1592,20 @@ def s(event):
       grid,auto,scale=.5,semithick,>=stealth]
 			\node[state,initial] (q0) {$q_0$};
 			\node[state,accepting] (qy) [below right of=q0] {$q_y$};
-			\node[state] (f) [right of=qy] {$f$};
+			\node[state,accepting] (f) [right of=qy] {$f$};
 			\node[state,accepting] (qw) [below left of=q0] {$q_w$};
-			\node[state] (f') [left of=qw] {$f'$};
+			\node[state,accepting] (f') [left of=qw] {$f'$};
 			\path
-        (q0) edge node [pos=0.3, below] {$E$} (qy)
-        (q0) edge node [pos=0.3, below] {$E'$} (qw)
-        (q0) edge node [above] {$\bar{E}$} (f)
-        (q0) edge node [pos=0.5, above] {$\bar{E'}$} (f');
+        (q0) edge node [below left] {$E$} (qy)
+        (q0) edge node [below right] {$E'$} (qw)
+        (q0) edge node [above right] {$\bar{E}$} (f)
+        (q0) edge node [above left] {$\bar{E'}$} (f');
 		\end{tikzpicture}
 	\end{minipage}
   \caption{An example showing a composition of an \textit{assert} specification
     $a_E$ with another \textit{assert} specification $a'_{E'}$. Only the
-    resulting $A(a_E \, \circ_{tail} \, a'_{E'})$ automata is shown.}
+    resulting $A(a_E \, \circ_{tail} \, a'_{E'})$ automata is shown. $q_y$ and
+    $q_w$ are success states; $f$ and $f'$ are fail states.}
 	\label{figure-assert-composition-example}
 \end{figure}
 
@@ -1498,7 +1613,7 @@ def s(event):
 	\begin{minipage}{0.45\textwidth}
 		\centering
     \[
-      (\{q_0, q_1, f\}, \{(q_0, q_1, E \wedge E'), (q_0, f, \bar{E} \vee \bar{E'})\}, q_0, \{q_1\})
+      (\{q_0, q_1, f\}, \{(q_0, q_1, E \wedge E'), (q_0, f, \bar{E} \vee \bar{E'})\}, q_0, \{q_1\}, \{f\})
     \]
 	\end{minipage}
 	\begin{minipage}{0.45\textwidth}
@@ -1507,14 +1622,15 @@ def s(event):
       grid,auto,scale=.5,semithick,>=stealth]
 			\node[state,initial] (q0) {$q_0$};
 			\node[state,accepting] (q1) [right of=q0] {$q_1$};
-			\node[state] (f) [below right of=q0] {f};
+			\node[state,accepting] (f) [below right of=q0] {f};
 			\path
 				(q0) edge node {$E \wedge E'$} (q1)
         (q0) edge node {$\bar{E} \vee \bar{E'}$} (f);
 		\end{tikzpicture}
 	\end{minipage}
   \caption{A simplified version of the automata from
-    Figure~\ref{figure-assert-composition-example}, semantically identical.}
+    Figure~\ref{figure-assert-composition-example}, semantically identical. The
+  success states have been merged into $q_1$, and the fail states into $f$.}
 	\label{figure-assert-composition-simplified}
 \end{figure}
 
@@ -1531,13 +1647,13 @@ is optional. Composition using the \textit{tail} composition point was
 described above.
 
 Composition with the \textit{next} composition point, $n \, \circ_{next} \, s$
-with $A(s) = (Q, P, q_0, F)$ is as follows:
+with $A(s) = (Q, P, q_0, S, F)$ is as follows:
 
 \medskip
 \[
   \begin{array}{rcl}
-    A(n \circ_{next} s) & = & (\{q_0'\} \cup Q, T \cup P, q_0', F) \\
-               T  & = & \{(q_0', q_0, \Sigma)\}
+    A(n \circ_{next} s) & = & (\{q_0'\} \cup Q, T \cup P, q_0', S, F) \\
+               T  & = & \{(q_0', q_0, \top)\}
   \end{array}
 \]
 \medskip
@@ -1576,12 +1692,11 @@ def s'(event):
 			\node[state,initial] (q0')	{$q_0'$};
 			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (cloud) [right of=q0'] {$A(s)$};
 			\path
-				(q0') edge node {$\Sigma$} (cloud);
+				(q0') edge node {$\top$} (cloud);
 		\end{tikzpicture}
 	\end{minipage}
   \caption{A composition of a \textit{next} specification and an
-    \textit{assert} specification, with the \textit{next} specification on the
-    left-hand side.}
+    \textit{assert} specification, using the \textit{next} composition point.}
 	\label{figure-next-composition-s}
 \end{figure}
 
@@ -1624,8 +1739,8 @@ def t(event):
 			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (s1) [right of=q0] {$A(s_1)$};
 			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (s2) [below right of=q0] {$A(s_2)$};
 			\path
-				(q0) edge node {$\Sigma$} (s1)
-				(q0) edge node {$\Sigma$} (s2);
+				(q0) edge node {$\top$} (s1)
+				(q0) edge node {$\top$} (s2);
 		\end{tikzpicture}
 
     \bigskip
@@ -1636,7 +1751,7 @@ def t(event):
 			\node[state,initial] (q0) {$q_0$};
 			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (t) [right of=q0] {$A(t)$};
 			\path
-				(q0) edge node {$\Sigma$} (t);
+				(q0) edge node {$\top$} (t);
 		\end{tikzpicture}
 	\end{minipage}
   \caption{The associativity of the \textit{next} composition point in a
@@ -1666,26 +1781,25 @@ as parts of a conjunctive.
 
 Let $s_1$ be the specification attached to the \textit{then} composition point
 and an optional $s_2$ attached to the \textit{else} composition point, and
-$A(s_1) = (Q_1, T_1 \cup R_1, q_{10}, F_1)$, $A(s_2) = (Q_2, T_2 \cup R_2,
-q_{20}, F_2)$. Then:
+$A(s_1) = (Q_1, T_1 \cup R_1, q_{10}, S_1, F_1)$, $A(s_2) = (Q_2, T_2 \cup R_2,
+q_{20}, S_2, F_2)$. Then:
 
 \medskip
 \[
   \begin{array}{rcl}
-  A((i_E \circ_{then} s_1) \circ_{else} s_2) & = & (Q \cup \{q_0, q_1\}, T_1 \cup T_2 \cup X \cup R, q_0, F \cup \{q_1\}) \\
-                                        T_1  & = & \{(q_0, q, E       \wedge E') \, | \, (q_{10}, q, E') \in T_1\} \\
-                                        T_2  & = & \{(q_0, q, \bar{E} \wedge E') \, | \, (q_{20}, q, E') \in T_2\} \\
-                                         X   & = & \{(q_0, q_1, \Sigma)\}
+  A((i_E \circ_{then} s_1) \circ_{else} s_2) & = & (Q, P, q_0, S, F) \\
+                                           Q & = & Q_1 \cup Q_2 \cup \{q_0\} - \{q_{10}, q_{20}\} \\
+                                           P & = & T'_1 \cup T'_2 \cup R_1 \cup R_2 \\
+                                        T'_1 & = & \{(q_0, q, E       \wedge E') \, | \, (q_{10}, q, E') \in T_1\} \\
+                                        T'_2 & = & \{(q_0, q, \bar{E} \wedge E') \, | \, (q_{20}, q, E') \in T_2\} \\
+                                           S & = & S_1 \cup S_2 \\
+                                           F & = & F_1 \cup F_2
   \end{array}
 \]
 \medskip
 
-If $s_2$ is left out, a dummy \textit{assert} specification of the form
-\texttt{assert True} is inserted instead, which would mean $A(s_2) =
-(\{a,b\}, (a, b, \Sigma), a, \{b\})$.
-
-The fall-through to the \textit{tail} composition point is represented by the
-$X$ transition.
+If the \textit{else} composition point is left out, then $Q_2 = T_2 = R_2 = S_2
+= F_2 = \emptyset$.
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% Composition, if o s, symbol-python-automata
@@ -1731,12 +1845,11 @@ start up sequence for, and structure of, Django applications.
 
 \subsection{Anatomy of a Django Application}
 
-A Django application follows the Model-View-Controller
-pattern\footnote{\todo{Link somewhere?}}, or as they call it, the
-Model-Template-View pattern. The model is a representation of the data used by
-the program, and the templates are the layer that constructs the display for
-the user. The view links the two together, fetching the correct models for
-specific requests, and then delegating to the appropriate templates.
+A Django application follows the Model-View-Controller pattern, or as they call
+it, the Model-Template-View pattern. The model is a representation of the data
+used by the program, and the templates are the layer that constructs the
+display for the user. The view links the two together, fetching the correct
+models for specific requests, and then delegating to the appropriate templates.
 
 Application-specific configuration for Django programs are stored in settings
 modules, which are ordinary Python files. These contain settings for database
