@@ -174,8 +174,8 @@ use of runtime verification for checking the correctness of programs.
 \section{Disposition}
 
 The first time an important concept is introduced it is written in
-\textit{italics}. These words are briefly explained in
-Appendix~\ref{appendix-dictionary}.
+\textit{italics}. These words are, if not explained in the text, have a brief
+description in Appendix~\ref{appendix-dictionary}.
 
 The rest of this report is structured as follows.
 Chapter~\ref{chapter-background} gives a
@@ -1095,7 +1095,7 @@ specification needs some sort of mathematical representation. This is often
 some sort of automata. A model of the system, a system model, is also required.
 In this case it is the events passed to the specification, with their
 associated data (arguments, object state, global state, etc.). This is
-described in more detail in section~\ref{section-approach-semantics}
+described in more detail in Section~\ref{section-approach-semantics}
 
 A seemingly insurmountable problem quickly arises when attempting to give a
 such a mathematical representation to the specifications described in
@@ -1109,7 +1109,7 @@ documents for new features, informally describing their rationales and how they
 work.}.
 
 One way to go around this is to define automata for a subset of Python, which
-we do in section~\ref{section-approach-python-subset}. Specifications written
+we do in Section~\ref{section-approach-python-subset}. Specifications written
 in this subset will have a formal semantics, and there will be a way to reason
 with them mathematically.
 
@@ -1121,9 +1121,9 @@ simpler.
 
 \begin{itemize}
   \item A \textit{formal specification function} is one of three basic
-    functions described in section~\ref{section-approach-python-subset}, or a
+    functions described in Section~\ref{section-approach-python-subset}, or a
     composition of them as described in
-    section~\ref{section-approach-composition}.
+    Section~\ref{section-approach-composition}.
 
   \item Formal specification functions have \textit{composition points} where
     they can be combined with other formal specification functions. A formal
@@ -1160,14 +1160,14 @@ simpler.
     automata below. Fail states are usually called \textit{fail}, $f$ etc.
 
   \item Each transition in the automata has a label - an expression - which is
-    described in detail in section~\ref{section-approach-semantics}. The label
+    described in detail in Section~\ref{section-approach-semantics}. The label
     is taken from the expressions in the python functions, as shown in
-    section~\ref{section-approach-python-subset}. The label $\top$ denotes "any
+    Section~\ref{section-approach-python-subset}. The label $\top$ denotes "any
     and all expressions".
 
   \item The set of \textit{initial transitions} $(q_0, q', E) \in T$, $T
     \subseteq P$ are especially important for composition, see
-    section~\ref{section-approach-composition}. All initial transitions start
+    Section~\ref{section-approach-composition}. All initial transitions start
     from $q_0$, go to some state $q'$, and have some label $E$.
 \end{itemize}
 
@@ -1184,7 +1184,7 @@ subscript can be omitted if irrelevant to the task at hand.
 
 The semantics for the specifications as expressed in their Python format, even
 composed only from the basic specification functions in
-section~\ref{section-approach-python-subset}, is quite straightforward. The
+Section~\ref{section-approach-python-subset}, is quite straightforward. The
 trick is to preserve this semantics when transforming and the specifications
 into automata, while at the same time allowing for mathematical reasoning to
 deduce the correctness of the specifications. This requires two parts. First, a
@@ -1413,7 +1413,7 @@ def if(event):
 
 The label \textit{E} used in the assertion and if statement (lines 2 and 11)
 denotes any idempotent, immutable, valid Python boolean expression. See
-section~\ref{section-approach-semantics} for the semantics for this.
+Section~\ref{section-approach-semantics} for the semantics for this.
 
 The three basic formal specification functions correspond to simple,
 nondeterministic, finite automata, which are depicted in
@@ -1490,7 +1490,7 @@ basic formal specifications, and all compositions thereof, are valid
 The idea is to use composition to build more complex and interesting
 specifications from the three basic formal specification functions. Composition
 is defined formally, which preserves the semantics from
-section~\ref{section-approach-semantics}.
+Section~\ref{section-approach-semantics}.
 
 There are no implicit precedence rules for the $\circ$ composition operator;
 parentheses are required.
@@ -1918,7 +1918,7 @@ specifications already written in formal languages. The fact that the chosen
 programming language, Python, does not have a formal semantics defined makes the
 task quite a bit larger.
 
-The formal foundation given in section~\ref{section-approach-formal-foundation}
+The formal foundation given in Section~\ref{section-approach-formal-foundation}
 is thus for a small subset of Python, which makes the math easier, but the
 resulting semantics less interesting.
 
@@ -1972,6 +1972,14 @@ verification.
 %====== Appendices
 %================================================
 
-% no appendices yet
+\appendix
+\addappheadtotoc
+
+%\pagestyle{newchap}
+\chapter{Dictionary} \label{appendix-dictionary}
+
+\begin{itemize}
+  \item Qdo.
+\end{itemize}
 
 \end{document}
