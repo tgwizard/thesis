@@ -1174,11 +1174,95 @@ subscript can be omitted if irrelevant to the task at hand.
 
 \subsection{Semantics} \label{section-approach-semantics}
 
-Qdo.
+The semantics for the specifications as expressed in their Python format, even
+composed only from the basic specification functions in
+section~\ref{section-approach-python-subset}, is quite straightforward. The
+trick is to preserve this semantics when transforming and the specifications
+into automata, while at the same time allowing for mathematical reasoning to
+deduce the correctness of the specifications. This requires two parts. First, a
+description of the system model. Second, a set of rules to deduce whether a
+specification would accept or reject an instance of such a model.
 
 
+\subsubsection{The system model}
 
-\subsection{Python Subset for Formal Specification Functions}
+The system model is quite simple. It consists of a sequence of \textit{events},
+$S = (\alpha_0, \alpha_1, \dots, \alpha_n)$, each of which is a two-part
+structure: The function called $\lambda$, and the associated arguments and
+state, $\delta$. $\alpha_i = (\lambda_i, \delta_i)$. Since the system model is
+an abstraction of an execution of the system (the target program), it is
+necessarily finite, but of arbitrary and possibly not-yet complete length.
+
+
+\subsubsection{Rules of deduction}
+
+Qdo. Figure~\ref{figure-deduction-example}.
+
+
+\begin{figure}[h!]
+	\begin{minipage}{0.9\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=3cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (s0) {$s_0$};
+      \node[state] (s1) [right of=s0] {$s_1$};
+      \node[state] (s2) [right of=s1] {$s_2$};
+      \node[state] (s3) [right of=s2] {$s_3$};
+			\path
+				(s0) edge node {$\alpha_0 = (a, \epsilon)$} (s1)
+				(s1) edge node {$\alpha_1 = (b, \epsilon)$} (s2)
+				(s2) edge node {$\alpha_2$} (s3);
+		\end{tikzpicture}
+    \subcaption{The system model $M$ consisting of two function calls, to $a$
+    and $b$, and an unspecified event $\alpha_2$.}
+	\end{minipage}
+
+  \bigskip
+
+	\begin{minipage}{0.90\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=3cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0) {$q_0$};
+      \node[state] (q1) [below right of=q0] {$q_1$};
+      \node[state,accepting] (f) [below left of=q0] {$f$};
+      \node[state,accepting] (q2) [below right of=q1] {$q_2$};
+			\path
+        (q0) edge node {$\lambda = a$} (q1)
+        (q0) edge node [above left] {$\lambda \neq a$} (f)
+        (q1) edge node {$\lambda = b$} (q2)
+        (q1) edge node [above] {$\lambda \neq b$} (f);
+		\end{tikzpicture}
+    \subcaption{The specification automata $C$. This automata is designed to
+      accept system models that consists of one call to $a$ followed by a call to
+      $b$. After that, any events are accepted.}
+	\end{minipage}
+
+  \bigskip
+
+	\begin{minipage}{0.90\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=3cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0) {$q_0,s_0$};
+      \node[state] (q1) [below right of=q0] {$q_1,s_1$};
+      \node[state,accepting] (f1) [below left of=q0] {$f_1,s_1$};
+      \node[state,accepting] (q2) [below right of=q1] {$q_2,s_2$};
+      \node[state,accepting] (f2) [below left of=q1] {$f_2,s_2$};
+			\path
+        (q0) edge node {$(a, \epsilon) \models \lambda = a$} (q1)
+        (q0) edge node [above left] {$(a, \epsilon) \models \lambda \neq a$} (f1)
+        (q1) edge node {$(b, \epsilon) \models \lambda = b$} (q2)
+        (q1) edge node [above left] {$(b, \epsilon) \models \lambda \neq b$} (f2);
+		\end{tikzpicture}
+    \subcaption{The product of the model and the specification, $M \times C$.}
+	\end{minipage}
+
+  \caption{Deduction example.}
+	\label{figure-deduction-example}
+\end{figure}
+
+\subsection{Python subset for formal specification functions}
 \label{section-approach-python-subset}
 \lstset{language=Python,numbers=left}
 
@@ -1285,7 +1369,8 @@ basic formal specifications, and all compositions thereof, are valid
 %%%%%%%%%%%%%%%%%%%%%%%%
 
 
-\subsection{Rules for Composition} \label{section-approach-composition}
+\subsection{Transforming specifications to automata and rules for composition}
+\label{section-approach-composition}
 \lstset{language=Python,numbers=none}
 
 The idea is to use composition to build more complex and interesting
@@ -1306,11 +1391,13 @@ specifications. The automata $A(a_E)$ for a standalone \textit{assert}
 specification $a_E$, shown in
 Figure~\ref{figure-basic-formal-specification-automata}, is defined as:
 
+\medskip
 \[
   \begin{array}{rcl}
     A(a_E) & = & (\{q_0, q_1, f\}, \{(q_0, q_1, E), (q_0, f, \bar{E})\}, q_0, \{q_1\})
   \end{array}
 \]
+\medskip
 
 $f$ (\textit{fail}) is a failure state, from which no transitions lead. If
 $\bar{E}$ is true, the failure state will be reached, and no further
@@ -1446,12 +1533,14 @@ described above.
 Composition with the \textit{next} composition point, $n \, \circ_{next} \, s$
 with $A(s) = (Q, P, q_0, F)$ is as follows:
 
+\medskip
 \[
   \begin{array}{rcl}
     A(n \circ_{next} s) & = & (\{q_0'\} \cup Q, T \cup P, q_0', F) \\
                T  & = & \{(q_0', q_0, \Sigma)\}
   \end{array}
 \]
+\medskip
 
 This is illustrated in Figure~\ref{figure-next-composition-s}.
 
@@ -1580,6 +1669,7 @@ and an optional $s_2$ attached to the \textit{else} composition point, and
 $A(s_1) = (Q_1, T_1 \cup R_1, q_{10}, F_1)$, $A(s_2) = (Q_2, T_2 \cup R_2,
 q_{20}, F_2)$. Then:
 
+\medskip
 \[
   \begin{array}{rcl}
   A((i_E \circ_{then} s_1) \circ_{else} s_2) & = & (Q \cup \{q_0, q_1\}, T_1 \cup T_2 \cup X \cup R, q_0, F \cup \{q_1\}) \\
@@ -1588,6 +1678,7 @@ q_{20}, F_2)$. Then:
                                          X   & = & \{(q_0, q_1, \Sigma)\}
   \end{array}
 \]
+\medskip
 
 If $s_2$ is left out, a dummy \textit{assert} specification of the form
 \texttt{assert True} is inserted instead, which would mean $A(s_2) =
