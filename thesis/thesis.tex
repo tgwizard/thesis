@@ -126,8 +126,8 @@ testing}, in which small modules of a program or system are tested
 individually.
 
 While testing is popular and often works well, it is incomplete and informal,
-and thus yields no proof that the program does what it should - i.e. follows
-its specification. Formal verification techniques, such as theorem proving,
+and thus yields no proof that the program does what it should -- i.e. follows
+its specification. Formal verification techniques, such as theorem proving and
 model checking (and its bounded variant), can give such proofs. However, they
 suffer from complexity problems (\textit{incompleteness},
 \textit{undecidability}) and practical issues, such as the so-called
@@ -135,8 +135,8 @@ suffer from complexity problems (\textit{incompleteness},
 
 A relatively new approach in this area is runtime verification, in which the
 program \textit{execution} is verified against its specification. With the
-specification written in a suitably formal language, the program can be given a
-mathematical proof that its specification is followed.
+specification written in a suitably formal language, the execution can be given
+a mathematical proof that it follows the program's specification.
 
 
 \section{Problem Statement} \label{section-problem-statement}
@@ -174,14 +174,14 @@ use of runtime verification for checking the correctness of programs.
 \section{Disposition}
 
 The first time an important concept is introduced it is written in
-\textit{italics}. These words are, if not explained in the text, have a brief
-description in Appendix~\ref{appendix-dictionary}.
+\textit{italics}. If such a concept is not explained in the text, it has a
+brief description in the Dictionary, see Appendix~\ref{appendix-dictionary}.
 
-The rest of this report is structured as follows.
-Chapter~\ref{chapter-background} gives a
-background to the subject of verifying program correctness.
-Chapter~\ref{chapter-previous-research} continues
-by describing the previous research on runtime verification and the syntax of
+The rest of this report is structured as follows. This chapter gives an
+introduction to the report and the problem statement.
+Chapter~\ref{chapter-background} gives a background to the subject of verifying
+program correctness. Chapter~\ref{chapter-previous-research} continues by
+describing the previous research on runtime verification and the syntax of
 specification languages. It also gives an overview of the current ideas in unit
 testing.
 
@@ -189,9 +189,8 @@ Chapter~\ref{chapter-approach} describes the approach this work takes to
 solving the problem stated in Section~\ref{section-problem-statement}. It
 describes the syntax, instrumentation and verification techniques used in a
 proof-of-concept implementation, and gives a formal foundation to a subset of
-the syntax. Chapter~\ref{chapter-evaluation} then gives an evaluation of this
-work...
-\todo{}.
+the syntax. Chapter~\ref{chapter-evaluation} then gives an evaluation of
+applying this work on a real-life web application.
 
 Conclusions and a discussion of this and future work is done in
 Chapter~\ref{chapter-conclusions}.
@@ -219,7 +218,7 @@ This chapter gives a short overview of the background to the concepts of this
 report. It starts with laying out what we mean by proving the correctness of
 programs in Section~\ref{section-proving-correctness}. Section~\ref{section-rv}
 describes runtime verification and its place in proving correctness. And
-finally, Section~\ref{section-testing} discusses testing - syntax, style and
+finally, Section~\ref{section-testing} discusses testing -- syntax, style and
 other concepts.
 
 
@@ -365,7 +364,7 @@ automatically generate tests.
 When discussing testing, and unit testing in particular, we must mention the
 concept of test-driven development (TDD). Also made popular by XP, it consists
 of the cycle: (1) write a failing test, (2) make it pass by writing the
-simplest code you can, and (3) refactor - rewrite the code so that it becomes
+simplest code you can, and (3) refactor -- rewrite the code so that it becomes
 good. Tests here play the part of specifications for the units of the program.
 
 
@@ -460,12 +459,12 @@ Figure~\ref{figure-ltl}.
 
 In \cite{bauer06monitoring} Bauer et al.\ introduce a three-valued boolean
 semantics for LTL, calling it LTL$_3$, which takes the values (true, false and
-?).  This logic is arguably more suited for the finite nature of runtime
+?). This logic is arguably more suited for the finite nature of runtime
 verification, whereas LTL was designed with infinite traces in mind. The
 semantics of LTL$_3$ reflect the fact that when verifying runtime verification
 specifications, the result can not only be that the specification is satisfied
 or violated; it can be inconclusive as well. For satisfied or violated
-specifications, no further verification is required - we already know the
+specifications, no further verification is required -- we already know the
 outcome. For inconclusive results, we need to continue with the verification,
 as, with future events, the result could change into either satisfied or
 violated.
@@ -524,13 +523,13 @@ require you to manually mark code for verification, and those that inject the
 verification code from external specifications.
 
 Rosuenblum \cite{rosenblum95practicalassertions} uses specially annotated
-comments, written directly in the code. Bodden \cite{bodden05efficientrv} uses
-Java annotations, which are written at function and variable definitions, to
-mark code for verification. The programming language Eiffel has full language
-support for Design by Contract, with pre- and post-conditions, invariants, and
-more. These are written in direct proximity to the code to be verified. For
-simple cases it is common to write assertions in the program
-\cite{bartetzko01jass}.
+comments, written directly in the code. Bodden
+\cite{bodden05efficientrv,bodden04lightweightltl} uses Java annotations, which
+are written at function and variable definitions, to mark code for
+verification. The programming language Eiffel has full language support for
+Design by Contract, with pre- and post-conditions, invariants, and more. These
+are written in direct proximity to the code to be verified. For simple cases it
+is common to write assertions in the program \cite{bartetzko01jass}.
 
 Other approaches, such as the ones taken by Jalili et al.\ in
 \cite{jalili07rverl} and Barringer et al.\ in \cite{barringer03eagle}, use
@@ -541,7 +540,7 @@ external specification files.
 \section{Verification against Specifications} \label{section-verification}
 
 Specifications for runtime verification are written so that programs can be
-verified against them - to see whether they follow the specification, or
+verified against them -- to see whether they follow the specification, or
 violate parts of it.
 
 There are several ways to verify a program against its specification. A common
@@ -731,6 +730,7 @@ Ludibrio\footnote{\texttt{https://github.com/nsigustavo/ludibrio/}} for Python.
 
 
 
+
 %================================================
 %====== Chapter 4, Approach
 %================================================
@@ -773,8 +773,8 @@ online\footnote{\texttt{https://github.com/tgwizard/pythonrv}}.
 Here follows some definition that will be used in the following sections.
 
 \begin{itemize}
-	\item A \textit{specification} is an construct that determines the correct
-		behaviour of a program. It could be a document, describing the programs
+  \item A \textit{specification} is a construct that determines the correct
+    behaviour of a program. It could be a document, describing the programs
 		functionality, or a set of inputs and outputs, describing the correct
 		results of the program's computation on that set. It could be a reference
 		implementation\footnote{For instance, the only specification for python is
@@ -796,6 +796,7 @@ Here follows some definition that will be used in the following sections.
 		monitored are called \textit{monitorees}.
 \end{itemize}
 
+
 \subsection{Choice of Language}
 
 During the development of this proof-of-concept, the biggest factor in deciding
@@ -810,6 +811,7 @@ would be a plus. More on this in Chapter~\ref{chapter-evaluation}.
 Python\footnote{\texttt{http://www.python.org}}, among several languages, fits
 these criteria, and was chosen as the implementation language.
 
+
 \section{Syntax} \label{section-approach-syntax}
 
 The canonical framework for doing unit testing in Python is the
@@ -817,7 +819,7 @@ The canonical framework for doing unit testing in Python is the
 Not much development has happened on it in the last years. Many new frameworks
 have have spawned, such as PyUnit, Nose and py.test. They build upon the style
 of unittest and mostly add new miscellaneous features, such as better test
-reporting. The original structure of the unit tests is still prevalent -
+reporting. The original structure of the unit tests is still prevalent --
 unittest builds on the xUnit style of unit testing, discussed in
 Section~\ref{section-unit-testing}.
 
@@ -902,7 +904,7 @@ element, which can also be accessed as \texttt{event.prev}.
 		functions, \texttt{foo}, \texttt{bar} and \texttt{baz}, and makes sure that
 		\texttt{foo} is called first, then any number calls to \texttt{bar} with
 		the first argument as \texttt{True}, and then finally a call to
-	\texttt{bar}. After that, any calls are allowed - the specification function
+	\texttt{bar}. After that, any calls are allowed -- the specification function
 will not be used in verification any longer.}
 	\label{figure-syntax-example-3}
 \end{figure}
@@ -914,12 +916,12 @@ functions (possibly implemented as closures or lambdas) to be executed when the
 next event occurs.
 
 On line 9 the function \texttt{followup} is added to be executed on the next
-event. Since \texttt{followup} is added in this way - as a ``oneshot''
-specification function - it needs to add itself using \texttt{next} for
+event. Since \texttt{followup} is added in this way -- as a ``oneshot''
+specification function -- it needs to add itself using \texttt{next} for
 verification on subsequent events. This is done on line 22.
 
 Figure~\ref{figure-syntax-example-3} also shows how a specification function
-can turn its verification off - i.e. unsubscribe from future events.
+can turn its verification off -- i.e. unsubscribe from future events.
 \texttt{event.finish} and \texttt{event.success} are essentially the same, and
 unsubscribes without further errors. \texttt{event.failure} can be thought of
 as a combination of \texttt{event.finish} and \texttt{assert False} (which
@@ -980,7 +982,7 @@ it.
 monitored, and then the specification function itself.
 
 In Python, almost all\footnotemark\ functions belong to a container of some
-sort - a class, an object, or a module. In
+sort -- a class, an object, or a module. In
 Figure~\ref{figure-function-decorator-usages} the functions \texttt{func\_a}
 and \texttt{func\_b} belong to the module \texttt{test} (the module's name is
 the same as that of the file containing the code). These containers are
@@ -989,10 +991,10 @@ pairs, where the keys in this case are function names and the values are
 objects representing the function code. (There are other types of values in
 these containers as well, which we can ignore).
 
-\footnotetext[5]{This is not true of closures - function defined inside other
-	functions. These functions cannot be directly referenced or modified from
-	outside the defining function. \textit{pythonrv} does not (as of writing)
-	support monitoring of closures.}
+\footnotetext[5]{This is not true of closures -- functions defined inside other
+  functions. These functions cannot be directly referenced or modified from
+  outside the defining function. \textit{pythonrv} does not (as of writing)
+  support monitoring of closures.}
 
 The instrumentation in \textit{pythonrv} works as follows. First, a wrapper
 function is defined for each function to be monitored (for each monitoree).
@@ -1088,30 +1090,31 @@ the running program.
 
 \section{Formal Foundation} \label{section-approach-formal-foundation}
 
-The purpose of a formal foundation for the specifications is so that the
-specification writer can reason mathematically about the specification, showing
-their semantical correctness using proof techniques. To do this, the
-specification needs some sort of mathematical representation. This is often
-some sort of automata. A model of the system, a system model, is also required.
-In this case it is the events passed to the specification, with their
-associated data (arguments, object state, global state, etc.). This is
-described in more detail in Section~\ref{section-approach-semantics}
+The purpose of a formal foundation for a verification approach is so that the
+specification writer can reason mathematically about her specifications,
+showing their semantical correctness using proof techniques. To do this, the
+specifications used for verification need some sort of mathematical
+representation. Different kinds of automata are often used. A model of the
+system, a system model, is also required. In this case the system model is the
+sequence of that occur during the program's execution, with their associated
+data (arguments, object state, global state, etc.). This is described in more
+detail in Section~\ref{section-approach-semantics}
 
-A seemingly insurmountable problem quickly arises when attempting to give a
-such a mathematical representation to the specifications described in
-Section~\ref{section-approach-syntax}. The specifications are written as
-ordinary Python functions and, as such, are difficult to formalize. The Python
-programming language is rather informal - one implementation of it, CPython,
-serves as the reference implementation. There are no other specifications or
-formal semantics for Python\footnote{The development of Python is organized
-  mainly through the Python Enhancement Proposal (PEP) process. PEPs are design
-documents for new features, informally describing their rationales and how they
-work.}.
+A seemingly insurmountable problem quickly arises when attempting to give such
+a mathematical representation to the \textit{pythonrv} specifications described
+in Section~\ref{section-approach-syntax}. \textit{pythonrv} specifications are
+written as ordinary Python functions and, as such, are difficult to formalize.
+The Python programming language is rather informal - one implementation of it,
+CPython, serves as the reference implementation. There are no other
+specifications or formal semantics for Python\footnote{The development of
+  Python is organized mainly through the Python Enhancement Proposal (PEP)
+  process. PEPs are design documents for new features, informally describing
+their rationales and how they work.}.
 
-One way to go around this is to define automata for a subset of Python, which
-we do in Section~\ref{section-approach-python-subset}. Specifications written
-in this subset will have a formal semantics, and there will be a way to reason
-with them mathematically.
+One way to go around this is to define formal semantics for a subset of Python,
+which is done in the following sections. This leads to a way to reason
+mathematically with and about specifications written in this subset -- see
+Section~\ref{section-approach-python-subset}.
 
 
 \subsection{Definitions and Terms}
@@ -1128,7 +1131,7 @@ simpler.
   \item Formal specification functions have \textit{composition points} where
     they can be combined with other formal specification functions. A formal
     specification function can have zero or more composition points. A
-    composition point can be \textit{open} or \textit{closed} - open
+    composition point can be \textit{open} or \textit{closed} -- open
     composition points can be used in composition, while closed have already
     been used. Composition points can be \textit{required} or
     \textit{optional}, where optional is the default.
@@ -1159,9 +1162,9 @@ simpler.
     fails and success states are marked as \textit{accepting states} in the
     automata below. Fail states are usually called \textit{fail}, $f$ etc.
 
-  \item Each transition in the automata has a label - an expression - which is
-    described in detail in Section~\ref{section-approach-semantics}. The label
-    is taken from the expressions in the python functions, as shown in
+  \item Each transition in the automata has a label -- an expression -- which
+    is described in detail in Section~\ref{section-approach-semantics}. The
+    label is taken from the expressions in the python functions, as shown in
     Section~\ref{section-approach-python-subset}. The label $\top$ denotes "any
     and all expressions".
 
@@ -1194,12 +1197,13 @@ specification would accept or reject an instance of such a model.
 
 \subsubsection{The system model}
 
-The system model is quite simple. It consists of a sequence of \textit{events},
-$S = (\alpha_0, \alpha_1, \dots, \alpha_n)$, each of which is a two-part
-structure: The function called $\lambda$, and the associated arguments and
-state, $\delta$. $\alpha_i = (\lambda_i, \delta_i)$. Since the system model is
-an abstraction of an execution of the system (the target program), it is
-necessarily finite, but of arbitrary and possibly not-yet complete length.
+The system model is quite simple. It consists of a sequence of \textit{events}
+of function calls, $S = (\alpha_0, \alpha_1, \dots, \alpha_n)$. Each event
+$\alpha_i = (\lambda_i, \delta_i)$ is a two-part structure: The function
+called, $\lambda$, and the associated arguments and state, $\delta$. Since the
+system model is an abstraction of an execution of the system (the target
+program), it is necessarily finite, but of arbitrary and possibly not-yet
+complete length.
 
 The system model can be viewed as a directed graph (actually, a tree), where
 all nodes but the last have an edge. The first edge is labeled $\alpha_0$, the
@@ -1366,7 +1370,7 @@ the values of an event $\alpha$.
       $PE(\texttt{a != b)})$ & = & $PE(\texttt{a}) \neq PE(\texttt{b})$ \\
       $PE(\texttt{a and b)})$ & = & $PE(\texttt{a}) \wedge PE(\texttt{b})$ \\
       $PE(\texttt{a or b)})$ & = & $PE(\texttt{a}) \vee PE(\texttt{b})$ \\
-      $PE(\textit{Accesing a Python function or property})$ & = & \textit{The return value} \\
+      $PE(\textit{Accessing a Python function or property})$ & = & \textit{The return value} \\
     \end{tabular}
   \end{minipage}
   \caption{A sketch of the translation procedure of Python expressions to
@@ -1853,7 +1857,7 @@ models for specific requests, and then delegating to the appropriate templates.
 
 Application-specific configuration for Django programs are stored in settings
 modules, which are ordinary Python files. These contain settings for database
-connections, authentication, etc.. During startup, Django reads the settings
+connections, authentication, etc. During startup, Django reads the settings
 files, starts up its internal machinery, and waits for the first request.
 
 
@@ -1869,14 +1873,14 @@ does code instrumentation, is that \textit{pythonrv} needs to load the modules
 dependent on Django, and that it has been started correctly, with all settings
 loaded.
 
-A suitable time to instrument the program - to enable the specifications - is
+A suitable time to instrument the program -- to enable the specifications -- is
 during startup, after the settings have been loaded. Some specifications, which
 do not monitor code dependent on the settings, could be loaded before that.
 
 
-\subsection{Issues}
+\subsection{Technical Issues}
 
-Early in the process of using \textit{pythonrv} in the program it was
+Early in the process of using \textit{pythonrv} in the web application it was
 discovered that the copying of data, such as function arguments, that
 \textit{pythonrv} does would not work with Django. The latest version of
 Django, v1.4.1, uses a module called \texttt{cStringIO}, which produces objects
