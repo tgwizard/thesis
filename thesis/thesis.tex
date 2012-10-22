@@ -66,19 +66,28 @@ Ranvinge\\Supervisor CSC: title Narges Khakpour\\Examiner: title Johan Håstad}
 
 \begin{abstract}
 
-Abstract in English. Write when most of the report is written.
+Computer software are growing ever more complex, and more sophisticated tools
+are required to make sure the software operates correctly. Traditional
+approaches, like formal methods and testing, suffer from complexity, difficulty
+and rarity of use, and incompleteness and informality, respectively. A
+relatively new approach called runtime verification is an attempt for a
+lightweight alternative that verifies a program's execution against its
+specification.
 
-\bigskip\noindent
-Keywords: Runtime Verification, Unit Testing, Program Correctness
+This work investigates how to use the simpleness of testing -- specifically
+unit testing -- and the target programs' programming language to write
+specifications to use for runtime verification. A proof-of-concept
+implementation written in Python is tested on a real-time application, and a
+formal foundation is given to specifications written in a subset of Python.
+
 \end{abstract}
 \clearpage
+
 
 \begin{foreignabstract}{swedish}
 
 Sammanfattning på svenska. Skrivs sist.
 
-\bigskip\noindent
-Keywords (Sökord? Nyckelord?):
 \end{foreignabstract}
 \clearpage
 
@@ -92,14 +101,24 @@ Keywords (Sökord? Nyckelord?):
 \pagestyle{newchap}
 \chapter*{Preface}
 
-This is a master thesis / degree project in Computer Science at the Royal
-Institute of Technology (KTH), Stocholm. The work was done at Valtech Sweden,
-an IT Consultancy. It was supervised by Erland Ranvinge (Valtech) and Dr.
-(\todo{check}) Narges Khakpour (CSC KTH).
+This is a degree project in Computer Science at the Royal Institute of
+Technology (KTH), Stockholm. The work was done at Valtech Sweden, an IT
+consultancy.
 
-\todo{Thanks to people.}. Narges, Erland. Valtech. Proof readers.
+I've been fortunate to have had two great supervisors: Erland Ranvinge at
+Valtech and Dr.\ Narges Khakpour at the School of Computer Science and
+Communication, KTH\@. They have been of great help, both in the conception of the
+initial idea, and during the project, discussing problems and giving feedback
+on the work and this report. Thank you!
 
-Any errors contained in the report are mine and mine alone \rephrase.
+I'd also like to thank Valtech for the opportunity to do this degree project as
+part of a trainee program, and for all the great colleagues there giving their
+support.
+
+And last, I'd like to thank the many proofreaders. Without them, this report
+would be a lot worse. Still, any errors contained in the report are mine and
+mine alone.
+
 \clearpage
 
 \pagestyle{newchap}
