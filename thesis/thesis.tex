@@ -31,12 +31,12 @@
 
 \subtitle{Using a unit test-like specification syntax for runtime verification}
 
-\foreigntitle{"TODO: Test-inspirerad runtime-verifiering"}
+\foreigntitle{Test-inspirerad runtime-verifiering}
 
 \author{Adam Renberg}
 \date{May 2012}
-\blurb{Master's Thesis at CSC\\Supervisor Valtech: title? Erland
-Ranvinge\\Supervisor CSC: title Narges Khakpour\\Examiner: title Johan Håstad}
+\blurb{Master's Thesis at CSC\\Supervisor Valtech: Erland Ranvinge\\Supervisor
+CSC: Dr.\ Narges Khakpour\\Examiner: title Johan Håstad}
 \trita{TRITA xxx yyyy-nn}
 
 \begin{document}
@@ -74,8 +74,8 @@ relatively new approach called runtime verification is an attempt for a
 lightweight alternative that verifies a program's execution against its
 specification.
 
-This work investigates how to use the simpleness of testing -- specifically
-unit testing -- and the target programs' programming language to write
+This work investigates how to use the simpleness of testing --- specifically
+unit testing --- and the target programs' programming language to write
 specifications to use for runtime verification. A proof-of-concept
 implementation written in Python is tested on a real-time application, and a
 formal foundation is given to specifications written in a subset of Python.
@@ -86,7 +86,8 @@ formal foundation is given to specifications written in a subset of Python.
 
 \begin{foreignabstract}{swedish}
 
-Sammanfattning på svenska. Skrivs sist.
+Sammanfattning på svenska. Skrivs sist --- översättning av den engelska
+sammanfattningen.
 
 \end{foreignabstract}
 \clearpage
@@ -116,8 +117,7 @@ part of a trainee program, and for all the great colleagues there giving their
 support.
 
 And last, I'd like to thank the many proofreaders. Without them, this report
-would be a lot worse. Still, any errors contained in the report are mine and
-mine alone.
+would be a lot worse. Any errors still in the report are mine and mine alone.
 
 \clearpage
 
@@ -145,7 +145,7 @@ testing}, in which small modules of a program or system are tested
 individually.
 
 While testing is popular and often works well, it is incomplete and informal,
-and thus yields no proof that the program does what it should -- i.e. follows
+and thus yields no proof that the program does what it should --- i.e. follows
 its specification. Formal verification techniques, such as theorem proving and
 model checking (and its bounded variant), can give such proofs. However, they
 suffer from complexity problems (\textit{incompleteness},
@@ -226,18 +226,19 @@ Chapter~\ref{chapter-conclusions}.
 \chapter{Background} \label{chapter-background}
 
 Runtime verification is a new area of research, but the research on
-verification and formal approachs goes back several decades. Research of interest
-include the early work on formal methods, e.g.\ by Hoare \cite{hoare69} and
-Floyd \cite{floyd67}, and work on logics suitable for runtime verification,
-e.g. LTL by Pnueli \cite{pnueli77}. The seminal work done by Hoare, Floyd and
-Pnueli lay the foundation for many interesting approaches. LTL is one of the
-common formal languages used for specifications in runtime verification.
+verification and formal approaches goes back several decades. Research of
+interest include the early work on formal methods, e.g.\ by Hoare
+\cite{hoare69} and Floyd \cite{floyd67}, and work on logics suitable for
+runtime verification, e.g. LTL by Pnueli \cite{pnueli77}. The seminal work done
+by Hoare, Floyd and Pnueli lay the foundation for many interesting approaches.
+LTL is one of the common formal languages used for specifications in runtime
+verification.
 
 This chapter gives a short overview of the background to the concepts of this
 report. It starts with laying out what we mean by proving the correctness of
 programs in Section~\ref{section-proving-correctness}. Section~\ref{section-rv}
 describes runtime verification and its place in proving correctness. And
-finally, Section~\ref{section-testing} discusses testing -- syntax, style and
+finally, Section~\ref{section-testing} discusses testing --- syntax, style and
 other concepts.
 
 
@@ -383,7 +384,7 @@ automatically generate tests.
 When discussing testing, and unit testing in particular, we must mention the
 concept of test-driven development (TDD). Also made popular by XP, it consists
 of the cycle: (1) write a failing test, (2) make it pass by writing the
-simplest code you can, and (3) refactor -- rewrite the code so that it becomes
+simplest code you can, and (3) refactor --- rewrite the code so that it becomes
 good. Tests here play the part of specifications for the units of the program.
 
 
@@ -483,7 +484,7 @@ verification, whereas LTL was designed with infinite traces in mind. The
 semantics of LTL$_3$ reflect the fact that when verifying runtime verification
 specifications, the result can not only be that the specification is satisfied
 or violated; it can be inconclusive as well. For satisfied or violated
-specifications, no further verification is required -- we already know the
+specifications, no further verification is required --- we already know the
 outcome. For inconclusive results, we need to continue with the verification,
 as, with future events, the result could change into either satisfied or
 violated.
@@ -513,7 +514,7 @@ written in a certain style.
 
 \subsubsection{Assertions}
 
-A common construct that is part of many popular programming languges, like C,
+A common construct that is part of many popular programming languages, like C,
 Java and Python, is the \texttt{assert} statement. It is a way to state that
 some predicate should hold at a point in the program. Usually the predicate is
 an expression in the programming language, and is not supposed to alter the
@@ -541,7 +542,7 @@ Approaches to writing specifications can be divided into two parts: those that
 require you to manually mark code for verification, and those that inject the
 verification code from external specifications.
 
-Rosuenblum \cite{rosenblum95practicalassertions} uses specially annotated
+Rosenblum \cite{rosenblum95practicalassertions} uses specially annotated
 comments, written directly in the code. Bodden
 \cite{bodden05efficientrv,bodden04lightweightltl} uses Java annotations, which
 are written at function and variable definitions, to mark code for
@@ -559,7 +560,7 @@ external specification files.
 \section{Verification against Specifications} \label{section-verification}
 
 Specifications for runtime verification are written so that programs can be
-verified against them -- to see whether they follow the specification, or
+verified against them --- to see whether they follow the specification, or
 violate parts of it.
 
 There are several ways to verify a program against its specification. A common
@@ -598,9 +599,9 @@ verification code is then compiled together with the program.
 It is also possible to rewrite the compiled program, instrumenting the code
 after compilation. This way, the program needs no knowledge of the verification
 framework. Depending on the compiled objects, this can be more or less
-difficult. Binary executables and intermediate formats, such as Java Bytecode
-or Common Intermediate Language for the Common Language Infrastructure used by
-.Net, require somewhat different approaches.
+difficult. Binary executables and intermediate formats, such as Java bytecode
+or Common Intermediate Language for the Common Language Infrastructure used
+by~.Net, require somewhat different approaches.
 
 
 \subsection{Dynamic Code Rewriting}
@@ -838,7 +839,7 @@ The canonical framework for doing unit testing in Python is the
 Not much development has happened on it in the last years. Many new frameworks
 have have spawned, such as PyUnit, Nose and py.test. They build upon the style
 of unittest and mostly add new miscellaneous features, such as better test
-reporting. The original structure of the unit tests is still prevalent --
+reporting. The original structure of the unit tests is still prevalent ---
 unittest builds on the xUnit style of unit testing, discussed in
 Section~\ref{section-unit-testing}.
 
@@ -923,7 +924,7 @@ element, which can also be accessed as \texttt{event.prev}.
 		functions, \texttt{foo}, \texttt{bar} and \texttt{baz}, and makes sure that
 		\texttt{foo} is called first, then any number calls to \texttt{bar} with
 		the first argument as \texttt{True}, and then finally a call to
-	\texttt{bar}. After that, any calls are allowed -- the specification function
+	\texttt{bar}. After that, any calls are allowed --- the specification function
 will not be used in verification any longer.}
 	\label{figure-syntax-example-3}
 \end{figure}
@@ -935,12 +936,12 @@ functions (possibly implemented as closures or lambdas) to be executed when the
 next event occurs.
 
 On line 9 the function \texttt{followup} is added to be executed on the next
-event. Since \texttt{followup} is added in this way -- as a ``oneshot''
-specification function -- it needs to add itself using \texttt{next} for
+event. Since \texttt{followup} is added in this way --- as a ``oneshot''
+specification function --- it needs to add itself using \texttt{next} for
 verification on subsequent events. This is done on line 22.
 
 Figure~\ref{figure-syntax-example-3} also shows how a specification function
-can turn its verification off -- i.e. unsubscribe from future events.
+can turn its verification off --- i.e. unsubscribe from future events.
 \texttt{event.finish} and \texttt{event.success} are essentially the same, and
 unsubscribes without further errors. \texttt{event.failure} can be thought of
 as a combination of \texttt{event.finish} and \texttt{assert False} (which
@@ -968,7 +969,7 @@ Instrumentation is done through the \texttt{rv.monitor} \textit{function
 decorator} in \textit{pythonrv}. A Python function decorator is similar to
 attributes in .Net and annotations in Java. It is essentially a function that
 takes in a function and returns a function, possibly modifies it, or uses it in
-some way (decorates it) in the processs. This is used throughout Python to, for
+some way (decorates it) in the process. This is used throughout Python to, for
 instance, turn functions into static or class methods.
 Figure~\ref{figure-function-decorator} shows an example function decorator
 definition, and Figure~\ref{figure-function-decorator-usages} shows how to use
@@ -1001,7 +1002,7 @@ it.
 monitored, and then the specification function itself.
 
 In Python, almost all\footnotemark\ functions belong to a container of some
-sort -- a class, an object, or a module. In
+sort --- a class, an object, or a module. In
 Figure~\ref{figure-function-decorator-usages} the functions \texttt{func\_a}
 and \texttt{func\_b} belong to the module \texttt{test} (the module's name is
 the same as that of the file containing the code). These containers are
@@ -1010,7 +1011,7 @@ pairs, where the keys in this case are function names and the values are
 objects representing the function code. (There are other types of values in
 these containers as well, which we can ignore).
 
-\footnotetext[5]{This is not true of closures -- functions defined inside other
+\footnotetext[5]{This is not true of closures --- functions defined inside other
   functions. These functions cannot be directly referenced or modified from
   outside the defining function. \textit{pythonrv} does not (as of writing)
   support monitoring of closures.}
@@ -1132,7 +1133,7 @@ their rationales and how they work.}.
 
 One way to go around this is to define formal semantics for a subset of Python,
 which is done in the following sections. This leads to a way to reason
-mathematically with and about specifications written in this subset -- see
+mathematically with and about specifications written in this subset --- see
 Section~\ref{section-approach-python-subset}.
 
 
@@ -1150,7 +1151,7 @@ simpler.
   \item Formal specification functions have \textit{composition points} where
     they can be combined with other formal specification functions. A formal
     specification function can have zero or more composition points. A
-    composition point can be \textit{open} or \textit{closed} -- open
+    composition point can be \textit{open} or \textit{closed} --- open
     composition points can be used in composition, while closed have already
     been used. Composition points can be \textit{required} or
     \textit{optional}.
@@ -1181,7 +1182,7 @@ simpler.
     states are depicted as \textit{accepting states} in the automata. Fail
     states are usually called \textit{fail}, $f$, etc.
 
-  \item Each transition in the automata has a label -- an expression -- which
+  \item Each transition in the automata has a label --- an expression --- which
     is described in detail in Section~\ref{section-approach-semantics}. The
     label is taken from the expressions in the python functions, as shown in
     Section~\ref{section-approach-python-subset}. The label $\top$ denotes ``any
@@ -1226,20 +1227,20 @@ extendible through continued execution of the program.
 The system model can be viewed as a directed acyclic graph (actually, a tree),
 where all nodes but the last have an edge. The first edge is labeled
 $\alpha_0$, the second is labeled $\alpha_1$, etc. See
-Figure~\ref{figure-deduction-example} (a).
+Figure~\ref{figure-deduction-example}~(a).
 
 
 \subsubsection{The product of a system model and a specification}
 
 In the same way that the system model can be viewed as a graph, so can a
-specification automata, see Figure~\ref{figure-deduction-example} (b).
+specification automata, see Figure~\ref{figure-deduction-example}~(b).
 Specification automata are defined and discussed more in
 sections~\ref{section-approach-python-subset}
 and~\ref{section-approach-composition}. The
 product $Z = M \times C$ of a system model $M$ and a specification automata $C$
 is the main construct used to reason about the correctness of the
-specification. An example can be seen in Figure~\ref{figure-deduction-example}
-(c).
+specification. An example can be seen in
+Figure~\ref{figure-deduction-example}~(c).
 
 The product $Z$ will be a tree of depth $min(depth(M), depth(C))$ (where the
 depth of a specification automata containing cycles is considered infinite).
@@ -1345,7 +1346,7 @@ See Figure~\ref{figure-deduction-example} for an example.
 \subsubsection{Rules of deduction}
 
 A product $Z$ of a system model and a specification can be used to determine
-whether that specification would accept or reject the system model -- or not
+whether that specification would accept or reject the system model --- or not
 know to do either or, yet. Start at the root node of $Z$ and follow all edges
 which labels evaluate to true. If a fail state is reached, the system model
 violates the specification. If all traversals reaches success states, the
@@ -1508,7 +1509,7 @@ functions.
 %%%%%%%%%%%%%%%%%%%%%%%%
 
 
-\subsection{Transforming specifications to automata and rules for composition}
+\subsection{Transformation to automata and rules for composition}
 \label{section-approach-composition}
 \lstset{language=Python,numbers=none}
 
@@ -1528,7 +1529,7 @@ The \textit{assert} specifications are the only basic formal specification
 functions that are complete, without the need to compose them with other
 specifications. The automata $A(a_E)$ for a standalone \textit{assert}
 specification $a_E$, depicted in
-Figure~\ref{figure-basic-formal-specification-automata} (a), is defined as:
+Figure~\ref{figure-basic-formal-specification-automata}~(a), is defined as:
 
 \medskip
 \[
@@ -1542,7 +1543,7 @@ If $\bar{E}$ is true, the fail state $f$ will be reached, and the specification
 has been violated.
 
 \textit{assert} specifications also have, together with all basic formal
-specification functions and compositions therof, at least one open composition
+specification functions and compositions thereof, at least one open composition
 point, the \textit{tail} composition point. Compositions using the
 \textit{tail} composition point are commutative: $s \, \circ_{tail} \, s' = s'
 \, \circ_{tail} \, s$. Composition using the \textit{tail} composition point is
@@ -1901,9 +1902,10 @@ does code instrumentation, is that \textit{pythonrv} needs to load the modules
 dependent on Django, and that it has been started correctly, with all settings
 loaded.
 
-A suitable time to instrument the program -- to enable the specifications -- is
-during startup, after the settings have been loaded. Some specifications, which
-do not monitor code dependent on the settings, could be loaded before that.
+A suitable time to instrument the program --- to enable the specifications ---
+is during startup, after the settings have been loaded. Some specifications,
+which do not monitor code dependent on the settings, could be loaded before
+that.
 
 
 \subsection{Technical Issues}
