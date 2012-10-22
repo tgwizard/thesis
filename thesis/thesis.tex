@@ -8,6 +8,7 @@
 \usepackage{modifications}
 \usepackage{amsmath}
 \usepackage{amsfonts}
+\usepackage{paralist}
 \usepackage{listings}
 \usepackage{alltt}
 \usepackage{subfigure}
@@ -41,8 +42,7 @@ CSC: Dr.\ Narges Khakpour\\Examiner: title Johan Håstad}
 
 \begin{document}
 
-\lstset{
-	basicstyle=\ttfamily,
+\lstset{basicstyle=\ttfamily,
 	keywordstyle=\bfseries,
 	commentstyle=\color{gray},
 	columns=fixed,
@@ -145,7 +145,7 @@ testing}, in which small modules of a program or system are tested
 individually.
 
 While testing is popular and often works well, it is incomplete and informal,
-and thus yields no proof that the program does what it should --- i.e. follows
+and thus yields no proof that the program does what it should --- i.e.\ follows
 its specification. Formal verification techniques, such as theorem proving and
 model checking (and its bounded variant), can give such proofs. However, they
 suffer from complexity problems (\textit{incompleteness},
@@ -235,14 +235,34 @@ LTL is one of the common formal languages used for specifications in runtime
 verification.
 
 This chapter gives a short overview of the background to the concepts of this
-report. It starts with laying out what we mean by proving the correctness of
-programs in Section~\ref{section-proving-correctness}. Section~\ref{section-rv}
-describes runtime verification and its place in proving correctness. And
-finally, Section~\ref{section-testing} discusses testing --- syntax, style and
-other concepts.
+report. It lays out what we mean by proving the correctness of programs in
+Section~\ref{section-formal-methods}. Section~\ref{section-rv} describes
+runtime verification and its place in proving correctness. And finally,
+Section~\ref{section-testing} discusses testing --- syntax, style and other
+concepts. But first we start with an essential concept in verification, that of
+a \textit{system model}.
 
 
-\section{Proving Correctness} \label{section-proving-correctness}
+\section{A Model of a System} \label{section-system-model}
+
+A system model is a construct that represents and describes a system. It is
+usually an abstraction, leaving out the properties that are of no interest to
+the task at hand, and making other properties more prominent.
+
+We use system models constantly in everyday life when we abstract away the
+details of how things actually work to a more easy-to-grasp model of how it
+seems to work --- e.g., when driving a car, operating a computer, etc. We often
+get into trouble when the system model becomes too much simplified, or when it
+conflicts with the actual system.
+
+More relevant to this report, in formal methods, a system model is used to
+capture and describe the relevant parts of the system --- the parts we desire
+prove properties about, and reason with formally. In unit testing, the unit
+under test is the system model, an isolated slice of the system, with
+everything else ignored or mocked away.
+
+
+\section{Formal Methods} \label{section-formal-methods}
 
 A correctness proof is a certificate, based in mathematics and logics, that a
 program/system/function follows its specifications, i.e.\ does what it is
@@ -262,8 +282,8 @@ points with their preceding program points' post-conditions, we know that
 correct indata will yield correct results.
 
 This way of proving correctness often yields the best results \rephrase. But it
-is slow, hard to automate, and therefore requires much manual work. Wading
-through large programs thus often becomes impractical.
+is slow, hard to automate completely, and therefore requires much manual work.
+Wading through large programs thus often becomes impractical.
 
 \textit{Model checking} is the concept of verifying that a \textit{model} of a
 system (the \textit{system model}) follows its specification. This requires
@@ -286,73 +306,18 @@ model can be difficult to construct, or deviate too far from the system. It can
 not take the dynamic properties and configuration of the executing code into
 account.
 
-Runtime verification attempts to solve this by dealing directly with the
-system, creating its model at runtime.
-
-
-\section{Runtime Verification} \label{section-rv}
-
-Runtime verification (RV) is a dynamic approach to checking program
-correctness, in contrast to the more traditional formal static analysis
-techniques discussed above.
-
-Runtime verification aspires to be a light-weight formal verification
-technique, see e.g.\ \cite{leucker09abriefaccount,delgado04taxonomy}. It
-verifies whether properties of a specification hold \textit{during the
-execution} of a program.
-
-The specification that should be verified is often written in a formal
-language, a logic or a calculus, such as linear temporal logic \cite{pnueli77}.
-To build a system model for verifying the properties of the specification, the
-target program needs to emit or expose certain events and data. The collected
-events and data are used to build the system model. RV frameworks typically
-use \textit{code instrumentation} to generate \textit{monitors} for this end.
-
-A monitor is either just part of a recording layer added to the program, which
-stores the events and data needed for verification, or also the part of the
-machinery that performs verification.
-
-There are two types of verification: \emph{online} and \emph{offline}. In
-online verification, the analysis and verification is done during the
-execution, in a synchronous manner with the observed system. In offline
-verification, a log of events is analysed at a later time. Online verification
-allows actions to be taken immediately when violations against the
-specifications are detected, but with considerable performance cost. Offline
-verification only impacts the performance by collecting data.
-
-When a violation of the specification occurs, simple actions can be taken
-(e.g.\ crash the program, log the error, send emails, etc.), or more complex
-responses initiated, resulting in a \textit{self-healing} or
-\textit{self-adapting} system (see e.g.\ \cite{huebscher08survey}).
-
-Relevant work on runtime verification include \cite{bauer06monitoring}, in
-which Bauer et al.\ use a three-valued boolean logic (true, false and ?) to
-reflect that a specification can not only be satisfied (true) or violated
-(false), but also neither yet, or, in the future it may be either. Bauer et
-al.\ also show how they transform specifications into automata (which they call
-\textit{runtime monitors}).
-
-Bodden presents in \cite{bodden05efficientrv} a framework for RV implemented
-through \emph{aspect-oriented programming} using
-\textit{aspectj}\footnote{\texttt{http://www.eclipse.org/aspectj/}} in Java,
-with specifications written as code annotations. Aspect-oriented programming is
-described in more detail in Section~\ref{section-aspects}.
-
-Leucker et al.\ present a definition of RV in \cite{leucker09abriefaccount},
-together with an exposition of the advantages and disadvantages, similarities
-and differences, with other verification approaches. In
-\cite{delgado04taxonomy}, Delgado et al.\ classify and review several different
-approaches and frameworks to runtime verification.
+Runtime verification (Section~\ref{section-rv}) attempts to solve this by
+dealing directly with the system, creating its model at runtime.
 
 
 \section{Testing} \label{section-testing}
-On the other end of the program-correctness-checking spectrum is
+Opposite formal methods on the program-correctness-checking spectrum is
 \emph{testing}, which is the practical approach of checking that the program,
 given a certain input, produces the correct/acceptable output. Testing is not
 complete (for all but the most trivial programs, it is impossible to write
 complete tests), and lacks a formal foundation, so it cannot be used for formal
 verification. Testing can be a complement to more formal techniques, such as
-RV. It is in many cases the sole correctness-checking tool.
+RV\@. It is in many cases the sole correctness-checking tool.
 
 \textit{Unit testing} is the concept of writing small tests, or test suites,
 for the units in a program, such as functions, classes, etc. These tests are
@@ -383,9 +348,57 @@ automatically generate tests.
 
 When discussing testing, and unit testing in particular, we must mention the
 concept of test-driven development (TDD). Also made popular by XP, it consists
-of the cycle: (1) write a failing test, (2) make it pass by writing the
-simplest code you can, and (3) refactor --- rewrite the code so that it becomes
-good. Tests here play the part of specifications for the units of the program.
+of the cycle:
+\begin{inparaenum}[1\upshape)]
+  \item write a failing test;
+  \item make it pass by writing the simplest code you can; and
+  \item refactor --- rewrite the code so that it becomes good.
+\end{inparaenum}
+Tests here play the part of specifications for the units of the program.
+
+
+\section{Runtime Verification} \label{section-rv}
+
+Runtime verification (RV) is a dynamic approach to checking program
+correctness, in contrast to the more traditional formal static analysis
+techniques discussed in Section~\ref{section-formal-methods}.
+
+Runtime verification aspires to be a light-weight formal verification
+technique, see e.g.\ \cite{leucker09abriefaccount,delgado04taxonomy}. It
+verifies whether properties of a specification hold \textit{during the
+execution} of a program.
+
+The specification that should be verified is often written in a formal
+language, a logic or a calculus, such as linear temporal logic \cite{pnueli77}.
+To build a system model for verifying the properties of the specification, the
+target program needs to emit or expose certain events and data. The collected
+events and data are used to build the system model. RV frameworks typically
+use \textit{code instrumentation} to generate \textit{monitors} for this end.
+
+A monitor is either just part of a recording layer added to the program, which
+stores the events and data needed for verification, or also the part of the
+machinery that performs verification.
+
+There are two types of verification: \emph{online} and \emph{offline}. In
+online verification, the analysis and verification is done during the
+execution, in a synchronous manner with the observed system. In offline
+verification, a log of events is analysed at a later time. Online verification
+allows actions to be taken immediately when violations against the
+specifications are detected, but with considerable performance cost. Offline
+verification only impacts the performance by collecting data.
+
+When a violation of the specification occurs, simple actions can be taken
+(e.g.\ crash the program, log the error, send emails, etc.), or more complex
+responses initiated, resulting in a \textit{self-healing} or
+\textit{self-adapting} system (see e.g.\ \cite{huebscher08survey}).
+
+Leucker et al.\ present a definition of RV in \cite{leucker09abriefaccount},
+together with an exposition of the advantages and disadvantages, similarities
+and differences, with other verification approaches. In
+\cite{delgado04taxonomy}, Delgado et al.\ classify and review several different
+approaches to and frameworks for runtime verification.
+
+The next chapter examines RV in more detail.
 
 
 
@@ -478,8 +491,8 @@ Figure~\ref{figure-ltl}.
 \end{figure}
 
 In \cite{bauer06monitoring} Bauer et al.\ introduce a three-valued boolean
-semantics for LTL, calling it LTL$_3$, which takes the values (true, false and
-?). This logic is arguably more suited for the finite nature of runtime
+semantics for LTL, calling it LTL$_3$, which takes the values (true, false
+and~?). This logic is arguably more suited for the finite nature of runtime
 verification, whereas LTL was designed with infinite traces in mind. The
 semantics of LTL$_3$ reflect the fact that when verifying runtime verification
 specifications, the result can not only be that the specification is satisfied
@@ -498,15 +511,18 @@ verification, but will not be discussed further here. See e.g.\
 
 \subsubsection{Design by Contract}
 
-Design by Contract was introduced by Bertrand Meyer in
-\cite{meyer92applyingdbc}, and has been fully implemented in the Eiffel
-programming language. A contract is the idea that functions, and methods on
-objects, promise to fulfill certain post-conditions (or promises) if the inputs
-they are given fulfill the pre-conditions (or requirements) specified in the
-contract.  Design by Contract also contains constructs for specifying
-loop-invariants and class-invariants, properties that should always hold during
-loops and for objects of a class, respectively. Assertions (see below) are also
-usually available.
+Design by Contract is a verification technique similar to runtime verification,
+without the ability to describe temporal properties. Design by Contract was
+introduced by Bertrand Meyer in \cite{meyer92applyingdbc}, and has been fully
+implemented in the Eiffel programming language.
+
+A contract is the idea that functions, and methods on objects, promise to
+fulfill certain post-conditions (or promises) if the inputs they are given
+fulfill the pre-conditions (or requirements) specified in the contract. Design
+by Contract also contains constructs for specifying loop-invariants and
+class-invariants, properties that should always hold during loops and for
+objects of a class, respectively. Assertions (see below) are also usually
+available, to be interspersed with the program code.
 
 Design by Contract is inspired by Hoare logic, and is essentially Hoare logic
 written in a certain style.
@@ -522,7 +538,11 @@ program state.
 
 Assertions are distinct from the normal program flow, and not to be conflated
 with exceptions. Assertions check for properties that should always be true,
-anything else would be a programming error.
+anything else would be a programming error. Assertions can sometimes be turned
+of with a compiler or runtime flag.
+
+Assertions are suitable for simpler specifications, and those more coupled to
+code. Assertions are the simplest of runtime verification specifications.
 
 
 \subsection{Writing Specifications}
@@ -553,7 +573,8 @@ is common to write assertions in the program \cite{bartetzko01jass}.
 
 Other approaches, such as the ones taken by Jalili et al.\ in
 \cite{jalili07rverl} and Barringer et al.\ in \cite{barringer03eagle}, use
-external specification files.
+external specification files, and the program is instrumented at compile- or
+runtime for verification.
 
 
 
@@ -568,9 +589,15 @@ one, used in
 \cite{bauer06monitoring,bodden05efficientrv,jalili07rverl,barringer03eagle}
 among others, is to generate state machines from the specification. These state
 machines, sometimes called \textit{runtime monitors}, operate with the input
-language of events emitted by the program.
+language of events emitted by the program. As the program executes, or a
+program execution is replayed offline, transitions are taken in the state
+machines, switching states. Violations against the specification can be
+described by failing to find a valid transition, or ending up in a fail state;
+Fulfilling a specification can be described by arriving at an accepting state.
 
-\todo{Write more on this.}
+Simpler verification approaches just instrument the code by adding assertions
+that check the properties of the specifications. This might be difficult to do
+with more complex specifications.
 
 
 \section{Code Instrumentation} \label{section-instrumentation}
@@ -583,7 +610,7 @@ means wrapping function calls and variable assignments in a ``recording
 layer'', which performs the desired action after logging the event. The events
 can then be passed on to the verification tools.
 
-There are four major approaches used for program instrumentation.
+What follows are four major approaches used for program instrumentation.
 
 
 \subsection{Pre-processing the Code}
@@ -606,7 +633,7 @@ by~.Net, require somewhat different approaches.
 
 \subsection{Dynamic Code Rewriting}
 
-In many dynamic languages, such as Python, Ruby or Javascript, it is possible
+In many dynamic languages, such as Python, Ruby or JavaScript, it is possible
 to rewrite the code during runtime, which is sometimes called \textit{monkey
 patching}. A function to be monitored could be rewritten, adding a lightweight
 wrapper that records all calls to it, and then passes on the call to the actual
@@ -677,7 +704,7 @@ that the object under test requires to work properly.
 Test written in this style are traditional unit tests.
 
 
-\subsection{Mocking and Faking}
+\subsection{Mocking and Faking} \label{section-mocking}
 
 A common issue when writing unit tests is that, to instantiate some object X,
 or to call some function Y, the program needs access to some other
@@ -743,7 +770,7 @@ expectations, and verify that they occur correctly.
 
 There are several frameworks for working with expectations, such as
 jMock\footnote{\texttt{http://www.jmock.org/}} for Java, Rhino
-Mocks\footnote{\texttt{http://ayende.com/wiki/Rhino+Mocks.ashx}} for .Net and
+Mocks\footnote{\texttt{http://ayende.com/wiki/Rhino+Mocks.ashx}} for~.Net and
 Ludibrio\footnote{\texttt{https://github.com/nsigustavo/ludibrio/}} for Python.
 
 
@@ -941,7 +968,7 @@ specification function --- it needs to add itself using \texttt{next} for
 verification on subsequent events. This is done on line 22.
 
 Figure~\ref{figure-syntax-example-3} also shows how a specification function
-can turn its verification off --- i.e. unsubscribe from future events.
+can turn its verification off --- i.e.\ unsubscribe from future events.
 \texttt{event.finish} and \texttt{event.success} are essentially the same, and
 unsubscribes without further errors. \texttt{event.failure} can be thought of
 as a combination of \texttt{event.finish} and \texttt{assert False} (which
@@ -967,7 +994,7 @@ call events and their arguments and associated state.
 
 Instrumentation is done through the \texttt{rv.monitor} \textit{function
 decorator} in \textit{pythonrv}. A Python function decorator is similar to
-attributes in .Net and annotations in Java. It is essentially a function that
+attributes in~.Net and annotations in Java. It is essentially a function that
 takes in a function and returns a function, possibly modifies it, or uses it in
 some way (decorates it) in the process. This is used throughout Python to, for
 instance, turn functions into static or class methods.
@@ -2012,8 +2039,12 @@ verification.
 %\pagestyle{newchap}
 \chapter{Dictionary} \label{appendix-dictionary}
 
-\begin{itemize}
-  \item Qdo.
-\end{itemize}
+\begin{description}
+  \item[mock, mocking] See Section~\ref{section-mocking}.
+
+  \item[model, system model] See Section~\ref{section-system-model}.
+
+  \item[state explosion problem] Qdo. \todo{}
+\end{description}
 
 \end{document}
