@@ -514,7 +514,22 @@ verification, but will not be discussed further here. See e.g.\
 Design by Contract is a verification technique similar to runtime verification,
 without the ability to describe temporal properties. Design by Contract was
 introduced by Bertrand Meyer in \cite{meyer92applyingdbc}, and has been fully
-implemented in the Eiffel programming language.
+implemented in the Eiffel programming language. An example can be seen in
+Figure~\ref{figure-dbc-example}.
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+    \lstset{language=Eiffel}
+		\lstinputlisting{figures/dbc_example.e}
+	\end{minipage}
+	\end{center}
+  \caption{An example showing the use of the Design-by-Contract concepts of
+    pre- and post-conditions, written in Eiffel. Note the use of the language
+    construct \texttt{old} to get the value of an attribute at before the
+    function executed. Example taken from \cite{meyer92applyingdbc}.}
+	\label{figure-dbc-example}
+\end{figure}
 
 A contract is the idea that functions, and methods on objects, promise to
 fulfill certain post-conditions (or promises) if the inputs they are given
@@ -534,7 +549,21 @@ A common construct that is part of many popular programming languages, like C,
 Java and Python, is the \texttt{assert} statement. It is a way to state that
 some predicate should hold at a point in the program. Usually the predicate is
 an expression in the programming language, and is not supposed to alter the
-program state.
+program state. See Figure~\ref{figure-c-assert-example} for an example.
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+    \lstset{language=C}
+		\lstinputlisting{figures/cassert_example.c}
+	\end{minipage}
+	\end{center}
+  \caption{An example showing the use of \texttt{assert} in C. Note that the
+    return value of \texttt{malloc} is checked to be non-null using an
+    if-statement --- this is a case that could happen. The assertions are used
+    to check for cases that should never happen.}
+	\label{figure-c-assert-example}
+\end{figure}
 
 Assertions are distinct from the normal program flow, and not to be conflated
 with exceptions. Assertions check for properties that should always be true,
@@ -617,9 +646,21 @@ What follows are four major approaches used for program instrumentation.
 
 Rosenblum \cite{rosenblum95practicalassertions} uses a pre-processor step in
 the C compilation setup to instrument code, where the specifications (called
-assertions by Rosenblum) are transformed from comments into regular C code. The
+assertions by Rosenblum) are transformed from comments into regular C code. See
+Figure~\ref{figure-pre-processing-comments-example} for an example. The
 verification code is then compiled together with the program.
 
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+    \lstset{language=C}
+		\lstinputlisting{figures/instrumentation_comments_example.c}
+	\end{minipage}
+	\end{center}
+  \caption{An example showing instrumentation via special comments and code
+    pre-processing. Example taken from \cite{rosenblum95practicalassertions}.}
+	\label{figure-pre-processing-comments-example}
+\end{figure}
 
 \subsection{Post-processing the Code}
 
@@ -680,7 +721,7 @@ Figure~\ref{figure-junit}.
 
 \begin{figure}[h!]
 	\begin{center}
-	\begin{minipage}{0.7\textwidth}
+	\begin{minipage}{0.9\textwidth}
 		\lstset{language=Java}
 		\lstinputlisting{figures/junit_example.java}
 	\end{minipage}
@@ -729,7 +770,7 @@ expectations is shown in Figure~\ref{figure-expectations}.
 
 \begin{figure}[h!]
 	\begin{center}
-	\begin{minipage}{0.7\textwidth}
+	\begin{minipage}{0.9\textwidth}
 		\lstset{language=Java}
 		\lstinputlisting{figures/expectations_example.java}
 	\end{minipage}
