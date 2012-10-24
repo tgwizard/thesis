@@ -1,7 +1,7 @@
 put-child (new: NODE) is
   -- Add new to the children of current node
   require
-    new/= Void
+    new /= Void
   do
     ... Insertion algorithm ...
   ensure

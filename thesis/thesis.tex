@@ -199,16 +199,15 @@ written in the target program's programming language, it might popularise the
 use of runtime verification for checking the correctness of programs.
 
 
-
 \section{Disposition}
 
 The rest of this report is structured as follows. This chapter gives an
 introduction to the report and the problem statement.
 Chapter~\ref{chapter-background} gives a background to the subject of verifying
-program correctness. Chapter~\ref{chapter-previous-research} continues by
+program correctness. Chapter~\ref{chapter-intro-to-rv} continues by
 describing the previous research on runtime verification and the syntax of
-specification languages. It also gives an overview of the current ideas in unit
-testing.
+specification languages. Chapter~\ref{chapter-intro-to-unit-testing} gives an
+overview of the current ideas in unit testing.
 
 Chapter~\ref{chapter-approach} describes the approach this work takes to
 solving the problem stated in Section~\ref{section-problem-statement}. It
@@ -423,12 +422,13 @@ The next chapter examines RV in more detail.
 
 
 
+
 %================================================
-%====== Chapter 3, Previous Research
+%====== Chapter 3, Introduction to Runtime Verification
 %================================================
 
 \pagestyle{newchap}
-\chapter{Previous Research} \label{chapter-previous-research}
+\chapter{Introduction to Runtime Verification} \label{chapter-intro-to-rv}
 
 As we saw in Section~\ref{section-rv}, runtime verification is a technique for
 verifying a program's compliance against a specification during runtime. These
@@ -439,24 +439,17 @@ runtime, the program usually needs to be instrumented in such a way that the
 verification process can access all pertinent data. This is discussed in
 Section~\ref{section-instrumentation}
 
-\todo{Better introduction to testing. Same problem as in Background. Should it
-be in both places?}
-
-The design of unit test syntax is discussed in
-Section~\ref{section-unit-testing}. The combination of the two, runtime
-verification and unit testing, will be the main subject in
-Chapters~\ref{chapter-approach} and~\ref{chapter-evaluation}.
-
 
 \section{Specifications} \label{section-specifications}
 
 Specifications come in many forms, from the informal ones like ``I want it have
 cool buttons'', to the contractual ones written between companies and their
-clients, to tests (see e.g.\ Section~\ref{section-unit-testing}), and to formal
-specifications, written in formal languages, specifying properties that should
-verifiably hold for the program (see e.g.\ Section~\ref{section-ltl}). It is
-these last two types of specifications that we are interested in here, and
-which play an important role in runtime verification.
+clients, to tests (see e.g.\ Chapter~\ref{chapter-intro-to-unit-testing}), and
+to formal specifications, written in formal languages, specifying properties
+that should verifiably hold for the program (see e.g.\
+Section~\ref{section-ltl}). It is these last two types of specifications that
+we are interested in here, and which play an important role in runtime
+verification.
 
 In general, specifications should be abstract, written in a high-level
 language, and succinctly capture the desired property. Writing erroneous
@@ -598,7 +591,7 @@ Assertions are suitable for simpler specifications, and those more coupled to
 code. Assertions are the simplest of runtime verification specifications.
 
 
-\subsection{Writing Specifications}
+\subsection{Developing with Specifications}
 
 For verification in general, specifications can be written and used externally
 to the program. They can be used in specialized model-checking tools, in tools
@@ -728,14 +721,26 @@ Aspects in AspectJ are implemented as a post-processing step in the compilation
 process, adding wrapper code for handling the aspects.
 
 
-\section{Unit Testing} \label{section-unit-testing}
+
+
+%================================================
+%====== Chapter 4, Introduction to Unit Testing
+%================================================
+
+\pagestyle{newchap}
+\chapter{Introduction to Unit Testing} \label{chapter-intro-to-unit-testing}
 
 We discussed testing and unit testing in general in
 Section~\ref{section-testing}. Here we'll discuss how it works, and what the
 syntax is like.
 
+With both runtime verification and unit testing introduced, a combination of
+the two will be the main subject in Chapters~\ref{chapter-approach}
+and~\ref{chapter-evaluation}.
 
-\subsection{xUnit}
+
+
+\section{xUnit}
 
 The xUnit style of unit testing \cite{fowlerxunit} has given rise to unit
 testing frameworks for many programming languages. Their structure are all
@@ -769,7 +774,7 @@ that the object under test requires to work properly.
 Test written in this style are traditional unit tests.
 
 
-\subsection{Mocking and Faking} \label{section-mocking}
+\section{Mocking and Faking} \label{section-mocking}
 
 A common issue when writing unit tests is that, to instantiate some object X,
 or to call some function Y, the program needs access to some other
@@ -785,7 +790,7 @@ upon them, and the test could then verify that these are according to
 expectations.
 
 
-\subsection{Expectations}
+\section{Expectations}
 
 Instead of writing fake objects, we can create a mock object and pre-record
 what actions we expect to be taken upon them. This is called writing
@@ -844,7 +849,7 @@ Ludibrio\footnote{\texttt{https://github.com/nsigustavo/ludibrio/}} for Python.
 
 
 %================================================
-%====== Chapter 4, Approach
+%====== Chapter 5, Approach
 %================================================
 
 \pagestyle{newchap}
@@ -933,7 +938,7 @@ have have spawned, such as PyUnit, Nose and py.test. They build upon the style
 of unittest and mostly add new miscellaneous features, such as better test
 reporting. The original structure of the unit tests is still prevalent ---
 unittest builds on the xUnit style of unit testing, discussed in
-Section~\ref{section-unit-testing}.
+Chapter~\ref{chapter-intro-to-unit-testing}.
 
 The next section will illustrate the syntax of \textit{pythonrv}.
 
@@ -1941,7 +1946,7 @@ when $E$ is false and there is no else clause.
 
 
 %================================================
-%====== Chapter 5, Evaluation
+%====== Chapter 6, Evaluation
 %================================================
 
 \pagestyle{newchap}
@@ -2024,7 +2029,7 @@ Talk about where specifications would be suitable, and for what.
 
 
 %================================================
-%====== Chapter 6, Conclusions
+%====== Chapter 7, Conclusions
 %================================================
 
 \pagestyle{newchap}
@@ -2054,7 +2059,7 @@ a simple framework for aspect-oriented programming.
 \section{Future Work}
 
 The testing tool called expectations, as described in
-Chapter~\ref{chapter-previous-research} could fit quite well with the
+Section~\ref{section-expectations}, could fit quite well with the
 \textit{pythonrv} style of writing specifications.
 
 The performance of the implementation has not been measured or considered in
@@ -2131,7 +2136,7 @@ verification.
   \item[undecidability] \todo{}
 
   \item[unit testing] Dividing the program into small units, testing each
-    separately. See Section~\ref{section-unit-testing}.
+    separately. See Chapter~\ref{chapter-intro-to-unit-testing}.
 \end{description}
 
 \end{document}
