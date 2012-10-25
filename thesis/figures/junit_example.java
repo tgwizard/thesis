@@ -1,3 +1,4 @@
+
 // required imports removed for brevity
 
 public class TestSomeClass
@@ -19,8 +20,8 @@ public class TestSomeClass
 	public void testSimpleAddition() {
 		// use the language assertion construct
 		assert 1+1 == 2
-			// use JUnit's assertion functions
-			assertEquals(4+7, 11)
+    // use JUnit's assertion functions
+    assertEquals(4+7, 11)
 	}
 
 	@Test
