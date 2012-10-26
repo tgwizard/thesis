@@ -2235,14 +2235,14 @@ either transition into state $q_0$ or $q_1$.
       \begin{array}{rcl}
         A(\text{spec}) & = & (Q, P_1 \cup P_2 \cup P_3 \cup P_4, q_0, S, F) \\
                      Q & = & \{q_0, q_1, f_1, q_2, q_3, f_2, r_0, r_1, f_r\} \\
-                   P_1 & = & \{(q_0, q_1, \lambda = \texttt{foo}), (q_0, f_1, \neg (\lambda = \texttt{foo}))\} \\
-                   P_2 & = & \{(q_0, q_2, X), (q_0, q_3, \top), (q_0, f_2, \neg X)\} \\
+                   P_1 & = & \{(q_0, q_1, \lambda = \texttt{foo}), (q_0, f_1, \neg(\lambda = \texttt{foo}))\} \\
+                   P_2 & = & \{(q_0, q_2, G \wedge X), (q_0, f_2, G \wedge \neg X), (q_0, q_3, \top)\} \\
                    P_3 & = & \{(q_0, r_0, \top), (r_0, q_0, \top)\} \\
-                   P_4 & = & \{(r_0, r_1, \lambda = \texttt{bar}), (r_0, f_r, \neg (\lambda = \texttt{bar}))\} \\
+                   P_4 & = & \{(r_0, r_1, \lambda = \texttt{bar}), (r_0, f_r, \neg(\lambda = \texttt{bar}))\} \\
                      S & = & \{q_1, q_2, q_3, r_1\} \\
                      F & = & \{f_1, f_2, f_r\} \\
-                     G & = & \delta(\texttt{foo.inputs$[0]$}) == 0 \\
-                     X & = & \delta(\texttt{foo.inputs$[1]$}) == 0
+                     G & = & \delta(\texttt{foo.inputs$[0]$}) = 0 \\
+                     X & = & \delta(\texttt{foo.inputs$[1]$}) = 0
       \end{array}
     \]
 	\end{minipage}
@@ -2251,30 +2251,30 @@ either transition into state $q_0$ or $q_1$.
 
 	\begin{minipage}{0.9\textwidth}
 		\centering
-		\begin{tikzpicture}[->,shorten >=1pt,node distance=3.2cm,on
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=3.5cm,on
       grid,auto,scale=.5,semithick,>=stealth]
 
       % first spec
 			\node[state,initial above] (q0) {$q_0$};
-			\node[state,accepting] (q1) [below right of=q0] {$q_1$};
-      \node[state] (f1) [below of=q0] {\textit{f$_1$}};
+			\node[state,accepting] (q1) [left of=q0] {$q_1$};
+      \node[state] (f1) [above left of=q0] {\textit{f$_1$}};
       % if
-			\node[state,accepting] (q2) [left of=q0] {$q_2$};
-      \node[state] (f2) [above left of=q2] {\textit{f$_2$}};
-			\node[state,accepting] (q3) [below left of=q2] {$q_3$};
+			\node[state,accepting] (q2) [below right of=q0] {$q_2$};
+      \node[state] (f2) [below of=q0] {\textit{f$_2$}};
+			\node[state,accepting] (q3) [below left of=q0] {$q_3$};
 
       % second spec
       \node[state] (r0) [right of=q0] {$r_0$};
 			\node[state,accepting] (r1) [right of=r0] {$r_1$};
-      \node[state] (fr) [below right of=r0] {\textit{f$_r$}};
+      \node[state] (fr) [above right of=r0] {\textit{f$_r$}};
 			\path
         % first spec
         % assert
-        (q0) edge node {$\lambda = \text{foo}$} (q1)
-        (q0) edge node [above left] {$\neg \lambda = \text{foo}$} (f1)
+        (q0) edge node [above] {$\lambda = \text{foo}$} (q1)
+        (q0) edge node [above right] {$\neg(\lambda = \text{foo})$} (f1)
         % if
-        (q0) edge node [above] {$G \wedge X$} (q2)
-        (q0) edge node [above right] {$\neg (G \wedge X)$} (f2)
+        (q0) edge node [above right] {$G \wedge X$} (q2)
+        (q0) edge node [right] {$G \wedge \neg X$} (f2)
         (q0) edge node [above left] {$\top$} (q3)
         % next
         (q0) edge [bend left=20] node [above] {$\top$} (r0)
@@ -2282,7 +2282,7 @@ either transition into state $q_0$ or $q_1$.
         % second spec
         % assert
         (r0) edge node {$\lambda = \text{bar}$} (r1)
-        (r0) edge node [above right] {$\neg \lambda = \text{bar}$} (fr)
+        (r0) edge node [above left] {$\neg(\lambda = \text{bar})$} (fr)
         % next
         (r0) edge [bend left=20] node [above] {$\top$} (q0);
 		\end{tikzpicture}
@@ -2377,6 +2377,26 @@ for all specifications or for a subset of them, to work around this issue.
 
 Now to the most important question: what specifications could, and should, be
 written? What value do they provide?
+
+The web application is only intended for internal use, for employees.
+Authentication of employees and authorization of their access rights are very
+important. Specifications can be written to make sure all views or requests are
+made by an authenticated user (except for the login screen), and that they are
+allowed to perform the requested action. A specification showing a
+specification verifying proper authentication is shown in
+Figure~\ref{figure-app-authentication}.
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.9\textwidth}
+	\lstinputlisting{figures/app_authentication.py}
+	\end{minipage}
+	\end{center}
+
+  \caption{A \textit{pythonrv} verifying that views are only accessible with
+    proper authentication.}
+	\label{figure-app-authentication}
+\end{figure}
 
 \todo{}
 Talk about where specifications would be suitable, and for what.
