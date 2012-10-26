@@ -300,9 +300,10 @@ correctly?". This can be contrasted with \textit{validation}, in which we ask:
 "Are we building the correct program?". It is verification in which this report
 takes an interest. Verification includes everything from manually running the
 program and parsing through the output, to automated testing setups, to formal
-methods. Formal methods and testing are described in this chapter.
+methods.
 
-Both formal methods and testing are thus included in the term verification.
+Both formal methods and testing are thus included in the term verification, and
+they are both described in this chapter.
 
 An essential concept in verification is that of a \textit{system model}. A
 system model is a construct that represents and describes a system. It is
@@ -315,11 +316,12 @@ seems to work --- e.g., when driving a car, operating a computer, etc. We often
 get into trouble when the system model becomes too much simplified, or when it
 conflicts with the actual system.
 
-More relevant to this report, in formal methods, a system model is used to
-capture and describe the relevant parts of the system --- the parts we desire
-to prove properties about, and reason with formally. In unit testing, the
-system model is the unit under test, an isolated slice of the system, with
-the rest of the actual system ignored or mocked away.
+More relevant to this report, in formal methods, a system model is a
+mathematical representation of the system that captures and describes its
+relevant parts --- the parts of the system we wish to prove properties about,
+and reason with formally. In unit testing, the system model is the unit under
+test, an isolated slice of the system, with the rest of the actual system
+ignored or mocked away.
 
 
 \section{Formal Methods} \label{section-formal-methods}
@@ -1053,8 +1055,39 @@ Chapter~\ref{chapter-intro-to-unit-testing}.
 
 The next section will illustrate the syntax of \textit{pythonrv}.
 
+\subsection{General Structure of a Specification}
 
-\subsection{Three Examples}
+The structure of a informal \textit{pythonrv} specification function is shown
+in pseudo-code in Figure~\ref{figure-pseudo-spec}. For the structure of formal
+specifications, see Section~\ref{section-approach-formal-foundation}. The next
+section illustrates the \textit{pythonrv} syntax for informal specifications
+with three concrete examples
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+    \begin{alltt}
+\emph{import} pythonrv module
+\emph{import} modules with functions to be monitored
+
+\emph{annotate} the spec with its monitorees
+\textbf{define} specification function \textit{spec}(\textbf{event}):
+  taking a special \textbf{event} argument
+
+  with a body of arbitrary Python code
+  that verifies that the provided event is correct
+  and throws an \textbf{AssertionError} exception when it is not
+    \end{alltt}
+	\end{minipage}
+	\end{center}
+
+  \caption{The structure of a \textit{pythonrv} specification. Note that the
+    Python \texttt{assert} statement throws an \texttt{AssertionError}
+    exception when its argument evaluates to \texttt{False}.}
+	\label{figure-pseudo-spec}
+\end{figure}
+
+\subsection{Three Examples of Informal Specification Functions}
 \lstset{language=Python,numbers=left}
 
 \begin{figure}[h!]
@@ -1064,10 +1097,11 @@ The next section will illustrate the syntax of \textit{pythonrv}.
 	\end{minipage}
 	\end{center}
 
-	\caption{A specification that monitors the function \texttt{fib} in the
-	module \texttt{fibmodule}. The monitored function is, locally to the
-specification function, aliased as \texttt{func}. The specification asserts
-that the first input to the monitored function is always greater than zero.}
+  \caption{A specification that monitors the function \texttt{fib} in the
+    module \texttt{fibmodule}. The monitored function is, locally to the
+    specification function, aliased as \texttt{func}. The specification asserts
+    that the first input to the monitored function is always greater than
+    zero.}
 	\label{figure-syntax-example-1}
 \end{figure}
 
@@ -1551,31 +1585,6 @@ See Figure~\ref{figure-deduction-example} for an example.
 %%%%%%%%%%%%%%%%%%%%%%%%
 
 
-\subsubsection{Verification}
-
-A product $Z$ of a system model and a specification can be used to determine
-whether that specification would accept or reject the system model --- or not
-know to do either or, yet.
-
-\begin{enumerate}
-  \item Compute the product $Z$ of the specification $C$ and the system model
-    $M$, as described above.
-
-  \item Traverse $Z$, starting at the root node, following all transitions
-    which labels evaluate to true (described next).
-
-    \begin{enumerate}
-      \item If a fail state is reached, the system models violates the
-        specification.
-      \item If only success states are reached, the system model satisfies the
-        specification.
-      \item If some traversal ends in a state that is neither a fail or a
-        success state, the system model could, if it were extended, either
-        satisfy or violate the specification.
-    \end{enumerate}
-\end{enumerate}
-
-
 \subsubsection{Evaluating specification-model product label expressions}
 
 The transition labels for the product of a specification automata and a system
@@ -1605,13 +1614,14 @@ using the values of an event $\alpha$.
       $PE(\texttt{True)})$ & = & $\top$ \\
       $PE(\texttt{False)})$ & = & $\bot$ \\
       $PE(\texttt{event.fn.x.called})$ & = & $\lambda = x$ \\
-      $PE(\texttt{event.fn.x.called == x})$ & = & $\lambda = x$ \\
+      $PE(\texttt{event.called\_function == x})$ & = & $\lambda = x$ \\
+      $PE(\texttt{event.fn.x.property})$ & = & $\delta(x.\texttt{property})$ \\
       $PE(\texttt{not a)})$ & = & $\neg PE(\texttt{a})$ \\
       $PE(\texttt{a == b)})$ & = & $PE(\texttt{a}) = PE(\texttt{b})$ \\
       $PE(\texttt{a != b)})$ & = & $PE(\texttt{a}) \neq PE(\texttt{b})$ \\
       $PE(\texttt{a and b)})$ & = & $PE(\texttt{a}) \wedge PE(\texttt{b})$ \\
       $PE(\texttt{a or b)})$ & = & $PE(\texttt{a}) \vee PE(\texttt{b})$ \\
-      $PE(\textit{Accessing a Python function or property})$ & = & \textit{The return value} \\
+      $PE(\textit{A Python function or property})$ & = & \textit{The return value} \\
     \end{tabular}
   \end{minipage}
   \caption{A sketch of the translation procedure of Python expressions to
@@ -1621,34 +1631,71 @@ using the values of an event $\alpha$.
 \end{figure}
 
 
-\subsection{Python subset for formal specification functions}
+\subsubsection{Verification}
+
+A product $Z$ of a system model and a specification can be used to determine
+whether that specification would accept or reject the system model --- or not
+know to do either or, yet.
+
+\begin{enumerate}
+  \item Compute the product $Z$ of the specification $C$ and the system model
+    $M$, as described above.
+
+  \item Traverse $Z$, starting at the root node, following all transitions
+    which labels evaluate to true.
+
+    \begin{enumerate}
+      \item If a fail state is reached, the system models violates the
+        specification.
+      \item If only success states are reached, the system model satisfies the
+        specification.
+      \item If some traversal ends in a state that is neither a fail or a
+        success state, the system model could, if it were extended, either
+        satisfy or violate the specification.
+    \end{enumerate}
+\end{enumerate}
+
+Formal \textit{pythonrv} specifications are verified using this procedure,
+although in an incremental manner. The verification is done online, so as soon
+as a new event is added to the system model, it is combined with the
+specification automata.
+
+We now go on to describe the actual syntax for these formal specification
+functions.
+
+
+\subsection{Python Subset for Formal Specification Functions}
 \label{section-approach-python-subset}
 \lstset{language=Python,numbers=left}
 
-The subset of Python that will be provided with a formal semantics consists of
-three composable specification functions: \textit{assert},
-\textit{next} and \textit{if}. See
-Figure~\ref{figure-basic-formal-specification-functions}.
+The subset of Python that can be used in formal \textit{pythonrv} specification
+functions consists of three composable specification functions:
+\textit{assert}, \textit{next} and \textit{if}; See
+Figure~\ref{figure-basic-formal-specification-functions}. A complete and
+verifiable formal specification function also needs some boilerplate, shown in
+Figure~\ref{figure-formal-boilerplate}.
 
 \begin{figure}[h!]
 	\begin{center}
 	\begin{minipage}{0.7\textwidth}
 	\begin{lstlisting}
-def assert(event):
-  assert E
-  # optional composition point 'tail'
+def spec():
+  a = make_assert(E)
+  tail = # optional composition point 'tail'
+  return a + tail
 
-def next(event):
+def next():
   x = # required composition point 'next'
-  event.next(x)
-  # optional composition point 'tail'
+  n = make_next(x)
+  tail = # optional composition point 'tail'
+  return n + tail
 
-def if(event):
-  if E:
-    # required composition point 'then'
-  else:
-    # optional composition point 'else'
-  # optional composition point 'tail'
+def if():
+  then = # required composition point 'then'
+  els = # optional composition point 'else'
+  i = make_if(E, then, else)
+  tail # optional composition point 'tail'
+  return i + tail
 	\end{lstlisting}
 	\end{minipage}
 	\end{center}
@@ -1657,9 +1704,35 @@ def if(event):
 	\label{figure-basic-formal-specification-functions}
 \end{figure}
 
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+	\begin{lstlisting}
+from pythonrv import rv
+from pythonrv.formalrv import (formal_spec,
+  make_assert, make_next, make_if)
+
+monitorees = # list of monitorees
+@rv.monitor(monitorees)
+@formal_spec
+def spec():
+  # spec is a formal specification function
+  # - assert, next or if
+	\end{lstlisting}
+	\end{minipage}
+	\end{center}
+
+  \caption{The boilerplate code for formal \textit{pythonrv} specification
+  functions that allow verification and instrumentation to take place.}
+	\label{figure-formal-boilerplate}
+\end{figure}
+
 The label \textit{E} used in the assertion and if statement (lines 2 and 11)
-denotes any idempotent, immutable, valid Python boolean expression. The
-previous section described the semantics for this.
+denotes any idempotent, immutable, valid Python boolean expression. A technical
+detail is that if the expression needs to access any properties of the
+\texttt{event} argument, they need to be of the form \texttt{lambda event: E}.
+The previous section described how these expressions are used in formal
+verification.
 
 The three basic formal specification functions correspond to simple,
 nondeterministic, finite automata, which are depicted in
@@ -1730,7 +1803,7 @@ functions.
 %%%%%%%%%%%%%%%%%%%%%%%%
 
 
-\subsection{Transformation to automata and rules for composition}
+\subsection{Transformation to Automata and Rules for Composition}
 \label{section-approach-composition}
 \lstset{language=Python,numbers=none}
 
@@ -1830,9 +1903,9 @@ same semantics, as seen in Figure~\ref{figure-assert-composition-simplified}.
 	\begin{minipage}{0.45\textwidth}
 		\centering
     \begin{lstlisting}
-def s(event):
-  assert E
-  assert E'
+def s():
+  return make_assert(E) +
+         make_assert(E')
     \end{lstlisting}
 	\end{minipage}
   ~
@@ -1921,18 +1994,18 @@ associative, as shown in Figure~\ref{figure-next-associative}.
 %% Associativity of the next composition point
 %%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure}[h!]
-	\begin{minipage}{0.25\textwidth}
+	\begin{minipage}{0.20\textwidth}
 		\centering
     \[
       s' = n \, \circ_{next} \, s
     \]
 	\end{minipage}
   ~
-	\begin{minipage}{0.25\textwidth}
+	\begin{minipage}{0.35\textwidth}
 		\centering
     \begin{lstlisting}
-def s'(event):
-  event.next(s)
+def s'():
+  return make_next(s)
     \end{lstlisting}
 	\end{minipage}
   ~
@@ -1968,17 +2041,16 @@ def s'(event):
 	\begin{minipage}{0.45\textwidth}
 		\centering
     \begin{lstlisting}
-def s(event):
-  event.next(s1)
-  event.next(s2)
+def s():
+  return make_next(s1) +
+    make_next(s2)
 
 # equivalent to
-def s(event):
-  event.next(t)
+def s():
+  return make_next(t)
 
 def t(event):
-  s1()
-  s2()
+  return s1() + s2()
     \end{lstlisting}
 	\end{minipage}
   ~
@@ -2055,18 +2127,178 @@ If the \textit{else} composition point is left out, then $Q_2 = T_2 = R_2 = S_2
 $q_1$, which can always be reached. This will allow for successful verification
 when $E$ is false and there is no else clause.
 
+With these constructions in mind, the next section shows a few functioning
+examples.
+
+
+\subsection{Examples of Formal Specifications}
+\label{section-approach-examples-of-formal-specifications}
+\lstset{language=Python,numbers=none}
+
+Here follows two examples of formal \textit{pythonrv} specifications, both in
+their specification function form, written in Python and shown in
+Figure~\ref{figure-formal-syntax-example-1} and
+Figure~\ref{figure-formal-syntax-example-2}, and as automata, shown in
+Figure~\ref{figure-formal-syntax-example-1-automata} and
+Figure~\ref{figure-formal-syntax-example-2-automata}.
+
+The first example, Figure~\ref{figure-formal-syntax-example-1}
+and~\ref{figure-formal-syntax-example-1-automata}, shows a simple specification
+that makes sure that the first argument to the function \texttt{fib} in the
+module \texttt{fibmodule} is always positive. The main difference with the
+similar informal specification in Figure~\ref{figure-syntax-example-1} is that
+here we have to explicitly create a loop by composing with a \textit{next}
+specification, pointing back to \texttt{spec}. This is required so that not
+only the first event is verified.
+
+The example in Figure~\ref{figure-formal-syntax-example-2} is more complex, as
+can be seen by the sprawling automata in
+Figure~\ref{figure-formal-syntax-example-2-automata}. The specification
+verifies accepts only interleaving calls to two functions, starting with
+\texttt{mymodule.foo}, then to
+\texttt{mymodule.bar}. This is represented by the loop between the $q_0$ and
+$r_0$ states in the automata. Because the labels for the transitions between
+them are $\top$, i.e.\ always true, we are guaranteed that on every event we
+either transition into state $q_0$ or $q_1$.
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%
-%% Composition, if o s, symbol-python-automata
+%% formal syntax examples
+%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.9\textwidth}
+	\lstinputlisting{figures/formal_syntax_example_1.py}
+	\end{minipage}
+	\end{center}
+
+  \caption{A formal \textit{pythonrv} specification function, similar to the
+    informal specification function shown in
+    Figure~\ref{figure-syntax-example-1}. The automata for this specification
+    function is shown in Figure~\ref{figure-formal-syntax-example-1-automata}.}
+	\label{figure-formal-syntax-example-1}
+\end{figure}
+
+\begin{figure}[h!]
+	\begin{minipage}{0.9\textwidth}
+		\centering
+    \[
+      \begin{array}{rcl}
+        A(\text{spec}) & = & (Q, P, q_0, S, F) \\
+                     Q & = & \{q_0, q_1, f\} \\
+                     P & = & \{(q_0, q_1, \delta(\texttt{func.inputs$[0]$}) > 0),
+      (q_0, f, \neg(\delta(\texttt{func.inputs$[0]$}) > 0)), \\
+                       &   & \; (q_0, q_0, \top)\} \\
+                     S & = & \{q_1\} \\
+                     F & = & \{f\}
+      \end{array}
+    \]
+	\end{minipage}
+
+  \bigskip
+
+	\begin{minipage}{0.9\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=3.5cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0) {$q_0$};
+			\node[state,accepting] (q1) [below right of=q0] {$q_1$};
+      \node[state] (f) [below left of=q0] {\textit{f}};
+			\path
+        (q0) edge [loop above] node {$\top$} (q0)
+        (q0) edge node {$\delta(\texttt{func.inputs$[0]$}) > 0$} (q1)
+        (q0) edge node [above left] {$\neg(\delta(\texttt{func.inputs$[0]$}) > 0)$} (f);
+		\end{tikzpicture}
+	\end{minipage}
+  \caption{The automata for the formal \textit{pythonrv} specification function
+    in Figure~\ref{figure-formal-syntax-example-1}.}
+	\label{figure-formal-syntax-example-1-automata}
+\end{figure}
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.9\textwidth}
+	\lstinputlisting{figures/formal_syntax_example_2.py}
+	\end{minipage}
+	\end{center}
+
+  \caption{A more complex formal \textit{pythonrv} specification function. The automata for
+    this specification function is shown in
+    Figure~\ref{figure-formal-syntax-example-2-automata}.}
+	\label{figure-formal-syntax-example-2}
+\end{figure}
+
+\begin{figure}[h!]
+	\begin{minipage}{0.9\textwidth}
+		\centering
+    \[
+      \begin{array}{rcl}
+        A(\text{spec}) & = & (Q, P_1 \cup P_2 \cup P_3 \cup P_4, q_0, S, F) \\
+                     Q & = & \{q_0, q_1, f_1, q_2, q_3, f_2, r_0, r_1, f_r\} \\
+                   P_1 & = & \{(q_0, q_1, \lambda = \texttt{foo}), (q_0, f_1, \neg (\lambda = \texttt{foo}))\} \\
+                   P_2 & = & \{(q_0, q_2, X), (q_0, q_3, \top), (q_0, f_2, \neg X)\} \\
+                   P_3 & = & \{(q_0, r_0, \top), (r_0, q_0, \top)\} \\
+                   P_4 & = & \{(r_0, r_1, \lambda = \texttt{bar}), (r_0, f_r, \neg (\lambda = \texttt{bar}))\} \\
+                     S & = & \{q_1, q_2, q_3, r_1\} \\
+                     F & = & \{f_1, f_2, f_r\} \\
+                     G & = & \delta(\texttt{foo.inputs$[0]$}) == 0 \\
+                     X & = & \delta(\texttt{foo.inputs$[1]$}) == 0
+      \end{array}
+    \]
+	\end{minipage}
+
+  \bigskip
+
+	\begin{minipage}{0.9\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=3.2cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+
+      % first spec
+			\node[state,initial above] (q0) {$q_0$};
+			\node[state,accepting] (q1) [below right of=q0] {$q_1$};
+      \node[state] (f1) [below of=q0] {\textit{f$_1$}};
+      % if
+			\node[state,accepting] (q2) [left of=q0] {$q_2$};
+      \node[state] (f2) [above left of=q2] {\textit{f$_2$}};
+			\node[state,accepting] (q3) [below left of=q2] {$q_3$};
+
+      % second spec
+      \node[state] (r0) [right of=q0] {$r_0$};
+			\node[state,accepting] (r1) [right of=r0] {$r_1$};
+      \node[state] (fr) [below right of=r0] {\textit{f$_r$}};
+			\path
+        % first spec
+        % assert
+        (q0) edge node {$\lambda = \text{foo}$} (q1)
+        (q0) edge node [above left] {$\neg \lambda = \text{foo}$} (f1)
+        % if
+        (q0) edge node [above] {$G \wedge X$} (q2)
+        (q0) edge node [above right] {$\neg (G \wedge X)$} (f2)
+        (q0) edge node [above left] {$\top$} (q3)
+        % next
+        (q0) edge [bend left=20] node [above] {$\top$} (r0)
+
+        % second spec
+        % assert
+        (r0) edge node {$\lambda = \text{bar}$} (r1)
+        (r0) edge node [above right] {$\neg \lambda = \text{bar}$} (fr)
+        % next
+        (r0) edge [bend left=20] node [above] {$\top$} (q0);
+		\end{tikzpicture}
+	\end{minipage}
+  \caption{A direct translation of the formal \textit{pythonrv} specification
+    function in Figure~\ref{figure-formal-syntax-example-2} to an automata.
+    $q_0$ is the root for the \texttt{spec} specification, and $r_0$ is the
+    root of the \texttt{spec\_bar\_called} specification. $q_1$ and $f_1$
+    relates to the assertion in \texttt{spec}, and $q_2$, $q_3$ and $f_2$ to
+    the if statement. $r_1$ and $f_r$ relates to the assertion in
+    \texttt{spec\_bar\_called}.}
+	\label{figure-formal-syntax-example-2-automata}
+\end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-
-
-
 
 
 %================================================
