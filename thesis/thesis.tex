@@ -82,38 +82,49 @@ CSC: Dr.\ Narges Khakpour\\Examiner: title Johan Håstad}
 
 \begin{abstract}
 
-Computer software are growing ever more complex, and more sophisticated tools
-are required to make sure the software operates correctly. Traditional
-approaches, like formal methods and testing, suffer from complexity, difficulty
-and rarity of use, and incompleteness and informality, respectively. A
-relatively new approach called runtime verification is an attempt for a
-lightweight alternative that verifies a program's execution against its
-specification.
+% introduction & problem
+Computer software is growing ever more complex, and more sophisticated tools
+are required to make sure the software operates in a correct way --- i.e.\
+according to its specification. Traditional approaches to program verification
+have much to give, but they also have their disadvantages. While formal methods
+can give nice mathematical proofs about the correctness of programs, they
+suffer from complexity and are difficult to use. Often they work only on a
+constructed system model, not the actual program. Testing on the other hand has
+a simple syntax and great tool support, and it is in widespread use. But it is
+informal and incomplete, only testing the specific test cases that the
+test-writers can come up with.
 
-This work investigates how to use the simpleness of testing syntax and its
-great tooling support --- specifically that of unit testing --- and how the
-target programs' programming language can be used to write specifications for
-runtime verification.
+A relatively new approach called runtime verification is an attempt for a
+lightweight alternative that verifies a program's actual \textit{execution}
+against its specification, possibly while the program is running.
 
-A proof-of-concept implementation written in Python is described. It is tested
-on a real-time application, and many interesting properties can be verified for
-it using runtime verification that ordinary tests would have trouble with.
+% abstract solution
+This work investigates how testing, and specifically unit testing, can be
+combined with runtime verification. It shows how the syntax of unit tests,
+written in the target program's programming language, can be used to inspire
+the syntax for specifications for runtime verification. Both informal and
+formal specifications are supported.
 
-Also, a formal foundation is given to specifications written in a subset of
-Python, enabling formal verification.
+% deliverables
+A proof-of-concept framework for Python called \textit{pythonrv} is implemented
+and described, and is tested on a real-life application. A formal foundation is
+constructed for specifications written in a subset of Python, enabling formal
+verification.
 
-The result shows that runtime verification can be made simpler, with easier
-integration into the program, and allowing the programmer to write
-specifications in pure Python. Formal specifications can also be used
-\todo{excitement!}.
+% results & conclusions
+The result shows that the proof-of-concept implementation allow for effective
+use of runtime verification. It is easy to integrate into existing programs,
+and the informal specification syntax is quite simple. Many interesting
+properties can be verified using it that ordinary tests would have trouble
+with.
 
+It also shows that formal specifications can be written in Python, but in a
+more unwieldy syntax and structure.
+
+% potential
 The recommendation for future work lies in improving the specification syntax,
-using unit testing concepts such as expectations, and on how to make the formal
-specification syntax more like that for its non-formal cousin.
-
-\todo{"Four punchlines". Sell --- this is a pitch. More exciting results. Part
-of toolbox, lots of value.}
-
+using unit testing concepts such as expectations, and on working to make the
+formal specification syntax more like that of its informal sibling.
 
 \end{abstract}
 \clearpage
@@ -247,10 +258,12 @@ use of runtime verification for checking the correctness of programs.
 The rest of this report is structured as follows. This chapter gives an
 introduction to the report and the problem statement.
 Chapter~\ref{chapter-background} gives a background to the subject of verifying
-program correctness. Chapter~\ref{chapter-intro-to-rv} continues by
-describing the previous research on runtime verification and the syntax of
-specification languages. Chapter~\ref{chapter-intro-to-unit-testing} gives an
-overview of the current ideas in unit testing.
+program correctness and an overview of formal methods, testing and runtime
+verification. Chapter~\ref{chapter-intro-to-rv} continues by describing the
+previous research on runtime verification, the syntax of specification
+languages and different approaches to code instrumentation.
+Chapter~\ref{chapter-intro-to-unit-testing} gives an overview of the current
+ideas in unit testing.
 
 Chapter~\ref{chapter-approach} describes the approach this work takes to
 solving the problem stated in Section~\ref{section-problem-statement}. It
@@ -266,6 +279,17 @@ The first time an important concept is introduced it is written in
 \textit{italics}. If such a concept is not explained in the text, it has a
 brief description in the Dictionary, see Appendix~\ref{appendix-dictionary}.
 
+\section{Limitations}
+
+Naturally, there are some areas that this report does not attempt to solve. The
+report describes a proof-of-concept implementation of a runtime verification
+framework for Python, with specifications written as Python code. It discusses
+both formal and informal specifications, and shows how verification can be done
+for both. It does not attempt to formalize Python. It gives a formalization for
+only a subset of Python --- for specifications constructed in a special way.
+
+Also, it only deals with a single thread of execution --- no multi-threading or
+multiple processes.
 
 
 
