@@ -985,13 +985,13 @@ the two will be the main subject in the next two chapters.
 \pagestyle{newchap}
 \chapter{Approach} \label{chapter-approach}
 
-This chapter describes the proof-of-concept implementation of this report.
-
+With all this background overview and introductions out of the way it is time
+for the core and main substance of this report.
 
 \section{Introduction}
 
 As stated in Section~\ref{section-problem-statement}, the objective of this
-thesis is to investigate whether it is possible to do runtime verification with
+report is to investigate whether it is possible to do runtime verification with
 specifications written in the target program's programming language, structured
 similar to unit tests. To find a solution for this, there are four issues we
 need to address:
@@ -1017,7 +1017,7 @@ online\footnote{\texttt{https://github.com/tgwizard/pythonrv}}.
 
 \subsection{Definitions}
 
-Here follows some definition that will be used in the following sections.
+The following definitions will be used through the next few sections.
 
 \begin{itemize}
   \item A \textit{specification} is a construct that determines the correct
@@ -1055,7 +1055,7 @@ Python\footnote{\texttt{http://www.python.org}}, among several languages, fits
 these criteria, and was chosen as the implementation language. Python is a
 dynamic programming language, commonly running inside a virtual machine.
 Perhaps the most striking feature of Python is its use of indentation as block
-delimiters. An increase in indentation starts a new block, a decrease marks the
+delimiters. An increase in indentation starts a new block; a decrease marks the
 end of the current block.
 
 The name \textit{pythonrv} clearly reflects that it is a framework for runtime
@@ -2179,11 +2179,13 @@ The example in Figure~\ref{figure-formal-syntax-example-2} is more complex, as
 can be seen by the sprawling automata in
 Figure~\ref{figure-formal-syntax-example-2-automata}. The specification
 verifies accepts only interleaving calls to two functions, starting with
-\texttt{mymodule.foo}, then to
-\texttt{mymodule.bar}. This is represented by the loop between the $q_0$ and
-$r_0$ states in the automata. Because the labels for the transitions between
-them are $\top$, i.e.\ always true, we are guaranteed that on every event we
-either transition into state $q_0$ or $q_1$.
+\texttt{mymodule.foo}, then to \texttt{mymodule.bar}. This is represented by
+the loop between the $q_0$ and $r_0$ states in the automata. Because the labels
+for the transitions between them are $\top$, i.e.\ always true, we are
+guaranteed that on every event we either transition into state $q_0$ or $q_1$,
+and verification will never be finished. The specification also asserts that if
+\texttt{foo} is called with $0$ as the first argument, the second argument must
+also be $0$. This is just to demonstrate how the \textit{if} construct works.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -2407,8 +2409,13 @@ Authentication of employees and authorization of their access rights are very
 important. Specifications can be written to make sure all views or requests are
 made by an authenticated user (except for the login screen), and that they are
 allowed to perform the requested action. A specification showing a
-specification verifying proper authentication is shown in
-Figure~\ref{figure-app-authentication}.
+specification verifying that proper authentication has been done is shown in
+Figure~\ref{figure-app-authentication-informal}. This is just one way of
+writing a specification function for this requirement. There are several other
+options, such as utilizing the temporal capabilities of runtime verification
+with the \texttt{event.next} function. E.g., if a request asks for a resource
+requiring authentication, we could specify that before the response is sent,
+authentication must have been done.
 
 \begin{figure}[h!]
 	\begin{center}
@@ -2418,12 +2425,16 @@ Figure~\ref{figure-app-authentication}.
 	\end{center}
 
   \caption{An informal \textit{pythonrv} specification verifying that views are
-    only accessible with proper authentication.}
-	\label{figure-app-authentication}
+    only accessible with proper authentication. Note how the use of Python in
+    the specification function allows us to refactor away the condition that
+    determines whether authentication should be required, leaving the
+    specification much simpler and cleaner.}
+	\label{figure-app-authentication-informal}
 \end{figure}
 
-\todo{}
+\todo{more examples}
 Talk about where specifications would be suitable, and for what.
+
 
 
 
@@ -2439,7 +2450,7 @@ This report, and the proof-of-concept implementation \textit{pythonrv}, has
 shown that it is possible to write specifications in the target programs
 programming language (Python) and in a manner more similar to unit testing.
 
-\todo{excitement!}
+\todo{excitement! and better structure}
 
 However, a few reservations should be mentioned.
 
@@ -2472,6 +2483,8 @@ Section~\ref{section-expectations}, could fit quite well with the
 \textit{pythonrv} style of writing specifications. This could allow for a nicer
 way to describe temporal properties.
 
+\todo{monitor more points. \texttt{@property}}
+
 Especially the formal specification could do with more work on the
 specification language. Can this language become more like that of the informal
 specifications?
@@ -2487,7 +2500,7 @@ to turn verification on or off, or to switch between online and offline, would
 be nice. For instance, when a bug has been found, RV could be turned on for
 further verification and help in finding the erroneous code.
 
-\section{Discussion}
+\section{Final Words}
 
 The trend of software systems in general seems to be toward larger and more
 complex entities. This makes the automated verification of program
