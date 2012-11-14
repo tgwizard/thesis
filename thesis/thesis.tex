@@ -193,9 +193,9 @@ consultancy.
 
 I've been fortunate to have had two great supervisors: Erland Ranvinge at
 Valtech and Dr.\ Narges Khakpour at the School of Computer Science and
-Communication, KTH\@. They have been of great help, both in the conception of the
-initial idea, and during the project, discussing problems and giving feedback
-on the work and this report. Thank you!
+Communication, KTH\@. They have been of great help, both in the conception of
+the initial idea, and during the project, discussing problems and giving
+feedback on the work and this report. Thank you!
 
 I'd also like to thank Valtech for the opportunity to do this degree project as
 part of a trainee program, and for all the great colleagues there giving their
@@ -248,9 +248,9 @@ execution can be given a mathematical proof that it follows the program's
 specification.
 
 This is where this report takes off, with formal verification on one side and
-testing on the other, and with runtime verification somewhere in between. Could
-the syntax and tooling of unit testing be used to improve the ease of using
-runtime verification?
+testing on the other, and with runtime verification somewhere in between. In
+this report, we investigate how the syntax and tooling of unit testing can be
+used to improve the ease of using runtime verification.
 
 
 \section{Problem Statement} \label{section-problem-statement}
@@ -293,7 +293,33 @@ written in the target program's programming language, it might popularise the
 use of runtime verification for checking the correctness of programs.
 
 
+\section{Contribution}
+
+In this report we give a background on runtime verification and unit testing,
+and describe a proof-of-concept implementation called \textit{pythonrv}.
+\textit{pythonrv} is a runtime verification framework for Python. It allows the
+specification writer to write specifications, both formal and informal,
+directly in Python. It makes good use of the Python decorator syntax, and gives
+a clean separation between the program and the specifications, while allowing
+the specifications to use the power of Python. It is the approach to formal
+verification for specifications written in Python that is our main
+contribution.
+
+Naturally, there are some areas that are left out-of-scope for this report. We
+give a formalization for only a subset of Python --- for specifications
+constructed in a special way. We do not attempt to formalize Python.
+
+Also, we only deal with a single thread of execution --- no multi-threading or
+multiple processes --- and we do not handle real-time specifications. No
+performance testing or benchmarking is done on the implementation.
+
+These limitations to this work are of course all very interesting, and would be
+very suitable for future work in this area.
+
+
 \section{Structure of this Report}
+
+\todo{Rewrite this structure thingy after I've restructured the report.}
 
 The rest of this report is structured as follows. This chapter gives an
 introduction to the report and the problem statement.
@@ -319,20 +345,6 @@ The first time an important concept is introduced it is written in
 \textit{italics}. If such a concept is not explained in the text, it has a
 brief description in the Glossary, see Appendix~\ref{appendix-glossary}.
 
-\section{Limitations}
-
-Naturally, there are some areas that this report does not attempt to solve. The
-report describes a proof-of-concept implementation of a runtime verification
-framework for Python, with specifications written as Python code. It discusses
-both formal and informal specifications, and shows how verification can be done
-for both. It does not attempt to formalize Python. It gives a formalization for
-only a subset of Python --- for specifications constructed in a special way.
-
-Also, it only deals with a single thread of execution --- no multi-threading or
-multiple processes. To limit the scope of the framework, it doesn't directly
-expose real-time data to the specifications.
-
-No performance testing or benchmarking is done on the implementation.
 
 
 
@@ -366,8 +378,8 @@ what it is supposed to, which can be expressed as "Are we building the program
 correctly?". This can be contrasted with \textit{validation}, in which we ask:
 "Are we building the correct program?" \cite{boehm81engineeringeconomics}.
 Validation is concerned with whether the specifications really capture the
-requirements we want for the system. Verification is concerned with assuring
-us that the program follows its specification, and it is verification in which
+requirements we want for the system. Verification is concerned with assuring us
+that the program follows its specifications, and it is verification in which
 this report takes an interest. Verification includes everything from manually
 running the program and parsing through the output, to automated testing
 setups, to formal methods.
@@ -411,8 +423,9 @@ supposed to do.
 Research of interest include the early work on formal methods, e.g.\ by Hoare
 \cite{hoare69} and Floyd \cite{floyd67}, and work on logics , e.g.\ linear
 temporal logic (LTL) by Pnueli \cite{pnueli77}. The seminal work done by Hoare,
-Floyd and Pnueli lay the foundation for many interesting approaches. LTL is one
-of the common formal languages used for specifications in runtime verification.
+Floyd and Pnueli lay the foundation for many interesting approaches for
+reasoning about program correctness. LTL is one of the common formal languages
+used for specifications in runtime verification.
 
 \textit{Theorem proving}, as started by Hoare \cite{hoare69}, Floyd
 \cite{floyd67} and others, is the manual, semi-automated, or (not so often)
@@ -577,9 +590,6 @@ having a specification as complex as the program itself, except for as a point
 of reference. A program can be seen as an all-encompassing, perfect,
 always-true, specification of itself.
 
-\section{Related Work}
-
-Temporal Rover, EAGLE, MAC Logic
 
 \subsection{Formalisms for Specifications}
 
@@ -644,6 +654,11 @@ Temporal Logic (TLTL). It introduces clocks to make specifications
 of real-time properties possible. It is of great interest to runtime
 verification, but will not be discussed further here. See e.g.\
 \cite{bauer06monitoring} for more.
+
+Several runtime verification approaches use LTL or versions thereof as
+specification language, see e.g.\ Bauer et al.\
+\cite{bauer06monitoring}, Bodden \cite{bodden05efficientrv}, Kähkönen et al.\
+\cite{kahkonen09lime} and Havelund et al.\ \cite{havelund04jpax}.
 
 \subsubsection{EAGLE and RuleR}
 
@@ -821,12 +836,13 @@ verification code from external specifications.
 
 Rosenblum \cite{rosenblum95practicalassertions} uses specially annotated
 comments, written directly in the code. Bodden
-\cite{bodden05efficientrv,bodden04lightweightltl} uses Java annotations, which
-are written at function and variable definitions, to mark code for
-verification. The programming language Eiffel has full language support for
-Design by Contract, with pre- and post-conditions, invariants, and more. These
-are written in direct proximity to the code to be verified. For simple cases it
-is common to write assertions in the program \cite{bartetzko01jass}.
+\cite{bodden05efficientrv,bodden04lightweightltl} and Kähkönen et al.\
+\cite{kahkonen09lime} use Java annotations, which are written at function and
+variable definitions, to mark code for verification. The programming language
+Eiffel has full language support for Design by Contract, with pre- and
+post-conditions, invariants, and more. These are written in direct proximity to
+the code to be verified. For simple cases it is common to write assertions in
+the program \cite{bartetzko01jass}.
 
 Other approaches, such as the ones taken by Jalili et al.\ in
 \cite{jalili07rverl} and Barringer et al.\ in \cite{barringer03eagle}, use
@@ -890,6 +906,7 @@ verification code is then compiled together with the program.
 	\label{figure-pre-processing-comments-example}
 \end{figure}
 
+
 \subsection{Post-processing the Code}
 
 It is also possible to rewrite the compiled program, instrumenting the code
@@ -925,12 +942,25 @@ AspectJ\footnote{\texttt{http://www.eclipse.org/aspectj/}} is the canonical
 framework for aspect-oriented programming.
 
 Runtime verification is a typical case of a cross-cutting concern. Bodden
-\cite{bodden05efficientrv} uses AspectJ in his runtime verification
-implementation.
+\cite{bodden05efficientrv} and Kähkönen et al.\ \cite{kahkonen09lime} use
+AspectJ in their runtime verification implementations. The specifications are
+however written adjacent to the code or interfaces being monitored, as Java
+Annotations.
 
 Aspects in AspectJ are implemented as a post-processing step in the compilation
 process, adding wrapper code for handling the aspects.
 
+
+\subsection{No instrumentation}
+
+Some runtime verification specifications can be written and executed without
+the need for extra instrumentation of the system. Such specifications could
+monitor the surrounding environment, e.g.\ check availability of required
+services, or make sure that enough disk space is free. Other approaches could be
+to use existing features of the system, such as its logging, for runtime
+verification. The logs can be parsed by a separate process, during the
+execution or as a post-mortem, do determine that the execution followed the
+specification. Barringer et al.\ do this in \cite{barringer09tutorial}.
 
 
 
@@ -1204,6 +1234,10 @@ verification in Python.
 The syntax, described in the next section, of the \textit{pythonrv}
 specifications are naturally heavily influenced by the fact that they are
 written in Python.
+
+\textit{pythonrv} is not the first runtime verification framework for Python,
+see e.g.\ \textsc{LogScope} \cite{barringer09tutorial}. But it is unique in its
+use of pure Python as specification language.
 
 
 \section{Syntax} \label{section-approach-syntax}
