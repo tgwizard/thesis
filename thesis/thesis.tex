@@ -349,23 +349,28 @@ brief description in the Glossary, see Appendix~\ref{appendix-glossary}.
 
 
 
+
 %================================================
-%====== Chapter 2, Background
+%====== Chapter 3, Introduction to Runtime Verification
 %================================================
 
 \pagestyle{newchap}
-\chapter{Background} \label{chapter-background}
+\chapter{Introduction to Runtime Verification} \label{chapter-intro-to-rv}
 
 Runtime verification is a new area of research, but the research on other forms
 of verification, such as formal methods and testing, goes back several decades.
 The terms used in this area are used slightly differently by different
 researchers, so this chapter starts by giving definitions for some concepts
-used in this report. Then we give a short overview of the research areas
-related to the subject of this report. Section~\ref{section-formal-methods}
-explains what is meant by proving the correctness of programs, and
-Section~\ref{section-testing} explains what testing is. And finally,
-Section~\ref{section-rv} describes runtime verification and its place in the
-set of verification approaches.
+used in this report, before delving into some background of formal methods
+
+Runtime verification is a technique for verifying a program's compliance
+against a specification during runtime. These specifications need to be written
+somehow, which will be discussed in Section~\ref{section-specifications}.
+Approaches for verification are discussed in
+Section~\ref{section-verification}. For verification to work, during runtime,
+the program usually needs to be instrumented in such a way that the
+verification process can access all pertinent data. This is discussed in
+Section~\ref{section-instrumentation}.
 
 
 \section{Terms and Definitions}
@@ -465,41 +470,8 @@ model can be difficult to construct, or deviate too far from the system. It can
 not take the dynamic properties and configuration of the executing code into
 account.
 
-Runtime verification (Section~\ref{section-rv}) attempts to solve this by
-dealing directly with the system, creating its model at runtime.
-
-
-\section{Testing} \label{section-testing}
-Opposite formal methods on the verification spectrum is \emph{testing}, which
-is the practical approach of checking that the program, given a certain input,
-produces the correct/acceptable output. Testing consists of a set, or
-\textit{suite}, of \textit{test cases}. A test case tests some aspect of the
-program, from large ("It should be possible to go through the shop flow and buy
-a product") to small ("This function should throw an exception when given a
-null argument").
-
-Testing can be either manual or \textit{automated}, or something in between. In
-manual testing a programmer, tester or other stakeholder, runs the program,
-entering some inputs and inspecting the outputs. Test cases could be documents
-describing what should happen for given inputs, where to click or type to cause
-the desired outcome. In \textit{automated} testing the test cases are
-machine-runnable, so that a computer can run them during the development
-process, or when checking code into a central repository, or during releases,
-etc.
-
-Testing is not complete (for all but the most trivial programs, it is
-impossible to write complete tests), and lacks a formal foundation, so it
-cannot be used for formal verification. Testing is popular and is used on
-virtually all development projects, taking up a large part of development time
-(see e.g.\ \cite{brooks75mythicalmanmonth}).
-
-\textit{Unit testing} is the concept of writing tests for small units in a
-program, such as functions, classes, etc. These tests are used during
-development to test the functionality of the units. The aim is to reduce the
-risk of breaking existing functionality when developing new features, or
-modifying existing code, by preventing regression. Unit testing is described in
-more detail in Chapter~\ref{chapter-intro-to-unit-testing}.
-
+Runtime verification attempts to solve this by dealing directly with the
+system, creating its model at runtime.
 
 
 \section{Runtime Verification} \label{section-rv}
@@ -547,27 +519,6 @@ and differences, with other verification approaches. In
 approaches to and frameworks for runtime verification.
 
 The next chapter examines RV in more detail.
-
-
-
-
-
-
-%================================================
-%====== Chapter 3, Introduction to Runtime Verification
-%================================================
-
-\pagestyle{newchap}
-\chapter{Introduction to Runtime Verification} \label{chapter-intro-to-rv}
-
-As we saw in Section~\ref{section-rv}, runtime verification is a technique for
-verifying a program's compliance against a specification during runtime. These
-specifications need to be written somehow, which will be discussed in
-Section~\ref{section-specifications}. Approaches for verification are discussed
-in Section~\ref{section-verification}. For verification to work, during
-runtime, the program usually needs to be instrumented in such a way that the
-verification process can access all pertinent data. This is discussed in
-Section~\ref{section-instrumentation}
 
 
 \section{Specifications} \label{section-specifications}
@@ -965,6 +916,7 @@ specification. Barringer et al.\ do this in \cite{barringer09tutorial}.
 
 
 
+
 %================================================
 %====== Chapter 4, Introduction to Unit Testing
 %================================================
@@ -975,6 +927,41 @@ specification. Barringer et al.\ do this in \cite{barringer09tutorial}.
 We discussed testing and in general in Section~\ref{section-testing}. Here
 we'll delve into more detail about unit testing in particular, and discuss how
 it works, and what the syntax is like.
+
+
+\section{Testing} \label{section-testing}
+Opposite formal methods on the verification spectrum is \emph{testing}, which
+is the practical approach of checking that the program, given a certain input,
+produces the correct/acceptable output. Testing consists of a set, or
+\textit{suite}, of \textit{test cases}. A test case tests some aspect of the
+program, from large ("It should be possible to go through the shop flow and buy
+a product") to small ("This function should throw an exception when given a
+null argument").
+
+Testing can be either manual or \textit{automated}, or something in between. In
+manual testing a programmer, tester or other stakeholder, runs the program,
+entering some inputs and inspecting the outputs. Test cases could be documents
+describing what should happen for given inputs, where to click or type to cause
+the desired outcome. In \textit{automated} testing the test cases are
+machine-runnable, so that a computer can run them during the development
+process, or when checking code into a central repository, or during releases,
+etc.
+
+Testing is not complete (for all but the most trivial programs, it is
+impossible to write complete tests), and lacks a formal foundation, so it
+cannot be used for formal verification. Testing is popular and is used on
+virtually all development projects, taking up a large part of development time
+(see e.g.\ \cite{brooks75mythicalmanmonth}).
+
+
+\section{Unit Testing}
+
+\textit{Unit testing} is the concept of writing tests for small units in a
+program, such as functions, classes, etc. These tests are used during
+development to test the functionality of the units. The aim is to reduce the
+risk of breaking existing functionality when developing new features, or
+modifying existing code, by preventing regression. Unit testing is described in
+more detail in Chapter~\ref{chapter-intro-to-unit-testing}.
 
 In unit testing, a program is divided into small, separate parts --- silos,
 with minimum dependencies to the rest of the system --- and each unit is tested
