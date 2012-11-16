@@ -9,6 +9,7 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
+\usepackage{amsthm}
 \usepackage{paralist}
 \usepackage{listings}
 \usepackage{alltt}
@@ -26,6 +27,8 @@
 % http://www.tex.ac.uk/cgi-bin/texfaq2html?label=splitfoot
 \interfootnotelinepenalty=10000
 
+\theoremstyle{definition}
+\newtheorem{mydef}{Definition}
 
 \newcommand{\todo}[1]{\textbf{todo: #1}}
 \newcommand{\rephrase}{\textbf{(rephrase)} }
@@ -44,7 +47,7 @@ CSC: Dr.\ Narges Khakpour\\Examiner: Prof. Johan Håstad}
 
 \begin{document}
 
-\lstset{basicstyle=\ttfamily,
+\lstset{basicstyle=\ttfamily\footnotesize,
 	keywordstyle=\bfseries,
 	commentstyle=\color{gray},
 	columns=fixed,
@@ -520,14 +523,20 @@ The next chapter examines RV in more detail.
 
 \section{Specifications} \label{section-specifications}
 
-A specification is essentially something that describes the correct behaviour
-of a system. Specifications come in many forms, from the informal ones like ``I
-want it have cool buttons'', to the contractual ones written between companies
-and their clients, to tests (see e.g.\
-Chapter~\ref{chapter-intro-to-unit-testing}), and to formal specifications,
-written in formal languages, specifying properties that should verifiably hold
-for the program. It is these last two types of specifications that we are
-interested in here, and which play an important role in runtime verification.
+A \textit{specification} is essentially something that describes the correct
+behaviour of a system. Specifications come in many forms, from the informal
+ones like ``I want it have cool buttons'', to the contractual ones written
+between companies and their clients, to reference implementations\footnote{For
+instance, the only specification for Python is the canonical CPython
+implementation. Python is defined as ``what CPython does''.}, to tests (see
+e.g.\ Chapter~\ref{chapter-intro-to-unit-testing}), and to \textit{formal
+specifications}, written in formal languages, specifying properties that should
+verifiably hold for the program. They are is a mathematical constructs that can
+be used in verification proofs to show that a program works correctly.
+
+It is these last two types of specifications, tests and formal specifications,
+that we are interested in in this report, and which play an important role in
+our approach to runtime verification.
 
 In general, specifications should be abstract, written in a high-level
 language, and succinctly capture the desired property. Writing erroneous
@@ -608,16 +617,20 @@ outcome. For inconclusive results, we need to continue with the verification,
 as, with future events, the result could change into either satisfied or
 violated.
 
-There is a counterpart to LTL in the real-time setting called Timed Linear
-Temporal Logic (TLTL). It introduces clocks to make specifications
-of real-time properties possible. It is of great interest to runtime
-verification, but will not be discussed further here. See e.g.\
-\cite{bauer06monitoring} for more.
+There are counterparts to LTL in the real-time setting such Timed Linear
+Temporal Logic (TLTL) and Metric Temporal Logic (MTL). They introduces clocks
+and time constraints to make specifications of real-time properties possible.
+The concept of real-time specifications is of great interest to runtime
+verification, but will not be discussed further here as it is out of scope for
+this work. See e.g.\ \cite{bauer06monitoring,drusinsky00temporalrover} for
+more.
 
 Several runtime verification approaches use LTL or versions thereof as
 specification language, see e.g.\ Bauer et al.\
 \cite{bauer06monitoring}, Bodden \cite{bodden05efficientrv}, Kähkönen et al.\
-\cite{kahkonen09lime} and Havelund et al.\ \cite{havelund04jpax}.
+\cite{kahkonen09lime}, Java PathExplorer by Havelund et al.\
+\cite{havelund04jpax}, Temporal Rover by Drusinsky
+\cite{drusinsky00temporalrover}.
 
 \subsection{\textsc{Eagle} and \textsc{RuleR}}
 
@@ -694,12 +707,8 @@ PreviouslyAlways$(F)$ should be true.
 
 Both \textsc{Eagle} and \textsc{RuleR} are strictly more powerful than LTL;
 e.g., they both support specifications that allow matching function calls with
-function returns, the realm of context-free grammars. LTL does not support this
-\cite{barringer03eagle,barringer07ruler}.
-
-\subsection{Temporal Rover}
-
-\todo{A short description of Temporal Rover's Logic}
+function returns, which is in the realm of context-free grammars. LTL does not
+support this \cite{barringer03eagle,barringer07ruler}.
 
 
 \subsection{Design by Contract}
@@ -796,19 +805,20 @@ verified against them --- to see whether they follow the specification, or
 violate parts of it.
 
 There are several ways to verify a program against its specification. A common
-one, used in \cite{bauer06monitoring, bodden05efficientrv, jalili07rverl,
-barringer03eagle} among others, is to generate state machines from the
-specification. These state machines, sometimes called \textit{runtime
-monitors}, operate with the input language of events emitted by the program. As
-the program executes, or a program execution is examined offline, transitions
-are taken in the state machines, switching states. Violations against the
-specification can be described by failing to find a valid transition, or ending
-up in a fail state; Fulfilling a specification can be described by arriving at
-an accepting state.
+one used for formal verification, see e.g.\ \cite{bauer06monitoring,
+bodden05efficientrv, jalili07rverl, barringer03eagle}, is to generate state
+machines from the specification. These state machines, sometimes called
+\textit{runtime monitors}, operate with the input language of events emitted by
+the program. As the program executes, or a program execution is examined
+offline, transitions are taken in the state machines, switching states.
+Violations against the specification can be described by failing to find a
+valid transition, or ending up in a fail state; Fulfilling a specification can
+be described by arriving at an accepting state.
 
-Simpler verification approaches just instrument the code by adding assertions
-that check the properties of the specifications. This might be difficult to do
-with more complex specifications.
+Another approach for verification is to rewrite the instrumented code, adding
+assertions that check the properties of the specifications, see e.g.\
+\cite{rosenblum95practicalassertions, drusinsky00temporalrover}. This might be
+difficult to do with more complex specifications.
 
 
 \section{Code Instrumentation} \label{section-instrumentation}
@@ -827,10 +837,11 @@ discussed.
 
 \subsection{Pre-processing the Code}
 
-Rosenblum \cite{rosenblum95practicalassertions} uses a pre-processor step in
-the C compilation setup to instrument code, where the specifications (called
-assertions by Rosenblum) are transformed from comments into regular C code. The
-verification code is then compiled together with the program.
+Rosenblum \cite{rosenblum95practicalassertions} and Drusinsky
+\cite{drusinsky00temporalrover} use a pre-processor step in the compilation
+setup to instrument code, where the specifications (called assertions by
+Rosenblum) are transformed from comments into regular code. The verification
+code is then compiled together with the program.
 
 An example is shown in Figure~\ref{figure-pre-processing-comments-example}. In
 this case, \texttt{assume} work as pre-conditions and \texttt{promise} as
@@ -1124,86 +1135,53 @@ the two will be the main subject in the next two chapters.
 
 \pagestyle{newchap}
 \chapter{Approach} \label{chapter-approach}
+\lstset{language=Python}
 
-With all this background overview and introductions out of the way it is time
-for the core and main substance of this report.
-
-\section{Introduction}
-
-As stated in Section~\ref{section-problem-statement}, the objective of this
-report is to investigate whether it is possible to do runtime verification with
-specifications written in the target program's programming language, structured
-similar to unit tests. To find a solution for this, there are four issues we
-need to address:
-
-\begin{enumerate}
-  \item How should the syntax for the specifications be defined, so that it
-    looks similar to that of unit tests, but works for runtime verification?
-    Which language should be used? Which unit testing framework to take
-    inspiration from?
-	\item How should the program be instrumented to monitor the system, to expose
-		the appropriate events and data, and to build the system model?
-  \item How will this be used to verify the system against the specification?
-    Should the verification be done online or offline? Which techniques should
-    be used to verify the monitored system against the specification?
-	\item How can the resulting approach be provided with a formal foundation?
-\end{enumerate}
-
-This report is a documentation on how to solve these issues. The following
-sections are each dedicated to one issue, and shows a proof-of-concept of these
-ideas. The implementation, called \textit{pythonrv}, can be found
-online\footnote{\texttt{https://github.com/tgwizard/pythonrv}}.
-
-
-\subsection{Definitions}
-
-The following definitions will be used through the next few sections.
+In this report we investigate whether it is possible to do runtime verification
+with specifications written in the target program's programming language,
+structured similar to unit tests. To this end, there are four issues we have
+addressed:
 
 \begin{itemize}
-  \item A \textit{specification} is a construct that determines the correct
-    behaviour of a program. It could be a document, describing the programs
-		functionality, or a set of inputs and outputs, describing the correct
-		results of the program's computation on that set. It could be a reference
-		implementation\footnote{For instance, the only specification for Python is
-		the canonical CPython implementation. Python is defined as ``what CPython
-		does''.}. A \textit{formal specification} is a mathematical construct that
-		can be used in verification proofs to show that a program works correctly,
-		i.e.\ according to its specification.
-
-	\item In \textit{pythonrv} a \textit{specification function} is a Python
-		function describing a specification, which \textit{pythonrv} can use for
-		verification of the program.
-
-  \item A specification function \textit{monitors} points of the program, and
-    the points being monitored are called \textit{monitorees}. Currently only
-    functions are supported as monitorable points.
+  \item[\textbf{Syntax}] We define the syntax and general structure of
+    specification function in the next section.
+  \item[\textbf{Instrumentation}] How these specifications gain access to the
+    target system is described in
+    Section~\ref{section-approach-instrumentation}.
+  \item[\textbf{Formalization}] A subset of python, using a special structure
+    and methods, is given a formal foundation, and specifications written are
+    considered formal. This is described in
+    Section~\ref{section-approach-formal-foundation}.
+  \item[\textbf{Verification}] We have chosen to perform verification online
+    and synchronous with the target system. The technique for verification
+    differs for informal and formal specification functions.  See
+    Sections~\ref{section-approach-verification}
+    and~\ref{section-approach-formal-foundation}, respectively.
 \end{itemize}
 
-
-\subsection{Implementation Language Discussion}
+This chapter is a documentation on how we have chosen to solve these issues.
+The following sections are each dedicated to one issue, and shows a
+proof-of-concept of these ideas. The implementation, called \textit{pythonrv},
+can be found online\footnote{\texttt{https://github.com/tgwizard/pythonrv}}.
 
 During the development of this proof-of-concept, the biggest factor in deciding
-what language to use was how it would assist in instrumentation.
-Instrumentation is discussed in Section~\ref{section-approach-instrumentation}.
-The language should also be in wide use, support quick development, and have an
-active testing culture.
+what language to use was how it would assist in instrumentation. The language
+should also be in wide use, support quick development, and have an active
+testing culture.
 
 Easy access to a non-trivial and actively used system for real-world testing
 would be a plus. More on this in Chapter~\ref{chapter-evaluation}.
 
 Python\footnote{\texttt{http://www.python.org}}, among several languages, fits
 these criteria, and was chosen as the implementation language. Python is a
-dynamic programming language, commonly running inside a virtual machine.
+dynamic programming language, usually running inside a virtual machine.
 Perhaps the most striking feature of Python is its use of indentation as block
 delimiters. An increase in indentation starts a new block; a decrease marks the
 end of the current block.
 
 The name \textit{pythonrv} clearly reflects that it is a framework for runtime
-verification in Python.
-
-The syntax, described in the next section, of the \textit{pythonrv}
-specifications are naturally heavily influenced by the fact that they are
-written in Python.
+verification in Python. The syntax of the \textit{pythonrv} specifications are
+naturally heavily influenced by the fact that they are written in Python.
 
 \textit{pythonrv} is not the first runtime verification framework for Python,
 see e.g.\ \textsc{LogScope} \cite{barringer09tutorial}. But it is unique in its
@@ -1221,15 +1199,33 @@ reporting. The original structure of the unit tests is still prevalent ---
 unittest builds on the xUnit style of unit testing, discussed in
 Chapter~\ref{chapter-intro-to-unit-testing}.
 
-The next section will illustrate the syntax of \textit{pythonrv}.
-
 \subsection{General Structure of a Specification}
 
+Specifications in \textit{pythonrv} are structured as \textit{specification
+functions}.
+
+\begin{mydef}\label{def-specification-function}
+In \textit{pythonrv} a \textit{specification function} is a Python function
+describing a specification, which \textit{pythonrv} can use for verification of
+the program. A specification function takes a special \textit{event} argument.
+A specification \textit{monitors} points of the program, and the points being
+monitored are called \textit{monitorees}. \textit{pythonrv} supports only
+monitoring of function calls.
+\end{mydef}
+
+The restriction that \textit{pythonrv} only support monitoring of function
+calls is not a very limiting one. For example, in Python, operators such as $+$
+and $-$ are functions, and reading and writing variables can be turned into
+function calls through the $property$ construct and other so-called magic
+functions. See the Python documentation\footnote{Specifically
+\texttt{http://docs.python.org/2/reference/datamodel.html}.} for more details.
+\textit{pythonrv} thus supports monitoring of these events as well.
+
 The structure of a informal \textit{pythonrv} specification function is shown
-in pseudo-code in Figure~\ref{figure-pseudo-spec}. For the structure of formal
-specifications, see Section~\ref{section-approach-formal-foundation}. The next
-section illustrates the \textit{pythonrv} syntax for informal specifications
-with three concrete examples
+in pseudo-code in Figure~\ref{figure-pseudo-spec}, and the structure of the
+special \textit{event} parameter is shown in
+Figures~\ref{figure-event-functions},~\ref{figure-event-data}
+and~\ref{figure-event-function-call}.
 
 \begin{figure}[h!]
 	\begin{center}
@@ -1255,7 +1251,107 @@ with three concrete examples
 	\label{figure-pseudo-spec}
 \end{figure}
 
-\subsection{Three Examples of Informal Specification Functions}
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+	\begin{lstlisting}
+# rv.py
+# the Event class has some special
+# functions
+class Event:
+  def finish(success):
+    if success:
+      self.success()
+    else:
+      self.failure()
+  def success():
+    # remove this spec from future
+    # verification
+  def failure():
+    # fail the spec by raising an
+    # exception
+    raise AssertionError("Violation")
+
+  def next(new_spec):
+    # add new_spec to be used in
+    # verification - on the next
+    # event only
+  def next_called_shoud_be(monitoree):
+    # on the next Event, the function
+    # called should be monitoree. Verify
+    # this
+	\end{lstlisting}
+	\end{minipage}
+	\end{center}
+
+  \caption{The structure of the special \textit{event} argument passed to
+    \textit{pythonrv} specification functions. The example is written in
+    pseudo-python.}
+	\label{figure-event-functions}
+\end{figure}
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+	\begin{lstlisting}
+# rv.py, cont'd
+# an Event object is populated with data
+event = Event()
+# list of previous events
+event.history = [] #
+# the event that occurred before this
+event.prev = history[-1]
+
+# list of FunctionCalls for functions
+# monitored by the spec
+event.fn = []
+# the monitored function that generated
+# this event
+event.called_function
+	\end{lstlisting}
+	\end{minipage}
+	\end{center}
+
+  \caption{The structure of the data in the \textit{event} argument passed to
+    \textit{pythonrv} specification functions. The example is written in
+    pseudo-python.}
+	\label{figure-event-data}
+\end{figure}
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+	\begin{lstlisting}
+# rv.py, cont'd
+# the FunctionCall class
+class FunctionCall:
+  def next(new_spec):
+    # this same as for Event
+    # but only for Events where
+    # this function was called
+
+fc = FunctionCall()
+# the name of the function
+fc.name
+# True if the function was called in this event
+fc.called
+# the input arguments for the function
+fc.inputs
+# the output arguments for the function
+fc.outputs
+# the function's return value
+fc.result
+	\end{lstlisting}
+	\end{minipage}
+	\end{center}
+
+  \caption{The structure of the function call structures in the \textit{event}
+    argument passed to \textit{pythonrv} specification functions. The example
+    is written in pseudo-python.}
+	\label{figure-event-function-call}
+\end{figure}
+
+\subsection{Informal Specification Functions by Example}
 \lstset{language=Python,numbers=left}
 
 \begin{figure}[h!]
@@ -1461,6 +1557,9 @@ def monitor(monitorees, specification):
 		# overwrite the monitoree in its container
 		container = get_container(monitoree)
 		setattr(container, monitoree.name, wrapper)
+
+monitor(myfunc, myspec)
+myfunc(x, y, z) # will call myspec first
 	\end{lstlisting}
 	\end{minipage}
 	\end{center}
@@ -1473,7 +1572,8 @@ def monitor(monitorees, specification):
 
 
 
-\section{Verification} \label{section-approach-verification}
+\section{Verification of Informal Specifications}
+\label{section-approach-verification}
 
 In \textit{pythonrv}, verification is quite simple. The specification functions
 are executable, and executing them on the appropriate events, providing access
@@ -1552,57 +1652,70 @@ Section~\ref{section-approach-python-subset}.
 We begin with some definitions and terms to make the following sections
 simpler.
 
-\begin{itemize}
-  \item A \textit{formal specification function} is one of three basic
-    functions described in Section~\ref{section-approach-python-subset}, or a
-    composition of them as described in
-    Section~\ref{section-approach-composition}.
+\begin{mydef}\label{def-}
+A \textit{formal specification function} is one of three basic functions
+described in Section~\ref{section-approach-python-subset}, or a composition of
+them as described in Section~\ref{section-approach-composition}.
+\end{mydef}
 
-  \item Formal specification functions have \textit{composition points} where
-    they can be combined with other formal specification functions. A formal
-    specification function can have zero or more composition points. A
-    composition point can be \textit{open} or \textit{closed} --- open
-    composition points can be used in composition, while closed have already
-    been used. Composition points can be \textit{required} or
-    \textit{optional}.
+\begin{mydef}\label{def-}
+Formal specification functions have \textit{composition points} where they can
+be combined with other formal specification functions. A formal specification
+function can have zero or more composition points. A composition point can be
+\textit{open} or \textit{closed} --- open composition points can be used in
+composition, while closed have already been used. Composition points can be
+\textit{required} or
+\textit{optional}.
+\end{mydef}
 
-  \item A formal specification function can be either \textit{complete} or
-    \textit{incomplete}. A complete formal specification function is a valid
-    specification. An incomplete formal specification function is not a valid
-    specification, but can, with composition, become complete. Complete formal
-    specification functions have no open required composition points;
-    incomplete formal specification functions have at least one.
+\begin{mydef}\label{def-}
+A formal specification function can be either \textit{complete} or
+\textit{incomplete}. A complete formal specification function is a valid
+specification. An incomplete formal specification function is not a valid
+specification, but can, with composition, become complete. Complete formal
+specification functions have no open required composition points; incomplete
+formal specification functions have at least one.
+\end{mydef}
 
-  \item Composition is described by the $\circ$ operator. Let $f$, $g$ and $h$
-    be formal specification functions. Let $f$ have one composition point, $g$
-    two, labeled $a$ and $b$, respectively, and $h$ none. A valid composition
-    would be: $s = f \, \circ \, ((g \, \circ_{a} \, h) \, \circ_{b} \, h)$.
-    $s$ would be a complete formal specification function, as it is composed of
-    formal specification functions, and it has no open required composition
-    points (or optional ones).
+\begin{mydef}\label{def-}
+Composition is described by the $\circ$ operator. Let $f$, $g$ and $h$ be
+formal specification functions. Let $f$ have one composition point, $g$ two,
+labeled $a$ and $b$, respectively, and $h$ none. A valid composition would be:
+$s = f \, \circ \, ((g \, \circ_{a} \, h) \, \circ_{b} \, h)$.  $s$ would be a
+complete formal specification function, as it is composed of formal
+specification functions, and it has no open required composition points (or
+optional ones).
+\end{mydef}
 
-  \item Every formal specification function $s$ can be represented by a
-    nondeterministic finite automata $A(s) = (Q, P, q_0, S, F)$. Each such
-    automata consists of a set of states $Q$ and transitions $(a, b, E) \in P$
-    between them, where $a$ is the start state, $b$ is the end state, and $E$
-    is a \textit{label}. An automata has one initial state $q_0$, a set of
-    \textit{success states} $S$ and a set of \textit{fail states} $F$.
+\begin{mydef}\label{def-}
+Every formal specification function $s$ can be represented by a
+nondeterministic finite automata $A(s) = (Q, P, q_0, S, F)$. Each such automata
+consists of a set of states $Q$ and transitions $(a, b, E) \in P$ between them,
+where $a$ is the start state, $b$ is the end state, and $E$ is a
+\textit{label}. An automata has one initial state $q_0$, a set of
+\textit{success states} $S$ and a set of \textit{fail states} $F$.
+\end{mydef}
 
-  \item A state cannot be in both $S$ and $F$: $S \cap F = \emptyset$. Success
-    states are depicted as \textit{accepting states} in the automata. Fail
-    states are usually called \textit{fail}, $f$, etc.
+\begin{mydef}\label{def-}
+A state cannot be in both $S$ and $F$: $S \cap F = \emptyset$. Success states
+are depicted as \textit{accepting states} in the automata. Fail states are
+usually called \textit{fail}, $f$, etc.
+\end{mydef}
 
-  \item Each transition in the automata has a label --- an expression --- which
-    is described in detail in Section~\ref{section-approach-semantics}. The
-    label is taken from the expressions in the Python functions, as shown in
-    Section~\ref{section-approach-python-subset}. The label $\top$ denotes ``any
-    and all expressions''.
+\begin{mydef}\label{def-}
+Each transition in the automata has a label --- an expression --- which is
+described in detail in Section~\ref{section-approach-semantics}. The label is
+taken from the expressions in the Python functions, as shown in
+Section~\ref{section-approach-python-subset}. The label $\top$ denotes ``any
+and all expressions''.
+\end{mydef}
 
-  \item The set of \textit{initial transitions} $T$, $(q_0, q', E) \in T$, $T
-    \subseteq P$ are especially important for composition, see
-    Section~\ref{section-approach-composition}. All initial transitions start
-    from $q_0$, go to some state $q'$, and have some label $E$.
-\end{itemize}
+\begin{mydef}\label{def-}
+The set of \textit{initial transitions} $T$, $(q_0, q', E) \in T$, $T \subseteq
+P$ are especially important for composition, see
+Section~\ref{section-approach-composition}. All initial transitions start from
+$q_0$, go to some state $q'$, and have some label $E$.
+\end{mydef}
 
 Notation: Let $a_E$ be an \textit{assert} specification asserting the
 expression $E$, let $n$ be a \textit{next} specifications and let $i_E$ be an

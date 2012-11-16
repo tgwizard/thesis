@@ -1,22 +1,21 @@
 # test.py
-from function_decorator import decorator
+from function_decorator import cache
 
-def func_a():
-	print "a",
+def fact(x):
+  if x <= 1:
+    return 1
+  return x*fact(x-1)
 
-func_a()
-# output: a
+print fact(5) # >> 120 (5 calls to fact)
+print fact(5) # >> 120 (5 calls to fact)
 
-# decorate func_a
-func_a = decorator(func_a)
-func_a()
-# output: before a after
+# decorate fact2
+# equivalent to fact2 = cache(fact)
+@cache
+def fact2(x):
+  if x <= 1:
+    return 1
+  return x*fact2(x-1)
 
-# decorate func_b - equivalent
-# to the decoration of func_a
-@decorator
-def func_b():
-	print "b",
-
-func_b()
-# output: before b after
+print fact2(5) # >> 120 (5 calls to fact2, results cached)
+print fact2(5) # >> 120 (0 calls to fact2)
