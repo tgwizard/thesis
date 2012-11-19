@@ -1203,7 +1203,7 @@ Specifications in \textit{pythonrv} are structured as \textit{specification
 functions}.
 
 \begin{mydef}\label{def-specification-function}
-In \textit{pythonrv} a \textit{specification function} is a Python function
+In \textit{pythonrv}, a \textit{specification function} is a Python function
 describing a specification, which \textit{pythonrv} can use for verification of
 the program. A specification function takes a special \textit{event} argument.
 A specification \textit{monitors} points of the program, and the points being
@@ -1459,8 +1459,8 @@ The examples above show the main capabilities of \textit{pythonrv}
 specifications. A few minor details were left out, such as how to specify how
 much history should be saved for a specification, or how to label
 specifications with error levels, so that different actions can be taken
-depending on which specification function fails. This is described on the website for
-\textit{pythonrv}.
+depending on which specification function fails. This is described on the
+website for \textit{pythonrv}.
 
 
 \section{Instrumentation} \label{section-approach-instrumentation}
@@ -1503,37 +1503,22 @@ it.
 	\label{figure-function-decorator-usages}
 \end{figure}
 
-\texttt{rv.monitor} first takes arguments specifying what functions should be
-monitored, and then the specification function itself.
+The decorator in Figure~\ref{figure-function-decorator} caches the return
+values for functions on which it is applied, so that future calls to a
+decorated function with the same arguments will short-circuit and return the
+cached value directly, never entering the function itself. As is shown in
+Figure~\ref{figure-function-decorator-usages}, the decorator is something that
+can be attached with a special syntax, using the \texttt{@} operator. The
+decorated function does not need any further modifications.
 
-In Python, almost all\footnotemark\ functions belong to a container of some
-sort --- a class, an object, or a module. In
-Figure~\ref{figure-function-decorator-usages} the functions \texttt{func\_a}
-and \texttt{func\_b} belong to the module \texttt{test} (the module's name is
-the same as that of the file containing the code). These containers are
-essentially dictionaries (\textit{dicts} in Python parlance) of key-value
-pairs, where the keys in this case are function names and the values are
-objects representing the function code. (There are other types of values in
-these containers as well, which we can ignore).
-
-\footnotetext[5]{This is not true of closures --- functions defined inside other
-  functions. These functions cannot be directly referenced or modified from
-  outside the defining function. \textit{pythonrv} does not (as of writing)
-  support monitoring of closures.}
-
-The instrumentation in \textit{pythonrv} works as follows. First, a wrapper
-function is defined for each function to be monitored (for each monitoree).
-This wrapper function's main purpose is to call the specifications attached to
-the monitored function, and then call the monitored function itself. The
-wrapper also does some argument copying and such, to prevent side-effects in
-the specifications from interfering with the monitored function. The container
-of the monitored function is then extracted, and the reference to the monitored
-function is overwritten with a reference to the wrapper. See
-Figure~\ref{figure-instrumentation-overview} for an overview.
-
-The implementation of the instrumentation code in \textit{pythonrv} is more
-optimized than this - for instance, only ever one wrapper per monitoree is
-created, independent of the number of specifications that want to monitor it.
+\texttt{rv.monitor} is a decorator similar to the \texttt{cache} decorator
+above. It first takes arguments specifying what functions should be monitored
+(the monitorees), and then the specification function itself. However, the
+\texttt{rv.monitor} decorator does not monitor the decorated function, which
+here is the specification function, but instead finds the monitorees and
+decorates them with a dynamically generated function \texttt{wrapper}. The code
+in Figure~\ref{figure-instrumentation-overview} illustrates how
+\textit{pythonrv} does instrumentation.
 
 \begin{figure}[h!]
 	\begin{center}
@@ -1569,6 +1554,38 @@ myfunc(x, y, z) # will call myspec first
 	\label{figure-instrumentation-overview}
 \end{figure}
 
+The instrumentation in \textit{pythonrv} works as follows. First, a wrapper
+function is defined for each function to be monitored (for each monitoree).
+This wrapper function's main purpose is to call the specifications attached to
+the monitored function, and then call the monitored function itself. The
+wrapper also does some argument copying and such, to prevent side-effects in
+the specifications from interfering with the monitored function.
+
+In Python, almost all\footnotemark\ functions have a parent \textit{container},
+such as a class, an object, or a module. In
+Figure~\ref{figure-function-decorator-usages} the functions \texttt{fact}
+and \texttt{fact2} belong to the module \texttt{test} (the module's name is
+the same as that of the file containing the code). These containers are
+essentially dictionaries (\textit{dicts} in Python parlance) of key-value
+pairs, where the keys in this case are function names and the values are
+objects representing the function code. (There are other types of values in
+these containers as well, which we can ignore).
+
+\footnotetext[5]{This is not true of closures --- functions defined inside other
+  functions. These functions cannot be directly referenced or modified from
+  outside the defining function. \textit{pythonrv} does not (as of writing)
+  support monitoring of closures.}
+
+So in the \textit{pythonrv} instrumentation process, the parent container of
+each monitoree is extracted, and the reference to the monitoree is overwritten
+with a reference to the wrapper. The wrapper still has a reference to the
+monitoree.
+
+The implementation of the instrumentation code in \textit{pythonrv} is more
+optimized than what is shown in Figure~\ref{figure-instrumentation-overview}.
+For instance, only ever one wrapper per monitoree is created, independent of
+the number of specifications that want to monitor it.
+
 
 
 \section{Verification of Informal Specifications}
@@ -1590,21 +1607,20 @@ explicitly remove themselves by calling one of \texttt{event.finish},
 \texttt{event.success} and \texttt{event.failure} (described in
 Section~\ref{section-approach-syntax}).
 
-
-\subsection{Dealing with Errors}
-
 Whenever a specification violation occurs, and an \texttt{AssertionError} is
 raised, it is passed to an \textit{error handler}. There are two built-in error
-handlers: One, the default, that re-raises the exception, and thus crashes the
-program\footnote{Unless some other part of the program, higher up the call
-stack, suppresses the exception.}, and a second which just logs the error
-message, using the standard Python logging module.
+handlers. One, the default, re-raises the \texttt{AssertionError} exception,
+and thus causing it to propagate up through the call stack. If the exception
+isn't caught and suppressed by code higher up the call stack, the program will
+crash. \texttt{AssertionError} are supposed to be raised when something has
+gone wrong and the operation should halt, so it is bad coding practice to
+suppress them.
 
-It is possible to write custom error handlers for \textit{pythonrv}. See the
-website for how.
+A second error handler just logs the error message, using the standard Python
+logging module.
 
-
-\subsection{Offline Verification}
+\textit{pythonrv} also allows for custom error handlers, which can deal with
+the specification violations as they see fit. See the website for how.
 
 The current verification approach in \textit{pythonrv} is to perform it online.
 This obviously affects the performance of the program under test. Offline
@@ -1613,7 +1629,8 @@ required recording layer.
 
 To do offline verification in \textit{pythonrv} the events and their associated
 data would need to be saved (serialized) and replayed outside the context of
-the running program.
+the running program. This is suggested as an area for future work in
+Chapter~\ref{chapter-conclusions}.
 
 
 
@@ -2702,45 +2719,67 @@ Talk about where specifications would be suitable, and for what.
 \pagestyle{newchap}
 \chapter{Conclusions} \label{chapter-conclusions}
 
-This report, and the proof-of-concept implementation \textit{pythonrv}, has
-shown that it is possible to write specifications in the target programs
-programming language (Python) and in a manner more similar to unit testing.
+In this report, and with the proof-of-concept implementation \textit{pythonrv},
+we have shown that it is possible to write specifications in the programming
+language Python and in a manner more similar to unit testing. Our approach
+utilizes the dynamic nature of Python to do instrumentation. Specifically, we
+use decorators to mark what functions should be monitored for a specification,
+and reflection to deduce the properties of the monitorees. We also use the fact
+that each function has a parent container, so it can be rewritten during
+runtime with the monitoring code.
 
-\todo{excitement! and better structure}
+However, our approach would work in other programming languages as well if they
+support hot-swapping of code --- replacing objects during runtime, injecting
+wrapping code around the functions to monitor.
 
-However, a few reservations should be mentioned.
+We have also implemented support in \textit{pythonrv} for formal verification.
+The formal specifications are written in a subset of Python, which is given a
+formal semantics, see Section~\ref{section-approach-formal-foundation}.
 
-The specification functions' explicit dealing with time and the actual
+A few reservations should be mentioned, however.
+
+The specifications' explicit dealing with time and the actual
 execution flow leads to some inherent divergences from ordinary unit testing
 styles. This is best exemplified by the \texttt{event.next} method described in
-Chapter~\ref{chapter-approach}. Expectations could perhaps help here, see the
-next section.
+Chapter~\ref{chapter-approach}.
 
-Also, giving the specifications a formal foundation, and doing formal
-verification with them, is different and difficult, than with specifications
-already written in formal languages. The fact that the chosen programming
-language, Python, does not have a formal semantics defined makes the task quite
-a bit larger.
+Giving the specifications a formal foundation, and doing formal verification
+with them, has been difficult, due to the fact that the chosen programming
+language, Python, does not have a formal semantics defined. We define the
+formal semantics for a subset of Python, which makes the math easier, but the
+resulting syntax less interesting --- it requires a lot of boilerplate
+for even the simplest of specifications.
 
-The formal foundation given in Section~\ref{section-approach-formal-foundation}
-is thus for a small subset of Python, which makes the math easier, but the
-resulting semantics less interesting.
+\section{Other Approaches}
 
-If the verification parts of \textit{pythonrv} is unwanted, it could be used as
-a simple framework for aspect-oriented programming. Self-healing and
-self-adaptation would be a very interesting use. Extracting logging
-functionality into separate modules, written as \textit{pythonrv}
-specifications, could make the separation of concerns in the program clearer.
+In Chapter~\ref{chapter-intro-to-rv} we describe approaches that others have
+taken to runtime verification. The formal specification languages used are
+mostly LTL or variations thereof, and either written as comments or special
+attributes in code, or as separate specification files. See e.g.\ Bauer et
+al.\ \cite{bauer06monitoring}, Bodden \cite{bodden05efficientrv}, Kähkönen et
+al.\ \cite{kahkonen09lime}, Java PathExplorer by Havelund et al.\
+\cite{havelund04jpax}, Temporal Rover by Drusinsky
+\cite{drusinsky00temporalrover}; these all use a language for specifications
+separate from the target program's programming language.
 
+The informal approaches, like some implementations of Design by Contract, and
+simple assertions, often use the target program's programming language. The
+contracts and assertions are often heavily attached to the code they verify,
+e.g.\ in \cite{bartetzko01jass,meyer92applyingdbc}.
+
+\textsc{LogScope} \cite{barringer09tutorial} is one of the few runtime
+verification approaches that are written in Python. It is very different from
+\textit{pythonrv} --- its specifications are written in a temporal logic based
+on \textsc{RuleR}, and builds its system model from log files, working
+completely offline.
 
 \section{Future Work}
 
 The testing tool called expectations, as described in
 Section~\ref{section-expectations}, could fit quite well with the
-\textit{pythonrv} style of writing specifications. This could allow for a nicer
-way to describe temporal properties.
-
-\todo{monitor more points. \texttt{@property}}
+\textit{pythonrv} style of writing specifications. This could allow for a
+cleaner and more succinct way to describe temporal properties, perhaps
+obviating the need to use the \texttt{event.next} method in many cases.
 
 Especially the formal specification could do with more work on the
 specification language. Can this language become more like that of the informal
@@ -2756,6 +2795,19 @@ Section~\ref{section-approach-verification} would be interesting. A simple way
 to turn verification on or off, or to switch between online and offline, would
 be nice. For instance, when a bug has been found, RV could be turned on for
 further verification and help in finding the erroneous code.
+
+If the verification parts of \textit{pythonrv} is unwanted, it could be used as
+a simple framework for aspect-oriented programming. Self-healing and
+self-adaptation would be a very interesting use. Extracting logging
+functionality into separate modules, written as \textit{pythonrv}
+specifications, could make the separation of concerns in the program clearer.
+
+It would be interesting to investigate how the approach we have used in this
+report would work in languages beside Python. Both Java and Ruby, for instance,
+support hot-swapping of code, but an implementation of \textit{pythonrv} in
+those languages would look very different than the original, due to the
+underlying workings of those languages.
+
 
 \section{Final Words}
 
