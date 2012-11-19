@@ -91,7 +91,7 @@ Computer software is growing ever more complex, and more sophisticated tools
 are required to make sure the software operates in a correct way --- i.e.\
 according to its specification. Traditional approaches to program verification
 have much to give, but they also have their disadvantages. While formal methods
-can give nice mathematical proofs about the correctness of programs, they
+can give useful mathematical proofs about the correctness of programs, they
 suffer from complexity and are difficult to use. Often they work only on a
 constructed system model, not the actual program. Testing, on the other hand,
 has a simple syntax and great tool support, and it is in widespread use. But it
@@ -120,11 +120,10 @@ power of Python as specification language.
 % results & conclusions
 The result shows that the proof-of-concept framework allow for effective use of
 runtime verification. It is easy to integrate into existing programs, and the
-informal specification syntax is quite simple. Many interesting properties can
-be verified using it that ordinary tests would have trouble with.
-
-It also shows that formal specifications can be written in Python, but in a
-more unwieldy syntax and structure.
+informal specification syntax is relatively simple. It also shows that formal
+specifications can be written in Python, but in a more unwieldy syntax and
+structure. Many interesting properties can be verified using it that ordinary
+tests would have trouble with.
 
 % potential
 The recommendation for future work lies in improving the specification syntax,
@@ -137,25 +136,25 @@ formal specification syntax more like that of its informal sibling.
 
 \begin{foreignabstract}{swedish}
 
-Mjukvara växer sig allt mer komplexa, och mer sofistikerade verktyg
-krävs för att säkerställa att programmen fungerar korrekt --- at den opererar
-enligt sin specifikation. Traditionella tillvägagångssätt till
-programverifiering har mycket att ge, men de har också sina nackdelar. Medan
-formella metoder kan ge trevliga matematiska bevis om korrektheten av program,
-lider de av komplexitet och är svåra att använda. Ofta opererar de bara på en
-konstruerad systemmodell, inte det faktiska programmet. Testning, å andra
-sidan, har en enkel syntax och bra verktygsstöd, och är i utbredd användning.
-Men det är informellt och ofullständigt, testar bara de specifika testfall som
-testkrivarna kan komma på.
+Mjukvarusystem växer sig allt mer komplexa, och mer sofistikerade verktyg
+krävs för att säkerställa att system fungerar korrekt --- att de opererar
+enligt sina specifikationer. Traditionella tillvägagångssätt för
+programverifiering tillför mycket, men de har också sina nackdelar. Formella
+metoder kan ge användbara matematiska bevis om korrektheten av program, men de
+är komplexa och är svåra att använda. Ofta opererar de bara på en
+konstruerad systemmodell, inte det faktiska programmet. Testning, som metod,
+har å andra sidan en enkel syntax och bra verktygsstöd, och används i stor
+utsträckning. Men testning är informell och ofullständig, och testar bara de
+specifika testfall som testkrivarna kan komma på.
 
-En relativt ny metod kallad runtime-verifiering är ett försök för ett
-lättviktigt alternativ som verifierar ett programs faktiska \textit{exekvering}
-mot dess specifikation, eventuellt medan programmet kör.
+En relativt ny metod, kallad runtime-verifiering, är tänkt som ett lättviktigt
+alternativ som verifierar ett programs faktiska \textit{exekvering} mot dess
+specifikation, eventuellt även medan programmet kör.
 
-Det här arbetet undersöker hur testning, och specifikt enhetstestning, kan
-kombineras med runtime-verifiering. Det visar hur syntaxen för enhetstester,
-skrivna i programmets programmeringsspråk, kan användas som inspiration för
-specifikationer för runtime-verifiering.
+Avsikten här har varit att undersöka hur testning, och specifikt
+enhetstestning, kan kombineras med runtime-verifiering. Detta genom att visa
+hur syntaxen för enhetstester, skrivna i programmets programmeringsspråk, kan
+användas som inspiration för specifikationer för runtime-verifiering.
 
 En proof-of-concept-implementation för Python kallad \textit{pythonrv}
 implementeras och beskrivs, och testas på en verklig applikation. En formell
@@ -163,19 +162,17 @@ grund framställs för specifikationer skrivna i en delmängd av Python, vilket
 möjliggör formell verifiering. Informella specifikationer stöds också, med hela
 kraften av Python som specifikationsspråk.
 
-Resultaten visar att proof-of-concept-implemenationen tillåter för effektiv
+Resultaten visar att proof-of-concept-implemenationen möjliggör en effektiv
 användning av runtime-verifiering. Den är enkel att integrera i existerande
-program, och den informella specifikationssyntaxen är hyfsat enkel. Många
-intressanta egenskaper kan verifieras med den som vanliga tester skulle ha
-problem med.
-
-De visar också att formella specifikationer kan skrivas i Python, men i en mer
-omständigt syntax och struktur.
+program, och den informella specifikationssyntaxen är förhållandevis enkel. Den
+visar också att formella specifikationer kan skrivas i Python, men i en mer
+omständigt syntax och struktur. Många intressanta egenskaper, som vanliga
+tester skulle ha problem med, kan verifieras med denna metod.
 
 Rekommendationen för framtida arbete är att förbättra specifikationssyntaxen,
 genom att använda koncept från enhetstestning såsom förväntningar, och genom
 att göra den formella specifikationssyntaxen mer som den av sin informella
-kusin.
+kusin \todo{Create a clearer bond between the two}.
 
 \end{foreignabstract}
 \clearpage
@@ -755,7 +752,8 @@ such as that of Eiffel, and Code
 Contracts\footnote{\texttt{http://msdn.microsoft.com/en-us/devlabs/dd491992.aspx}}
 in~.Net, allow for arbitrary code in the specifications. The specifications are
 thus informal, unless a formalization is given for the programming language
-used.
+used. The Design by Contract specifications used in Jass (Java with assertions)
+have formal semantics \cite{bartetzko01jass}.
 
 
 \subsection{Assertions}
@@ -1298,13 +1296,14 @@ class Event:
 # an Event object is populated with data
 event = Event()
 # list of previous events
-event.history = [] #
+event.history
 # the event that occurred before this
 event.prev = history[-1]
 
-# list of FunctionCalls for functions
+# map of FunctionCalls for functions
 # monitored by the spec
-event.fn = []
+# name => FunctionCall
+event.fn
 # the monitored function that generated
 # this event
 event.called_function
