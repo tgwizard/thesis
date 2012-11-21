@@ -599,6 +599,12 @@ area for future work in Chapter~\ref{chapter-conclusions}.
 
 
 
+
+
+%================================================
+%====== Formal Foundation
+%================================================
+
 \section{Formal Foundation} \label{section-approach-formal-foundation}
 
 The purpose of a formal foundation for a verification approach is so that we
@@ -627,13 +633,11 @@ mathematically with and about specifications written in this subset --- see
 Section~\ref{section-approach-python-subset}.
 
 
-\subsection{Terminology and Definitions}
-
 We begin with some definitions and terms to make the following sections
-simpler.
+simpler. \todo{Move to where they are first used}
 
 \begin{mydef}\label{def-}
-A \textit{formal specification function} is one of three basic functions
+A \textit{formal specification function} is one of four basic functions
 described in Section~\ref{section-approach-python-subset}, or a composition of
 them as described in Section~\ref{section-approach-composition}.
 \end{mydef}
@@ -644,8 +648,7 @@ be combined with other formal specification functions. A formal specification
 function can have zero or more composition points. A composition point can be
 \textit{open} or \textit{closed} --- open composition points can be used in
 composition, while closed have already been used. Composition points can be
-\textit{required} or
-\textit{optional}.
+\textit{required} or \textit{optional}.
 \end{mydef}
 
 \begin{mydef}\label{def-}
@@ -694,7 +697,9 @@ and all expressions''.
 The set of \textit{initial transitions} $T$, $(q_0, q', E) \in T$, $T \subseteq
 P$ are especially important for composition, see
 Section~\ref{section-approach-composition}. All initial transitions start from
-$q_0$, go to some state $q'$, and have some label $E$.
+$q_0$, go to some state $q'$, and have some label $E$. When we describe an
+automata we will usually split up its transitions $P$ into two parts, the
+initial transitions $T$, and all other transitions $U$: $P = T \cup U$.
 \end{mydef}
 
 Notation: Let $a_E$ be an \textit{assert} specification asserting the
@@ -930,8 +935,8 @@ functions.
 \lstset{language=Python,numbers=left}
 
 The subset of Python that can be used in formal \textit{pythonrv} specification
-functions consists of three composable specification functions:
-\textit{assert}, \textit{next} and \textit{if}; See
+functions consists of four composable specification functions:
+\textit{assert}, \textit{next}, \textit{if-then} and \textit{if-then-else}; See
 Figure~\ref{figure-basic-formal-specification-functions}. A complete and
 verifiable formal specification function also needs some boilerplate, shown in
 Figure~\ref{figure-formal-boilerplate}.
@@ -951,17 +956,23 @@ def next():
   tail = # optional composition point 'tail'
   return n + tail
 
-def if():
+def if_then():
   then = # required composition point 'then'
-  els = # optional composition point 'else'
-  i = make_if(E, then, else)
+  i = make_if(E, then)
+  tail # optional composition point 'tail'
+  return i + tail
+
+def if_then_else():
+  then = # required composition point 'then'
+  els = # required composition point 'else'
+  i = make_if(E, then, els)
   tail # optional composition point 'tail'
   return i + tail
 	\end{lstlisting}
 	\end{minipage}
 	\end{center}
 
-	\caption{The three basic formal specification functions.}
+	\caption{The four basic formal specification functions.}
 	\label{figure-basic-formal-specification-functions}
 \end{figure}
 
@@ -973,7 +984,6 @@ from pythonrv import rv
 from pythonrv.formalrv import (formal_spec,
   make_assert, make_next, make_if)
 
-monitorees = # list of monitorees
 @rv.monitor(monitorees)
 @formal_spec
 def spec():
@@ -984,7 +994,7 @@ def spec():
 	\end{center}
 
   \caption{The boilerplate code for formal \textit{pythonrv} specification
-  functions that allow verification and instrumentation to take place.}
+  functions that allow for verification and instrumentation to take place.}
 	\label{figure-formal-boilerplate}
 \end{figure}
 
@@ -995,15 +1005,20 @@ detail is that if the expression needs to access any properties of the
 The previous section described how these expressions are used in formal
 verification.
 
-The three basic formal specification functions correspond to simple,
-nondeterministic, finite automata, which are depicted in
+The four basic formal specification functions correspond to simple,
+deterministic, finite automata, which are depicted in
 Figure~\ref{figure-basic-formal-specification-automata}. The basic formal
 specifications can be combined by composition into larger, more complex
 specifications. Details on the basic formal specification functions and their
 composition is described in the next section. Note that the \textit{assert}
-formal specification function, and all complete compositions of the three basic
+formal specification function, and all complete compositions of the four basic
 formal specification functions, are valid \textit{pythonrv} specification
 functions.
+
+Please note that the automata are not complete in
+Figure~\ref{figure-basic-formal-specification-automata} (as can be seen by the
+squiggly cloud-shapes), and are only supposed to give an overview of how they
+work. They are defined properly below.
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% Automata for the basic formal specification functions
@@ -1021,7 +1036,7 @@ functions.
         (q0) edge node {$\bar{E}$} (f);
 		\end{tikzpicture}
     \subcaption{A generalized \textit{assert} specification, asserting the
-      expression $E$. $q_1$ is a success state; \textit{f} is a fail state.}
+      expression $E$.}
 	\end{minipage}
   ~
 	\begin{minipage}{0.45\textwidth}
@@ -1038,23 +1053,35 @@ functions.
 
   \bigskip
 
-	\begin{minipage}{0.90\textwidth}
+	\begin{minipage}{0.45\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=2.5cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0)	{$q_0$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (then) [right of=q0] {$A(then)$};
+			\node[state,accepting] (q1) [below of=q0]	{$q_1$};
+			\path
+				(q0) edge node {$E$} (then)
+        (q0) edge node {$\bar{E}$} (q1);
+		\end{tikzpicture}
+    \subcaption{A template for an \textit{if-then} specification.}
+	\end{minipage}
+  ~
+	\begin{minipage}{0.45\textwidth}
 		\centering
 		\begin{tikzpicture}[->,shorten >=1pt,node distance=2.5cm,on
       grid,auto,scale=.5,semithick,>=stealth]
 			\node[state,initial] (q0)	{$q_0$};
 			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (then) [right of=q0] {$A(then)$};
 			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (else) [below of=then] {$A(else)$};
-			\node[state,accepting] (q1) [below of=q0]	{$q_1$};
 			\path
 				(q0) edge node {$E$} (then)
-        (q0) edge node {$\bar{E}$} (else)
-        (q0) edge node {$\top$} (q1);
+        (q0) edge node {$\bar{E}$} (else);
 		\end{tikzpicture}
-    \subcaption{A template for an \textit{if} specification.}
+    \subcaption{A template for an \textit{if-then-else} specification.}
 	\end{minipage}
 
-  \caption{Sketches of automata for the three basic formal specification
+  \caption{Sketches of automata for the four basic formal specification
     functions. The squiggles around $A(next)$, $A(then)$ and $A(else)$ denote
     that some composition is required there.}
 	\label{figure-basic-formal-specification-automata}
@@ -1069,12 +1096,9 @@ functions.
 \lstset{language=Python,numbers=none}
 
 The idea is to use composition to build more complex and interesting
-specifications from the three basic formal specification functions. Composition
+specifications from the four basic formal specification functions. Composition
 is defined inductively, preserving the semantics from
 Section~\ref{section-approach-semantics}.
-
-There are no implicit precedence rules for the $\circ$ composition operator;
-parentheses are required.
 
 
 \subsubsection{Composition of the \textit{assert} specification, and
@@ -1347,15 +1371,18 @@ def t(event):
 %%%%%%%%%%%%%%%%%%%%%%%%
 
 
-\subsubsection{Composition of the \textit{if} specification}
+\subsubsection{Composition of the \textit{if-then} and \textit{if-then-else}
+specifications}
 
-\textit{if} specifications have three composition points: one required,
-\textit{then}, and two optional, \textit{else} and \textit{tail}. Composition
-using the \textit{tail} composition point was described above.
+\textit{if-then} specifications have two composition points: one required,
+\textit{then}, and one optional, \textit{tail}. \textit{if-then-else}
+specifications have an additional required composition point \textit{else}.
+Composition using the \textit{tail} composition point was described above.
 
-In an \textit{if} specification $i_E$ we consider the expression $E$ as a guard
-for the \textit{then} composition point, and $\bar{E}$ as a guard for the
-\textit{else} composition point.
+In an \textit{if-then-else} specification $i_E$ we consider the expression $E$
+as a guard for the \textit{then} composition point, and $\bar{E}$ as a guard
+for the \textit{else} composition point. In \textit{if-then} specifications,
+the $\bar{E}$ guard goes to an accepting state.
 
 The composition essentially becomes to add the guard $E$ to the labels of all
 initial transitions for the automata at the \textit{then} composition point,
@@ -1364,29 +1391,48 @@ and $\bar{E}$ to the labels of all initial transitions for the automata at the
 parts of a conjunctive.
 
 Let $s_1$ be the specification attached to the \textit{then} composition point
-and an optional $s_2$ attached to the \textit{else} composition point, and
-$A(s_1) = (Q_1, T_1 \cup R_1, q_{10}, S_1, F_1)$, $A(s_2) = (Q_2, T_2 \cup R_2,
-q_{20}, S_2, F_2)$. Then:
+and $s_2$ attached to the \textit{else} composition point, and:
+
+\medskip
+\[
+  \begin{array}{rcl}
+    A(s_1) & = & (Q_1, T_1 \cup R_1, q_{10}, S_1, F_1) \\
+    A(s_2) & = & (Q_2, T_2 \cup R_2, q_{20}, S_2, F_2)
+  \end{array}
+\]
+\medskip
+
+For \textit{if-then} specifications compositions becomes:
+
+\medskip
+\[
+  \begin{array}{rcl}
+  A(i_E \circ_{then} s_1) & = & (Q, P, q_0, S, F) \\
+                        Q & = & Q_1 \cup \{q_0, q_1\} - \{q_{10}\} \\
+                        P & = & T'_1 \cup R_1 \cup X \\
+                     T'_1 & = & \{(q_0, q, E       \wedge E') \, | \, (q_{10}, q, E') \in T_1\} \\
+                        X & = & \{(q_0, q_1, \bar{E})\} \\
+                        S & = & S_1 \cup \{q_1\} \\
+                        F & = & F_1
+  \end{array}
+\]
+\medskip
+
+And for \textit{if-then-else} specifications compositions becomes:
 
 \medskip
 \[
   \begin{array}{rcl}
   A((i_E \circ_{then} s_1) \circ_{else} s_2) & = & (Q, P, q_0, S, F) \\
-                                           Q & = & Q_1 \cup Q_2 \cup \{q_0, q_1\} - \{q_{10}, q_{20}\} \\
-                                           P & = & T'_1 \cup T'_2 \cup R_1 \cup R_2 \cup X \\
+                                           Q & = & Q_1 \cup Q_2 \cup \{q_0\} - \{q_{10}, q_{20}\} \\
+                                           P & = & T'_1 \cup T'_2 \cup R_1 \cup R_2 \\
                                         T'_1 & = & \{(q_0, q, E       \wedge E') \, | \, (q_{10}, q, E') \in T_1\} \\
                                         T'_2 & = & \{(q_0, q, \bar{E} \wedge E') \, | \, (q_{20}, q, E') \in T_2\} \\
-                                           X & = & \{(q_0, q_1, \top)\} \\
-                                           S & = & S_1 \cup S_2 \cup \{q_1\} \\
+                                           S & = & S_1 \cup S_2 \\
                                            F & = & F_1 \cup F_2
   \end{array}
 \]
 \medskip
-
-If the \textit{else} composition point is left out, then $Q_2 = T_2 = R_2 = S_2
-= F_2 = \emptyset$. $X$ is the fall-through transition to the success state
-$q_1$, which can always be reached. This will allow for successful verification
-when $E$ is false and there is no else clause.
 
 With these constructions in mind, the next section shows a few functioning
 examples.
