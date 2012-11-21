@@ -1,0 +1,108 @@
+%================================================
+%====== Chapter 6, Evaluation
+%================================================
+
+\pagestyle{newchap}
+\chapter{Evaluation} \label{chapter-evaluation}
+
+To see how \textit{pythonrv} would work in a real-world setting it was
+incorporated into a real-time web application for Valtech Sweden, a
+medium-sized Swedish company.
+
+The web application is written in Python 2.7 using the
+Django\footnote{\texttt{https://www.djangoproject.com/}} web framework. It has
+approximately 10000 lines of code.
+
+There are two questions we need to answer when writing specifications for a
+program. First, when, in the life-cycle of the program, should we attach the
+specifications? In other words, when should the code instrumentation be done?
+And second, and most important: what specifications should be written, and for
+which functions?
+
+We can answer the first question first. It requires a bit of knowledge on the
+start up sequence for, and structure of, Django applications.
+
+
+\section{Technical Perspective}
+
+
+\subsection{Anatomy of a Django Application}
+
+A Django application follows the Model-View-Controller pattern, or as they call
+it, the Model-Template-View pattern. The model is a representation of the data
+used by the program, and the templates are the layer that constructs the
+display for the user. The view links the two together, fetching the correct
+models for specific requests, and then delegating to the appropriate templates.
+
+Application-specific configuration for Django programs are stored in settings
+modules, which are ordinary Python files. These contain settings for database
+connections, authentication, etc. During startup, Django reads the settings
+files, starts up its internal machinery, and waits for the first request.
+
+
+\subsection{When to Attach}
+
+At first glance it might seem desirable to attach the specifications before
+even starting the Django framework. That way we could monitor the startup
+process, and all of the functionality of Django.
+
+A problem with this, that is due to how Python works, and how \textit{pythonrv}
+does code instrumentation, is that \textit{pythonrv} needs to load the modules
+(files) for each function to be monitored. These modules are often heavily
+dependent on Django, and that it has been started correctly, with all settings
+loaded.
+
+A suitable time to instrument the program --- to enable the specifications ---
+is during startup, after the settings have been loaded. Some specifications,
+which do not monitor code dependent on the settings, could be loaded before
+that.
+
+
+\subsection{Technical Issues}
+
+Early in the process of using \textit{pythonrv} in the web application it was
+discovered that the copying of data, such as function arguments, that
+\textit{pythonrv} does would not work with Django. The latest version of
+Django, v1.4.1, uses a module called \texttt{cStringIO}, which produces objects
+that cannot be copied. All functions dealing with web requests are affected by
+this. This has been fixed in the development branch of Django, but in the
+meantime, \textit{pythonrv} has an option to disable argument copying, either
+for all specifications or for a subset of them, to work around this issue.
+
+
+\section{Potential Value}
+
+Now to the most important question: what specifications could, and should, be
+written? What value do they provide?
+
+The web application is only intended for internal use, for employees.
+Authentication of employees and authorization of their access rights are very
+important. Specifications can be written to make sure all views or requests are
+made by an authenticated user (except for the login screen), and that they are
+allowed to perform the requested action. A specification showing a
+specification verifying that proper authentication has been done is shown in
+Figure~\ref{figure-app-authentication-informal}. This is just one way of
+writing a specification function for this requirement. There are several other
+options, such as utilizing the temporal capabilities of runtime verification
+with the \texttt{event.next} function. E.g., if a request asks for a resource
+requiring authentication, we could specify that before the response is sent,
+authentication must have been done.
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.9\textwidth}
+	\lstinputlisting{figures/app_authentication_informal.py}
+	\end{minipage}
+	\end{center}
+
+  \caption{An informal \textit{pythonrv} specification verifying that views are
+    only accessible with proper authentication. Note how the use of Python in
+    the specification function allows us to refactor away the condition that
+    determines whether authentication should be required, leaving the
+    specification much simpler and cleaner.}
+	\label{figure-app-authentication-informal}
+\end{figure}
+
+\todo{more examples}
+Talk about where specifications would be suitable, and for what.
+

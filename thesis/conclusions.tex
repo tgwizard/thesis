@@ -1,0 +1,112 @@
+%================================================
+%====== Chapter 7, Conclusions
+%================================================
+
+\pagestyle{newchap}
+\chapter{Conclusions} \label{chapter-conclusions}
+
+In this report, and with the proof-of-concept implementation \textit{pythonrv},
+we have shown that it is possible to write specifications in the programming
+language Python and in a manner more similar to unit testing. Our approach
+utilizes the dynamic nature of Python to do instrumentation. Specifically, we
+use decorators to mark what functions should be monitored for a specification,
+and reflection to deduce the properties of the monitorees. We also use the fact
+that each function has a parent container, so it can be rewritten during
+runtime with the monitoring code.
+
+However, our approach would work in other programming languages as well if they
+support hot-swapping of code --- replacing objects during runtime, injecting
+wrapping code around the functions to monitor.
+
+We have also implemented support in \textit{pythonrv} for formal verification.
+The formal specifications are written in a subset of Python, which is given a
+formal semantics, see Section~\ref{section-approach-formal-foundation}.
+
+A few reservations should be mentioned, however.
+
+The specifications' explicit dealing with time and the actual
+execution flow leads to some inherent divergences from ordinary unit testing
+styles. This is best exemplified by the \texttt{event.next} method described in
+Chapter~\ref{chapter-approach}.
+
+Giving the specifications a formal foundation, and doing formal verification
+with them, has been difficult, due to the fact that the chosen programming
+language, Python, does not have a formal semantics defined. We define the
+formal semantics for a subset of Python, which makes the math easier, but the
+resulting syntax less interesting --- it requires a lot of boilerplate
+for even the simplest of specifications.
+
+\section{Other Approaches}
+
+In Chapter~\ref{chapter-intro-to-rv} we describe approaches that others have
+taken to runtime verification. The formal specification languages used are
+mostly LTL or variations thereof, and either written as comments or special
+attributes in code, or as separate specification files. See e.g.\ Bauer et
+al.\ \cite{bauer06monitoring}, Bodden \cite{bodden05efficientrv}, Kähkönen et
+al.\ \cite{kahkonen09lime}, Java PathExplorer by Havelund et al.\
+\cite{havelund04jpax}, Temporal Rover by Drusinsky
+\cite{drusinsky00temporalrover}; these all use a language for specifications
+separate from the target program's programming language.
+
+The informal approaches, like some implementations of Design by Contract, and
+simple assertions, often use the target program's programming language. The
+contracts and assertions are often heavily attached to the code they verify,
+e.g.\ in \cite{bartetzko01jass,meyer92applyingdbc}.
+
+\textsc{LogScope} \cite{barringer09tutorial} is one of the few runtime
+verification approaches that are written in Python. It is very different from
+\textit{pythonrv} --- its specifications are written in a temporal logic based
+on \textsc{RuleR}, and builds its system model from log files, working
+completely offline.
+
+\section{Future Work}
+
+The testing tool called expectations, as described in
+Section~\ref{section-expectations}, could fit quite well with the
+\textit{pythonrv} style of writing specifications. This could allow for a
+cleaner and more succinct way to describe temporal properties, perhaps
+obviating the need to use the \texttt{event.next} method in many cases.
+
+Especially the formal specification could do with more work on the
+specification language. Can this language become more like that of the informal
+specifications?
+
+The performance of the implementation has not been measured or considered in
+much detail. Benchmark tests for \textit{pythonrv} would be interesting, as
+would attempts to introduce it as a correctness verification approach for more
+programs.
+
+Offline verification, discussed in Section~\ref{section-rv} and
+Section~\ref{section-approach-verification} would be interesting. A simple way
+to turn verification on or off, or to switch between online and offline, would
+be nice. For instance, when a bug has been found, RV could be turned on for
+further verification and help in finding the erroneous code.
+
+If the verification parts of \textit{pythonrv} is unwanted, it could be used as
+a simple framework for aspect-oriented programming. Self-healing and
+self-adaptation would be a very interesting use. Extracting logging
+functionality into separate modules, written as \textit{pythonrv}
+specifications, could make the separation of concerns in the program clearer.
+
+It would be interesting to investigate how the approach we have used in this
+report would work in languages beside Python. Both Java and Ruby, for instance,
+support hot-swapping of code, but an implementation of \textit{pythonrv} in
+those languages would look very different than the original, due to the
+underlying workings of those languages.
+
+
+\section{Final Words}
+
+The trend of software systems in general seems to be toward larger and more
+complex entities. This makes the automated verification of program
+correctness, formal or not, ever more important and an essential part of
+software development. Runtime verification could have a place there, if it
+becomes more popular and simpler to integrate and use in ordinary software.
+
+The implementation described in this report, \textit{pythonrv}, is publicly
+available on the web\footnote{\texttt{https://github.com/tgwizard/pythonrv}} as
+free, open source software. People are welcome to try it, incorporate it into
+their programs, and extend it, as they see fit. With enough interest,
+\textit{pythonrv} might develop into a mature framework for runtime
+verification.
+

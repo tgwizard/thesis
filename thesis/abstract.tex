@@ -1,0 +1,95 @@
+%================================================
+%====== The Abstracts
+%================================================
+
+\begin{abstract}
+
+% introduction & problem
+Computer software is growing ever more complex, and more sophisticated tools
+are required to make sure the software operates in a correct way --- i.e.\
+according to its specification. Traditional approaches to program verification
+have much to give, but they also have their disadvantages. While formal methods
+can give useful mathematical proofs about the correctness of programs, they
+suffer from complexity and are difficult to use. Often they work only on a
+constructed system model, not the actual program. Testing, on the other hand,
+has a simple syntax and great tool support, and it is in widespread use. But it
+is informal and incomplete, only testing the specific test cases that the
+test-writers can come up with.
+
+A relatively new approach called \textit{runtime verification} is an attempt
+for a lightweight alternative. It verifies a program's actual
+\textit{execution} against its specification, possibly while the program is
+running.
+
+% abstract solution
+This work investigates how testing, and specifically unit testing, can be
+combined with runtime verification. It shows how the syntax of unit tests,
+written in the target program's programming language, can be used to inspire
+the syntax for specifications for runtime verification. Both informal and
+formal specifications are described and supported.
+
+% deliverables
+A proof-of-concept framework for Python called \textit{pythonrv} is implemented
+and described, and it is tested on a real-life application. A formal foundation
+is constructed for specifications written in a subset of Python, enabling
+formal verification. Informal specifications are also supported, with the full
+power of Python as specification language.
+
+% results & conclusions
+The result shows that the proof-of-concept framework allow for effective use of
+runtime verification. It is easy to integrate into existing programs, and the
+informal specification syntax is relatively simple. It also shows that formal
+specifications can be written in Python, but in a more unwieldy syntax and
+structure than the informal one. Many interesting properties can be verified
+using it that ordinary tests would have trouble with.
+
+% potential
+The recommendation for future work lies in improving the specification syntax,
+using unit testing concepts such as expectations, and on working to make the
+formal specification syntax more like that of its informal sibling.
+
+\end{abstract}
+\clearpage
+
+
+\begin{foreignabstract}{swedish}
+
+Mjukvarusystem växer sig allt mer komplexa, och mer sofistikerade verktyg
+krävs för att säkerställa att system fungerar korrekt --- att de opererar
+enligt sina specifikationer. Traditionella tillvägagångssätt för
+programverifiering tillför mycket, men de har också sina nackdelar. Formella
+metoder kan ge användbara matematiska bevis om korrektheten av program, men de
+är komplexa och är svåra att använda. Ofta opererar de bara på en
+konstruerad systemmodell, inte det faktiska programmet. Testning, som metod,
+har å andra sidan en enkel syntax och bra verktygsstöd, och används i stor
+utsträckning. Men testning är informell och ofullständig, och testar bara de
+specifika testfall som testkrivarna kan komma på.
+
+En relativt ny metod, kallad runtime-verifiering, är tänkt som ett lättviktigt
+alternativ som verifierar ett programs faktiska \textit{exekvering} mot dess
+specifikation, eventuellt även medan programmet kör.
+
+Avsikten här har varit att undersöka hur testning, och specifikt
+enhetstestning, kan kombineras med runtime-verifiering. Detta genom att visa
+hur syntaxen för enhetstester, skrivna i programmets programmeringsspråk, kan
+användas som inspiration för specifikationer för runtime-verifiering.
+
+En proof-of-concept-implementation för Python kallad \textit{pythonrv}
+implementeras och beskrivs, och testas på en verklig applikation. En formell
+grund framställs för specifikationer skrivna i en delmängd av Python, vilket
+möjliggör formell verifiering. Informella specifikationer stöds också, med hela
+kraften av Python som specifikationsspråk.
+
+Resultaten visar att proof-of-concept-implemenationen möjliggör en effektiv
+användning av runtime-verifiering. Den är enkel att integrera i existerande
+program, och den informella specifikationssyntaxen är förhållandevis enkel. Den
+visar också att formella specifikationer kan skrivas i Python, men i en mer
+omständigt syntax och struktur än den informella. Många intressanta egenskaper,
+som vanliga tester skulle ha problem med, kan verifieras med denna metod.
+
+Rekommendationen för framtida arbete är att förbättra specifikationssyntaxen,
+genom att använda koncept från enhetstestning såsom förväntningar, och genom
+att göra den formella specifikationssyntaxen mer som den av sin informella
+kusin.
+
+\end{foreignabstract}

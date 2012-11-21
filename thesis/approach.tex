@@ -1,0 +1,1565 @@
+%================================================
+%====== Chapter 5, Approach
+%================================================
+
+\pagestyle{newchap}
+\chapter{Approach} \label{chapter-approach}
+\lstset{language=Python}
+
+In this report we investigate whether it is possible to do runtime verification
+with specifications written in the target program's programming language,
+structured similar to unit tests. To this end, there are four issues we
+address:
+
+\begin{itemize}
+  \item[\textbf{Syntax}] We define the syntax and general structure of
+    specification function in the next section.
+  \item[\textbf{Instrumentation}] How these specifications gain access to the
+    target system is described in
+    Section~\ref{section-approach-instrumentation}.
+  \item[\textbf{Formalization}] A subset of python, using a special structure
+    and methods, is given a formal foundation, and specifications written are
+    considered formal. This is described in
+    Section~\ref{section-approach-formal-foundation}.
+  \item[\textbf{Verification}] We have chosen to perform verification online
+    and synchronous with the target system. The technique for verification
+    differs for informal and formal specification functions.  See
+    Sections~\ref{section-approach-verification}
+    and~\ref{section-approach-formal-foundation}, respectively.
+\end{itemize}
+
+This chapter is a documentation on how we have chosen to solve these issues.
+The following sections are each dedicated to one issue, and shows a
+proof-of-concept of these ideas. The implementation, called \textit{pythonrv},
+can be found online\footnote{\texttt{https://github.com/tgwizard/pythonrv}}.
+
+During the development of this proof-of-concept, the biggest factor in deciding
+what language to use was how it would assist in instrumentation. The language
+should also be in wide use, support quick development, and have an active
+testing culture.
+
+Easy access to a non-trivial and actively used system for real-world testing
+would be a plus. More on this in Chapter~\ref{chapter-evaluation}.
+
+Python\footnote{\texttt{http://www.python.org}}, among several languages, fits
+these criteria, and was chosen as the implementation language. Python is a
+dynamic programming language, usually running inside a virtual machine.
+Perhaps the most striking feature of Python is its use of indentation as block
+delimiters. An increase in indentation starts a new block; a decrease marks the
+end of the current block.
+
+The name \textit{pythonrv} clearly reflects that it is a framework for runtime
+verification in Python. The syntax of the \textit{pythonrv} specifications are
+naturally heavily influenced by the fact that they are written in Python.
+
+\textit{pythonrv} is not the first runtime verification framework for Python,
+see e.g.\ \textsc{LogScope} \cite{barringer09tutorial}. But it is unique in its
+use of pure Python as specification language.
+
+
+\section{Syntax} \label{section-approach-syntax}
+
+The canonical framework for doing unit testing in Python is the
+\textit{unittest} framework that is included in all modern versions of Python.
+Not much development has happened on it in the last years. Many new frameworks
+have have spawned, such as PyUnit, Nose and py.test. They build upon the style
+of unittest and mostly add new miscellaneous features, such as better test
+reporting. The original structure of the unit tests is still prevalent ---
+unittest builds on the xUnit style of unit testing, discussed in
+Chapter~\ref{chapter-intro-to-unit-testing}.
+
+\subsection{General Structure of a Specification}
+
+Specifications in \textit{pythonrv} are structured as \textit{specification
+functions}.
+
+\begin{mydef}\label{def-specification-function}
+In \textit{pythonrv}, a \textit{specification function} is a Python function
+describing a specification, which \textit{pythonrv} can use for verification of
+the program. A specification function takes a special \textit{event} argument.
+A specification \textit{monitors} points of the program, and the points being
+monitored are called \textit{monitorees}. \textit{pythonrv} supports only
+monitoring of function calls.
+\end{mydef}
+
+The restriction that \textit{pythonrv} only support monitoring of function
+calls is not a very limiting one. For example, in Python, operators such as $+$
+and $-$ are functions, and reading and writing variables can be turned into
+function calls through the $property$ construct and other so-called magic
+functions. See the Python documentation\footnote{Specifically
+\texttt{http://docs.python.org/2/reference/datamodel.html}.} for more details.
+\textit{pythonrv} thus supports monitoring of these events as well.
+
+A specification function consists of any valid Python code. It is passed the
+special \texttt{event} during verification, which gives the specification
+function access to data about the current event.
+
+In Figure~\ref{figure-specification-flow} we show what happens when a monitored
+function is called. The monitoree is wrapped, so the function call first
+reaches the verification code. This will do some setup and pre-processing and
+then pass the event on to the specifications monitoring this function. If these
+do not find any violations, the actual function is called, and the return value
+is sent back to the system. As we'll see later in this section and in
+Section~\ref{section-approach-instrumentation}, this is a somewhat simplified
+version. Verification can, at the discretion of the specification writer, occur
+after the function call.
+
+\begin{figure}[h!]
+  \begin{center}
+    \begin{minipage}{0.7\textwidth}
+      \begin{sequencediagram}
+        \newthread{system}{System}
+        \newinst{function}{Function}
+        \newinst[1]{verifier}{Verifier}
+        \newinst[1]{specification}{Specification}
+
+        \begin{call}{system}{call}{verifier}{return}
+          \begin{call}{verifier}{verify event}{specification}{}
+          \end{call}
+          \begin{call}{verifier}{call}{function}{return}
+          \end{call}
+        \end{call}
+      \end{sequencediagram}
+    \end{minipage}
+  \end{center}
+  \caption{The sequence for verifying a function call event.}
+	\label{figure-specification-flow}
+\end{figure}
+
+The structure of a informal \textit{pythonrv} specification function is shown
+in pseudo-code in Figure~\ref{figure-pseudo-spec}, and the structure of the
+special \texttt{event} parameter is shown in
+Figures~\ref{figure-event-functions},~\ref{figure-event-data}
+and~\ref{figure-event-function-call}.
+
+Note that the Python \texttt{assert} statement raises an
+\texttt{AssertionError} exception when its argument evaluates to
+\texttt{False}. This is used in \textit{pythonrv} to represent a specification
+violation, see Section~\ref{section-approach-verification}.
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+    \begin{alltt}
+\emph{import} pythonrv module
+\emph{import} modules with functions to be monitored
+
+\emph{decorate} the spec with its monitorees
+\textbf{define} specification function \textit{spec}(\textbf{event}):
+  \textit{# perform verification here}
+  \textbf{if} bad input:
+    raise an \textbf{AssertionError} exception
+
+  \textbf{assert} properties that should be true
+    \end{alltt}
+	\end{minipage}
+	\end{center}
+
+  \caption{The structure of a \textit{pythonrv} specification.}
+	\label{figure-pseudo-spec}
+\end{figure}
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+	\begin{lstlisting}
+# rv.py
+# the Event class has some special
+# functions
+class Event:
+  def finish(success):
+    if success:
+      self.success()
+    else:
+      self.failure()
+  def success():
+    # remove this spec from future
+    # verification
+  def failure():
+    # fail the spec by raising an
+    # exception
+    raise AssertionError("Violation")
+
+  def next(new_spec):
+    # add new_spec to be used in
+    # verification - on the next
+    # event only
+  def next_called_shoud_be(monitoree):
+    # on the next Event, the function
+    # called should be monitoree. Verify
+    # this
+	\end{lstlisting}
+	\end{minipage}
+	\end{center}
+
+  \caption{The structure of the special \textit{event} argument passed to
+    \textit{pythonrv} specification functions. The example is written in
+    pseudo-python.}
+	\label{figure-event-functions}
+\end{figure}
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+	\begin{lstlisting}
+# rv.py, cont'd
+# an Event object is populated with data
+event = Event()
+# list of previous events
+event.history
+# the event that occurred before this
+event.prev = history[-1]
+
+# map (name => FunctionCall) for functions
+# monitored by the spec
+event.fn
+# the monitored function that generated
+# this event
+event.called_function
+	\end{lstlisting}
+	\end{minipage}
+	\end{center}
+
+  \caption{The structure of the data in the \textit{event} argument passed to
+    \textit{pythonrv} specification functions. The example is written in
+    pseudo-python.}
+	\label{figure-event-data}
+\end{figure}
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+	\begin{lstlisting}
+# rv.py, cont'd
+# the FunctionCall class
+class FunctionCall:
+  def next(new_spec):
+    # same as for Event but only for Events
+    # where this function was called
+
+fc = FunctionCall()
+# the name of the function
+fc.name
+# True if the function was called in this event
+fc.called
+# the input arguments for the function
+fc.inputs
+# the output arguments for the function
+fc.outputs
+# the function's return value
+fc.result
+	\end{lstlisting}
+	\end{minipage}
+	\end{center}
+
+  \caption{The structure of the function call structures in the \textit{event}
+    argument passed to \textit{pythonrv} specification functions. The example
+    is written in pseudo-python.}
+	\label{figure-event-function-call}
+\end{figure}
+
+
+
+\clearpage
+\subsection{Specification Functions by Example}
+\lstset{language=Python,numbers=left}
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.5\textwidth}
+	\lstinputlisting{figures/syntax_example_1.py}
+	\end{minipage}
+	\end{center}
+
+  \caption{A very simple \textit{pythonrv} specification function.}
+	\label{figure-syntax-example-1}
+\end{figure}
+
+We now proceed with a few simple examples to show how informal
+\textit{pythonrv} specifications can be written. More realistic examples are
+shown in Chapter~\ref{chapter-evaluation}.
+
+The first example, in Figure~\ref{figure-syntax-example-1}, shows the basics of
+a \textit{pythonrv} specification function. The specification just verifies,
+through the \texttt{assert} statement, that the first input to the monitored
+function is always greater than zero.
+
+On line 1 we import the \texttt{rv} module from the \texttt{pythonrv} package,
+which gives us access to the runtime verification features of
+\textit{pythonrv}. We specify that the specification should monitor the
+function \texttt{fib} in the module \texttt{fibmodule} on line 4, and that
+whenever \texttt{fib} is called, the specification should be verified. The
+monitoree \texttt{fib} is, locally to the specification function, aliased as
+\texttt{func}. The instrumentation is also done on line 4 by using the
+\textit{function decorator} \texttt{rv.monitor} (see
+  Section~\ref{section-approach-instrumentation} for an explanation of function
+decorators and \texttt{rv.monitor}.)
+
+On line 5 we define the specification as an ordinary Python function called
+\texttt{spec}, taking one argument, \texttt{event}. On line 6, the array of
+input arguments used to call \texttt{fib} is accessed to check that the first
+argument is greater than zero.
+
+The specification function in Figure~\ref{figure-syntax-example-1} will be
+called upon every invocation to \texttt{fibmodule.fib}.
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+	\lstinputlisting{figures/syntax_example_2.py}
+	\end{minipage}
+	\end{center}
+
+  \caption{A \textit{pythonrv} specification that monitors two functions,
+    \texttt{mymodule.foo} and \texttt{mymodule.bar}.}
+	\label{figure-syntax-example-2}
+\end{figure}
+
+In the second example, Figure~\ref{figure-syntax-example-2}, we show how a
+specification function can monitor two functions. The specification function
+will be called whenever either of the monitored functions are called. The
+example specification verifies that the calls to the two functions alternate;
+that no two calls to \texttt{foo} occur without a call to \texttt{bar} in
+between, and vice versa. The first call has to be to \texttt{foo}.
+
+Which function was called can be determined from the \texttt{event} argument,
+as is done on lines 7 and 14. It is the \texttt{called} attribute of a function
+in the \texttt{event.fn} structure that allows for this.
+
+We also show in the example how the specification can access a history of
+previous events - events that it has handled in the past.
+\texttt{event.history} is a list of all events that has occurred that this
+specification monitors. The last element is the current event, and the
+next-to-last element is the previous element, which can also be accessed as
+\texttt{event.prev}.
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+	\lstinputlisting{figures/syntax_example_3.py}
+	\end{minipage}
+	\end{center}
+
+  \caption{A more complex example, utilizing the \texttt{event.next} function.}
+	\label{figure-syntax-example-3}
+\end{figure}
+
+In the last example, Figure~\ref{figure-syntax-example-3}, we show a more
+advanced specification, in which the \texttt{next} function of the
+\texttt{event} argument is used. \texttt{event.next} allows the specification
+function to add more specification functions (possibly implemented as closures
+or lambdas) to be executed when the next event occurs.
+
+The specification function monitors three functions, \texttt{foo}, \texttt{bar}
+and \texttt{baz}, and makes sure that \texttt{foo} is called first, then any
+number calls to \texttt{bar} with the first argument as \texttt{True}, and then
+finally a call to \texttt{baz}. After that, any calls are allowed --- the
+specification function will not be used in verification any longer. So, the
+call event sequence $(\texttt{foo()}, \texttt{baz(True)}, \texttt{baz(True)},
+\texttt{baz(True)}, \texttt{bar()})$ is accepted, but $\texttt{baz(True)},
+\texttt{bar()}$ is not.
+
+The specification is split into two parts, \texttt{spec} and \texttt{followup}.
+\texttt{spec} verifies that \texttt{foo} is called first, and then that
+\texttt{followup} should be verified on the following event. After that, on
+line 11, \texttt{spec} notifies that it has finished its verification, and
+should not be used in the future --- it ``unsubscribes'' from future events.
+
+On line 10 the function \texttt{followup} is added to be executed on the next
+event. We use \texttt{followup} to accept any calls to \texttt{baz} (with the
+first argument set to \texttt{True}). \texttt{followup} finishes its
+verification when \texttt{bar} has been called.
+
+Since \texttt{followup} is added to the verification machinery through the
+\texttt{event.next} function --- as a ``oneshot'' specification function --- it
+needs to add itself using \texttt{next} for verification on subsequent events.
+We do this on line 24.
+
+
+
+\subsection{Customization}
+
+The examples above show the main capabilities of \textit{pythonrv}
+specifications. However, some details can be customized through the
+\texttt{@rv.spec} decorator, which accepts the following parameters (default
+values in parentheses):
+
+\begin{itemize}
+  \item[\texttt{when}] (\texttt{rv.PRE}). This argument allows the
+    specification writer to determine when the specification should be
+    verified, before or after the monitorees are called. The valid arguments
+    \texttt{rv.PRE} and \texttt{rv.POST}, respectively. Only when
+    \texttt{when=rv.POST} does the specification function have access to the
+    monitorees' return values.
+
+  \item[\texttt{history\_size}] (\texttt{2}). Specifies how much event history
+    should be remembered for the specification.
+    \texttt{rv.INFINITE\_HISTORY\_SIZE} can be used to remember all previous
+    events, although this could naturally be a big drain on the available
+    memory resources.
+
+  \item[\texttt{level}] (\texttt{rv.ERROR}). Specifies how severe or important
+    the specification is. Any value can be used; \texttt{DEBUG}, \texttt{INFO},
+    \texttt{WARNING}, \texttt{ERROR}, \texttt{CRITICAL} are supplied by
+    \texttt{pythonrv}. With these levels we can have more control over what
+    should happen when a specification violation occurs, see
+    Section~\ref{section-approach-verification}.
+\end{itemize}
+
+
+\section{Instrumentation} \label{section-approach-instrumentation}
+
+The previous section showed how \textit{pythonrv} specification functions can
+be written. This section will describe how these functions can jack themselves
+into the ordinary control flow of the program and gain access to the function
+call events and their arguments and associated state.
+
+Instrumentation is done through the \texttt{rv.monitor} \textit{function
+decorator} in \textit{pythonrv}. A Python function decorator is similar to
+attributes in~.Net and annotations in Java. It is essentially a function that
+takes a function as a parameter, possibly modifies it, or uses it in some way
+(decorates it), and then returns it (or another function). This is used
+throughout Python to, for instance, turn functions into static or class
+methods. In Figure~\ref{figure-function-decorator} we show an example function
+decorator definition, and in Figure~\ref{figure-function-decorator-usages} we
+show the syntax for using it.
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+	\lstinputlisting{figures/function_decorator.py}
+	\end{minipage}
+	\end{center}
+
+	\caption{An example of how to define a function decorator.}
+	\label{figure-function-decorator}
+\end{figure}
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+	\lstinputlisting{figures/function_decorator_usages.py}
+	\end{minipage}
+	\end{center}
+
+	\caption{An example of how to use the function decorator from
+	Figure~\ref{figure-function-decorator}.}
+	\label{figure-function-decorator-usages}
+\end{figure}
+
+The decorator in Figure~\ref{figure-function-decorator} caches the return
+values for functions on which it is applied, so that future calls to a
+decorated function with the same arguments will short-circuit and return the
+cached value directly, never entering the function itself. As is shown in
+Figure~\ref{figure-function-decorator-usages}, the decorator is something that
+can be attached with a special syntax, using the \texttt{@} operator. The
+decorated function does not need any further modifications.
+
+\texttt{rv.monitor} is a decorator similar to the \texttt{cache} decorator
+above. It takes to set of arguments, first what functions should be monitored
+(the monitorees), and second the specification function. However, the
+\texttt{rv.monitor} decorator does not modify the function which it decorates,
+which here is the specification function, but instead finds the monitorees and
+decorates them with a dynamically generated function \texttt{wrapper}. The code
+in Figure~\ref{figure-instrumentation-overview} illustrates how
+\textit{pythonrv} does instrumentation.
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+	\begin{lstlisting}
+# rv.py
+def monitor(monitorees, specification):
+	for monitoree in monitorees:
+		# define a wrapper for each monitoree
+		def wrapper(*args, **kwargs)
+			event = create_event(...)
+
+			# call specification
+			specification(event)
+
+			# call the actual function - the
+			# monitoree
+			return monitoree(*args, **kwargs)
+
+		# overwrite the monitoree in its container
+		container = get_container(monitoree)
+		setattr(container, monitoree.name, wrapper)
+
+monitor(myfunc, myspec)
+myfunc(x, y, z) # will call myspec first
+	\end{lstlisting}
+	\end{minipage}
+	\end{center}
+
+	\caption{An overview of the \textit{pythonrv} instrumentation process,
+		written in pseudo-Python. This is just for illustrative purposes and not
+		how \textit{pythonrv} actually does the instrumentation.}
+	\label{figure-instrumentation-overview}
+\end{figure}
+
+The instrumentation in \textit{pythonrv} works as follows. First, a wrapper
+function is defined for each function to be monitored (for each monitoree).
+This wrapper function's main purpose is to call the specifications attached to
+the monitored function, and then call the monitored function itself. The
+wrapper also does some argument copying and such, to prevent side-effects in
+the specifications from interfering with the monitored function.
+
+Usually in Python, functions belong to a parent \textit{container}, such as a
+class, an object, or a module\footnotemark. In
+Figure~\ref{figure-function-decorator-usages} the functions \texttt{fact} and
+\texttt{fact2} belong to the module \texttt{test} (the module's name is the
+same as that of the file containing the code). These containers are essentially
+dictionaries (\textit{dicts} in Python parlance) of key-value pairs, where the
+keys in this case are function names and the values are objects representing
+the function code. (There are other types of values in these containers as
+well, which we can ignore).
+
+\footnotetext[4]{This is not true of closures --- functions defined inside other
+  functions. These functions cannot be directly referenced or modified from
+  outside the defining function. \textit{pythonrv} does not (as of writing)
+  support monitoring of closures.}
+
+So in the \textit{pythonrv} instrumentation process, the parent container of
+each monitoree is extracted, and the reference to the monitoree is overwritten
+with a reference to the wrapper. The wrapper still has a reference to the
+monitoree.
+
+The implementation of the instrumentation code in \textit{pythonrv} is more
+optimized than what is shown in Figure~\ref{figure-instrumentation-overview}.
+For instance, each monitoree only ever have one wrapper function, independent
+of how many specifications want to monitor it. The wrappers then iterate over
+the relevant specifications, passes the control (and an event) to them, and
+then runs the monitoree. As we stated in section~\ref{section-approach-syntax},
+a specification can either be verified before or after the function call. The
+wrapper function handles this.
+
+
+
+\section{Verification of Informal Specifications}
+\label{section-approach-verification}
+
+In \textit{pythonrv}, verification of informal specifications means just
+executing them. The specification functions are valid python functions, and
+executing them on the appropriate events, providing access to the corresponding
+data, verifies the specification they represent.
+
+Specification functions notify verification violations, that the specifications
+are not followed, by raising exceptions of the type \texttt{AssertionError}.
+These exceptions are raised when the \texttt{assert} statement fails. They can
+also be raised manually: \texttt{raise AssertionError('error message')}.
+
+The verification is performed online, during the program execution.
+Specifications are verified for all calls to function they monitor unless they
+explicitly remove themselves by calling one of \texttt{event.finish},
+\texttt{event.success} and \texttt{event.failure} (described in
+Section~\ref{section-approach-syntax}).
+
+Whenever a specification violation occurs, and an \texttt{AssertionError} is
+raised, it is passed to an \textit{error handler}. There are two built-in error
+handlers. One, the default, re-raises the \texttt{AssertionError} exception,
+and thus causes it to propagate up through the call stack. If the exception
+isn't caught and suppressed by code higher up the call stack, the program will
+crash. \texttt{AssertionError} are supposed to be raised when something has
+gone wrong and the operation should halt, so it is bad coding practice to
+suppress them.
+
+A second error handler just logs the error message, using the standard Python
+logging module.
+
+We can customize what should happen when verification fails for a
+specification. We do this by creating an error handler and passing it to the
+\texttt{rv.configure} function. Any object with a \texttt{handle} method that
+takes two arguments, the specification \texttt{level} and a list of errors, is
+a valid error handler.
+
+In Figure~\ref{figure-configure-error-handler} we use a simple error handler
+that only propagates the verification errors, and thus crashes the program, for
+specifications with level \texttt{rv.CRITICAL}. A specification with
+\texttt{level} set to \texttt{rv.CRITICAL} is also shown.
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+	\lstinputlisting{figures/configure_error_handler.py}
+	\end{minipage}
+	\end{center}
+
+  \caption{How to use a custom error handler.}
+	\label{figure-configure-error-handler}
+\end{figure}
+
+The current verification approach in \textit{pythonrv} is to perform it online.
+This obviously affects the performance of the program under test. Offline
+verification could be used to mitigate this, removing all overhead but for the
+required recording layer. To do offline verification in \textit{pythonrv} the
+events and their associated data would need to be saved (serialized) and
+replayed outside the context of the running program. This is suggested as an
+area for future work in Chapter~\ref{chapter-conclusions}.
+
+
+
+\section{Formal Foundation} \label{section-approach-formal-foundation}
+
+The purpose of a formal foundation for a verification approach is so that we
+can reason mathematically about the specifications. To this end, the
+specifications used for verification need some sort of mathematical
+representation. Different kinds of automata are often used. A model of the
+system, a system model, is also required. In this case the system model is the
+sequence of that occur during the program's execution, with their associated
+data (arguments, object state, global state, etc.). This is described in more
+detail in Section~\ref{section-approach-semantics}
+
+A seemingly insurmountable problem quickly arises when attempting to give such
+a mathematical representation to the \textit{pythonrv} specifications described
+in Section~\ref{section-approach-syntax}. \textit{pythonrv} specifications are
+written as ordinary Python functions and, as such, are difficult to formalize.
+The Python programming language is rather informal - one implementation of it,
+CPython, serves as the reference implementation. There are no other
+specifications or formal semantics for Python\footnote{The development of
+  Python is organized mainly through the Python Enhancement Proposal (PEP)
+  process. PEPs are design documents for new features, informally describing
+their rationales and how they work.}.
+
+One way to go around this is to define formal semantics for a subset of Python,
+which is done in the following sections. This leads to a way to reason
+mathematically with and about specifications written in this subset --- see
+Section~\ref{section-approach-python-subset}.
+
+
+\subsection{Terminology and Definitions}
+
+We begin with some definitions and terms to make the following sections
+simpler.
+
+\begin{mydef}\label{def-}
+A \textit{formal specification function} is one of three basic functions
+described in Section~\ref{section-approach-python-subset}, or a composition of
+them as described in Section~\ref{section-approach-composition}.
+\end{mydef}
+
+\begin{mydef}\label{def-}
+Formal specification functions have \textit{composition points} where they can
+be combined with other formal specification functions. A formal specification
+function can have zero or more composition points. A composition point can be
+\textit{open} or \textit{closed} --- open composition points can be used in
+composition, while closed have already been used. Composition points can be
+\textit{required} or
+\textit{optional}.
+\end{mydef}
+
+\begin{mydef}\label{def-}
+A formal specification function can be either \textit{complete} or
+\textit{incomplete}. A complete formal specification function is a valid
+specification. An incomplete formal specification function is not a valid
+specification, but can, with composition, become complete. Complete formal
+specification functions have no open required composition points; incomplete
+formal specification functions have at least one.
+\end{mydef}
+
+\begin{mydef}\label{def-}
+Composition is described by the $\circ$ operator. Let $f$, $g$ and $h$ be
+formal specification functions. Let $f$ have one composition point, $g$ two,
+labeled $a$ and $b$, respectively, and $h$ none. A valid composition would be:
+$s = f \, \circ \, ((g \, \circ_{a} \, h) \, \circ_{b} \, h)$.  $s$ would be a
+complete formal specification function, as it is composed of formal
+specification functions, and it has no open required composition points (or
+optional ones).
+\end{mydef}
+
+\begin{mydef}\label{def-}
+Every formal specification function $s$ can be represented by a
+nondeterministic finite automata $A(s) = (Q, P, q_0, S, F)$. Each such automata
+consists of a set of states $Q$ and transitions $(a, b, E) \in P$ between them,
+where $a$ is the start state, $b$ is the end state, and $E$ is a
+\textit{label}. An automata has one initial state $q_0$, a set of
+\textit{success states} $S$ and a set of \textit{fail states} $F$.
+\end{mydef}
+
+\begin{mydef}\label{def-}
+A state cannot be in both $S$ and $F$: $S \cap F = \emptyset$. Success states
+are depicted as \textit{accepting states} in the automata. Fail states are
+usually called \textit{fail}, $f$, etc.
+\end{mydef}
+
+\begin{mydef}\label{def-}
+Each transition in the automata has a label --- an expression --- which is
+described in detail in Section~\ref{section-approach-semantics}. The label is
+taken from the expressions in the Python functions, as shown in
+Section~\ref{section-approach-python-subset}. The label $\top$ denotes ``any
+and all expressions''.
+\end{mydef}
+
+\begin{mydef}\label{def-}
+The set of \textit{initial transitions} $T$, $(q_0, q', E) \in T$, $T \subseteq
+P$ are especially important for composition, see
+Section~\ref{section-approach-composition}. All initial transitions start from
+$q_0$, go to some state $q'$, and have some label $E$.
+\end{mydef}
+
+Notation: Let $a_E$ be an \textit{assert} specification asserting the
+expression $E$, let $n$ be a \textit{next} specifications and let $i_E$ be an
+\textit{if} specification with the expression $E$ guarding the \textit{then}
+composition point. Let $s$ be any specification. Appending subscripts and $'$
+denotes different specifications or expressions of the same type. The $E$
+subscript can be omitted if irrelevant to the task at hand.
+
+
+\subsection{Semantics} \label{section-approach-semantics}
+
+The semantics for the specifications as expressed in their Python format, even
+composed only from the basic specification functions in
+Section~\ref{section-approach-python-subset}, is quite straightforward. The
+trick is to preserve this semantics when transforming the specifications into
+automata, while at the same time allowing for mathematical reasoning to deduce
+the correctness of the specifications. This requires two parts. First, a
+description of the system model. Second, a set of rules to deduce whether a
+specification would accept or reject an instance of such a model.
+
+
+\subsubsection{The system model}
+
+The system model is quite simple. It consists of a sequence of \textit{events}
+of function calls, $S = (\alpha_0, \alpha_1, \dots, \alpha_n)$. Each event
+$\alpha_i = (\lambda_i, \delta_i)$ is a two-part structure: The function
+called, $\lambda$, and the associated arguments and state, $\delta$. Since the
+system model is an abstraction of an execution of the system (the target
+program), it is necessarily finite, but of arbitrary length, and possibly
+extendible through continued execution of the program.
+
+The system model can be viewed as a directed acyclic graph (actually, a tree),
+where all nodes but the last have an edge. The first edge is labeled
+$\alpha_0$, the second is labeled $\alpha_1$, etc. See
+Figure~\ref{figure-deduction-example}~(a) for an example.
+
+
+\subsubsection{The product of a system model and a specification}
+
+In the same way that the system model can be viewed as a graph, so can a
+specification automata, see Figure~\ref{figure-deduction-example}~(b).
+Specification automata are defined and discussed more in
+sections~\ref{section-approach-python-subset}
+and~\ref{section-approach-composition}. The
+product $Z = M \times C$ of a system model $M$ and a specification automata $C$
+is the main construct used to reason about the correctness of the
+specification. An example can be seen in
+Figure~\ref{figure-deduction-example}~(c).
+
+The product $Z$ will be a tree of depth $min(depth(M), depth(C))$ (where the
+depth of a specification automata containing cycles is considered infinite).
+
+First, the two initial states of $M$ and $C$ are merged, resulting in a new
+state $(q_0,s_0)$. All transitions $T$ from $q_0$ are merged with the (single)
+transition $(s_0, s_1, \alpha_0)$ from $s_0$. This results in a new set
+$T_{q_0,s_0}$ of transitions from $(q_0,s_0)$:
+
+\medskip
+\[
+  \begin{array}{rcl}
+    T_{q_0,s_0} & = & \{((q_0,s_0), (q,s_1), \alpha_0 \models E) \, | \, (q_0, q, E) \in T \}
+  \end{array}
+\]
+\medskip
+
+The result is a set of second-level states, $Q_2 = \{(q,s_1) | (x, (q,s_1),
+E) \in T_{q_0,s_0}\}$, and the process continues. The transitions from all
+specification states $q$ in $Q_2$ are merged with the transition $(s_1, s_2,
+\alpha_1)$ from $s_1$, generating a set of third-level states, $Q_3$. This
+terminates when the depth of either the specification or the system model is
+reached.
+
+A state $(q, s)$ of the product is a success state if $q$ is a success state,
+and a fail state if $q$ is a fail state.
+
+See Figure~\ref{figure-deduction-example} for an example.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% Deduction example
+%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[h!]
+	\begin{minipage}{0.9\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=3cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (s0) {$s_0$};
+      \node[state] (s1) [right of=s0] {$s_1$};
+      \node[state] (s2) [right of=s1] {$s_2$};
+      \node[state] (s3) [right of=s2] {$s_3$};
+			\path
+				(s0) edge node {$\alpha_0 = (a, \epsilon)$} (s1)
+				(s1) edge node {$\alpha_1 = (b, \epsilon)$} (s2)
+				(s2) edge node {$\alpha_2$} (s3);
+		\end{tikzpicture}
+    \subcaption{The system model $M$ consisting of two function calls, to $a$
+    and $b$, and an unspecified event $\alpha_2$.}
+	\end{minipage}
+
+  \bigskip
+
+	\begin{minipage}{0.90\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=3cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0) {$q_0$};
+      \node[state] (q1) [below right of=q0] {$q_1$};
+      \node[state] (f) [below left of=q0] {$f$};
+      \node[state,accepting] (q2) [below right of=q1] {$q_2$};
+			\path
+        (q0) edge node {$\lambda = a$} (q1)
+        (q0) edge node [above left] {$\lambda \neq a$} (f)
+        (q1) edge node {$\lambda = b$} (q2)
+        (q1) edge node [above] {$\lambda \neq b$} (f);
+		\end{tikzpicture}
+    \subcaption{The specification automata $C$. This automata is designed to
+      accept system models that consists of one call to $a$ followed by a call to
+      $b$. After that, verification is complete and any events are accepted.
+      $f$ is a fail state and $q_2$ is a success state.}
+	\end{minipage}
+
+  \bigskip
+
+	\begin{minipage}{0.90\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=3cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0) {$q_0,s_0$};
+      \node[state] (q1) [below right of=q0] {$q_1,s_1$};
+      \node[state] (f1) [below left of=q0] {$f_1,s_1$};
+      \node[state,accepting] (q2) [below right of=q1] {$q_2,s_2$};
+      \node[state] (f2) [below left of=q1] {$f_2,s_2$};
+			\path
+        (q0) edge node {$(a, \epsilon) \models \lambda = a$} (q1)
+        (q0) edge node [above left] {$(a, \epsilon) \models \lambda \neq a$} (f1)
+        (q1) edge node {$(b, \epsilon) \models \lambda = b$} (q2)
+        (q1) edge node [above left] {$(b, \epsilon) \models \lambda \neq b$} (f2);
+		\end{tikzpicture}
+    \subcaption{The product of the model and the specification, $M \times C$.
+    $(f_1,s_1)$ and $(f_2,s_2)$ are fail states; $(q_2,s_2)$ is a success state.}
+	\end{minipage}
+
+  \caption{Deduction example.}
+	\label{figure-deduction-example}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\subsubsection{Evaluating specification-model product label expressions}
+
+The transition labels for the product of a specification automata and a system
+model is of the form (the second line is a expanded form of the first):
+
+\medskip
+\[
+  \begin{array}{rcl}
+    \alpha & \models & \text{expression $E$ over $\alpha$} \\
+    (\lambda, \delta) & \models & \text{expression $E$ over $\lambda$ and $\delta$}
+  \end{array}
+\]
+\medskip
+
+The expression $E$ is translated directly from Python expressions in the
+specification function. An incomplete sketch of the translation procedure,
+shown in Figure~\ref{figure-semantics-translation}, is just syntax replacement.
+The resulting specification expression has the same semantics as the Python
+expression. In the same way that the Python specification operates on an event,
+a specification expression is evaluated to true ($\top$) or false ($\bot$)
+using the values of an event $\alpha$.
+
+\begin{figure}[h!]
+	\begin{minipage}{0.9\textwidth}
+		\centering
+    \begin{tabular}{r c l}
+      $PE(\texttt{True)})$ & = & $\top$ \\
+      $PE(\texttt{False)})$ & = & $\bot$ \\
+      $PE(\texttt{event.fn.x.called})$ & = & $\lambda = x$ \\
+      $PE(\texttt{event.called\_function == x})$ & = & $\lambda = x$ \\
+      $PE(\texttt{event.fn.x.property})$ & = & $\delta(x.\texttt{property})$ \\
+      $PE(\texttt{not a)})$ & = & $\neg PE(\texttt{a})$ \\
+      $PE(\texttt{a == b)})$ & = & $PE(\texttt{a}) = PE(\texttt{b})$ \\
+      $PE(\texttt{a != b)})$ & = & $PE(\texttt{a}) \neq PE(\texttt{b})$ \\
+      $PE(\texttt{a and b)})$ & = & $PE(\texttt{a}) \wedge PE(\texttt{b})$ \\
+      $PE(\texttt{a or b)})$ & = & $PE(\texttt{a}) \vee PE(\texttt{b})$ \\
+      $PE(\textit{A Python function or property})$ & = & \textit{The return value} \\
+    \end{tabular}
+  \end{minipage}
+  \caption{A sketch of the translation procedure of Python expressions to
+    specification expressions. $PE$ is the mapping function, replacing the
+    Python syntax with mathematics syntax.}
+  \label{figure-semantics-translation}
+\end{figure}
+
+
+\subsubsection{Verification}
+
+A product $Z$ of a system model and a specification can be used to determine
+whether that specification would accept or reject the system model --- or not
+know to do either or, yet.
+
+\begin{enumerate}
+  \item Compute the product $Z$ of the specification $C$ and the system model
+    $M$, as described above.
+
+  \item Traverse $Z$, starting at the root node, following all transitions
+    which labels evaluate to true.
+
+    \begin{enumerate}
+      \item If a fail state is reached, the system models violates the
+        specification.
+      \item If only success states are reached, the system model satisfies the
+        specification.
+      \item If some traversal ends in a state that is neither a fail or a
+        success state, the system model could, if it were extended, either
+        satisfy or violate the specification.
+    \end{enumerate}
+\end{enumerate}
+
+Formal \textit{pythonrv} specifications are verified using this procedure,
+although in an incremental manner. The verification is done online, so as soon
+as a new event is added to the system model, it is combined with the
+specification automata.
+
+We now go on to describe the actual syntax for these formal specification
+functions.
+
+
+\subsection{Python Subset for Formal Specification Functions}
+\label{section-approach-python-subset}
+\lstset{language=Python,numbers=left}
+
+The subset of Python that can be used in formal \textit{pythonrv} specification
+functions consists of three composable specification functions:
+\textit{assert}, \textit{next} and \textit{if}; See
+Figure~\ref{figure-basic-formal-specification-functions}. A complete and
+verifiable formal specification function also needs some boilerplate, shown in
+Figure~\ref{figure-formal-boilerplate}.
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+	\begin{lstlisting}
+def spec():
+  a = make_assert(E)
+  tail = # optional composition point 'tail'
+  return a + tail
+
+def next():
+  x = # required composition point 'next'
+  n = make_next(x)
+  tail = # optional composition point 'tail'
+  return n + tail
+
+def if():
+  then = # required composition point 'then'
+  els = # optional composition point 'else'
+  i = make_if(E, then, else)
+  tail # optional composition point 'tail'
+  return i + tail
+	\end{lstlisting}
+	\end{minipage}
+	\end{center}
+
+	\caption{The three basic formal specification functions.}
+	\label{figure-basic-formal-specification-functions}
+\end{figure}
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.7\textwidth}
+	\begin{lstlisting}
+from pythonrv import rv
+from pythonrv.formalrv import (formal_spec,
+  make_assert, make_next, make_if)
+
+monitorees = # list of monitorees
+@rv.monitor(monitorees)
+@formal_spec
+def spec():
+  # spec is a formal specification function
+  # - assert, next or if
+	\end{lstlisting}
+	\end{minipage}
+	\end{center}
+
+  \caption{The boilerplate code for formal \textit{pythonrv} specification
+  functions that allow verification and instrumentation to take place.}
+	\label{figure-formal-boilerplate}
+\end{figure}
+
+The label \textit{E} used in the assertion and if statement (lines 2 and 11)
+denotes any idempotent, immutable, valid Python boolean expression. A technical
+detail is that if the expression needs to access any properties of the
+\texttt{event} argument, they need to be of the form \texttt{lambda event: E}.
+The previous section described how these expressions are used in formal
+verification.
+
+The three basic formal specification functions correspond to simple,
+nondeterministic, finite automata, which are depicted in
+Figure~\ref{figure-basic-formal-specification-automata}. The basic formal
+specifications can be combined by composition into larger, more complex
+specifications. Details on the basic formal specification functions and their
+composition is described in the next section. Note that the \textit{assert}
+formal specification function, and all complete compositions of the three basic
+formal specification functions, are valid \textit{pythonrv} specification
+functions.
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% Automata for the basic formal specification functions
+%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[h!]
+	\begin{minipage}{0.45\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=2cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0) {$q_0$};
+			\node[state,accepting] (q1) [right of=q0] {$q_1$};
+      \node[state] (f) [below right of=q0] {\textit{f}};
+			\path
+				(q0) edge node {$E$} (q1)
+        (q0) edge node {$\bar{E}$} (f);
+		\end{tikzpicture}
+    \subcaption{A generalized \textit{assert} specification, asserting the
+      expression $E$. $q_1$ is a success state; \textit{f} is a fail state.}
+	\end{minipage}
+  ~
+	\begin{minipage}{0.45\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=2.5cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0)	{$q_0$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (cloud) [right of=q0] {$A(next)$};
+			\path
+				(q0) edge node {$\top$} (cloud);
+		\end{tikzpicture}
+    \subcaption{A template for a \textit{next} specification.}
+	\end{minipage}
+
+  \bigskip
+
+	\begin{minipage}{0.90\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=2.5cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0)	{$q_0$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (then) [right of=q0] {$A(then)$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (else) [below of=then] {$A(else)$};
+			\node[state,accepting] (q1) [below of=q0]	{$q_1$};
+			\path
+				(q0) edge node {$E$} (then)
+        (q0) edge node {$\bar{E}$} (else)
+        (q0) edge node {$\top$} (q1);
+		\end{tikzpicture}
+    \subcaption{A template for an \textit{if} specification.}
+	\end{minipage}
+
+  \caption{Sketches of automata for the three basic formal specification
+    functions. The squiggles around $A(next)$, $A(then)$ and $A(else)$ denote
+    that some composition is required there.}
+	\label{figure-basic-formal-specification-automata}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\subsection{Transformation to Automata and Rules for Composition}
+\label{section-approach-composition}
+\lstset{language=Python,numbers=none}
+
+The idea is to use composition to build more complex and interesting
+specifications from the three basic formal specification functions. Composition
+is defined inductively, preserving the semantics from
+Section~\ref{section-approach-semantics}.
+
+There are no implicit precedence rules for the $\circ$ composition operator;
+parentheses are required.
+
+
+\subsubsection{Composition of the \textit{assert} specification, and
+composition with the \textit{tail} composition point}
+
+The \textit{assert} specifications are the only basic formal specification
+functions that are complete, without the need to compose them with other
+specifications. The automata $A(a_E)$ for a standalone \textit{assert}
+specification $a_E$, depicted in
+Figure~\ref{figure-basic-formal-specification-automata}~(a), is defined as:
+
+\medskip
+\[
+  \begin{array}{rcl}
+    A(a_E) & = & (\{q_0, q_1, f\}, \{(q_0, q_1, E), (q_0, f, \bar{E})\}, q_0, \{q_1\}, \{f\})
+  \end{array}
+\]
+\medskip
+
+If $\bar{E}$ is true, the fail state $f$ will be reached, and the specification
+has been violated.
+
+\textit{assert} specifications also have, together with all basic formal
+specification functions and compositions thereof, at least one open composition
+point, the \textit{tail} composition point. Compositions using the
+\textit{tail} composition point are commutative: $s \, \circ_{tail} \, s' = s'
+\, \circ_{tail} \, s$. Composition using the \textit{tail} composition point is
+essentially just a merge of the initial states of the two specifications,
+making the initial transitions of both specifications go out from the same
+state $q_0$, and merging the success states and fail states of the automata. Given two
+specifications $s$ and $s'$, where:
+
+\medskip
+\[
+  \begin{array}{rcl}
+    A(s) & = & (Q_s, T_s \cup R_s, q_{0s}, S_s, F_s) \\
+   A(s') & = & (Q_{s'}, T_{s'} \cup R_{s'}, q_{0s'}, S_{s'}, F_{s'})
+  \end{array}
+\]
+\medskip
+
+Then:
+
+\medskip
+\[
+  \begin{array}{rcl}
+    A(s \circ_{tail} s') & = & (Q, P, q_0, S_s \cup S_{s'}, F_s \cup F_{s'}) \\
+                       Q & = & \{q_0\} \cup Q_s \cup Q_{s'} - \{q_{0s}, q_{0s'}\} \\
+                       P & = & T \cup R_s \cup R_{s'} \\
+                       T & = & \{(q_0, q', E) \, | \, (q, q', E) \in (T_s \cup T_{s'})\} \\
+  \end{array}
+\]
+\medskip
+
+An example for composing two \textit{assert} specifications is shown in
+Figure~\ref{figure-assert-composition-example}. The resulting automata is
+unnecessarily complex, and can be simplified to a smaller automata with the
+same semantics, as seen in Figure~\ref{figure-assert-composition-simplified}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% Composition, assert o s, symbol-python-automata
+%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[h!]
+	\begin{minipage}{0.90\textwidth}
+		\centering
+    \[
+      \begin{array}{rcl}
+        A(a_E) & = & (\{q_x, q_y, f\}, \{(q_x, q_y, E), (q_x, f, \bar{E})\}, q_x, \{q_y\}, \{f\}) \\
+    A(a'_{E'}) & = & (\{q_z, q_w, f'\}, \{(q_z, q_w, E') ,(q_z, f', \bar{E'})\}, q_z, \{q_w\}, \{f'\})
+      \end{array}
+    \]
+		\centering
+    \[
+      \begin{array}{rcl}
+        A(a_E \circ_{tail} a'_{E'}) & = & (Q, P, q_0, S, F) \\
+                                 Q & = & \{q_0, q_y, f, q_w, f'\} \\
+                                 P & = & \{(q_0, q_y, E), (q_0, f, \bar{E}), (q_0, q_w, E'), (q_0, f', \bar{E'})\} \\
+                                 S & = & \{q_y, q_w\} \\
+                                 F & = & \{f, f'\}
+      \end{array}
+    \]
+	\end{minipage}
+
+  \bigskip
+
+	\begin{minipage}{0.45\textwidth}
+		\centering
+    \begin{lstlisting}
+def s():
+  return make_assert(E) +
+         make_assert(E')
+    \end{lstlisting}
+	\end{minipage}
+  ~
+	\begin{minipage}{0.45\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=2cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0) {$q_0$};
+			\node[state,accepting] (qy) [below right of=q0] {$q_y$};
+			\node[state] (f) [right of=qy] {$f$};
+			\node[state,accepting] (qw) [below left of=q0] {$q_w$};
+			\node[state] (f') [left of=qw] {$f'$};
+			\path
+        (q0) edge node [below left] {$E$} (qy)
+        (q0) edge node [below right] {$E'$} (qw)
+        (q0) edge node [above right] {$\bar{E}$} (f)
+        (q0) edge node [above left] {$\bar{E'}$} (f');
+		\end{tikzpicture}
+	\end{minipage}
+  \caption{An example showing a composition of an \textit{assert} specification
+    $a_E$ with another \textit{assert} specification $a'_{E'}$. Only the
+    resulting $A(a_E \, \circ_{tail} \, a'_{E'})$ automata is shown. $q_y$ and
+    $q_w$ are success states; $f$ and $f'$ are fail states.}
+	\label{figure-assert-composition-example}
+\end{figure}
+
+\begin{figure}[h!]
+	\begin{minipage}{0.45\textwidth}
+		\centering
+    \[
+      (\{q_0, q_1, f\}, \{(q_0, q_1, E \wedge E'), (q_0, f, \bar{E} \vee \bar{E'})\}, q_0, \{q_1\}, \{f\})
+    \]
+	\end{minipage}
+	\begin{minipage}{0.45\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=3cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0) {$q_0$};
+			\node[state,accepting] (q1) [right of=q0] {$q_1$};
+			\node[state] (f) [below right of=q0] {f};
+			\path
+				(q0) edge node {$E \wedge E'$} (q1)
+        (q0) edge node {$\bar{E} \vee \bar{E'}$} (f);
+		\end{tikzpicture}
+	\end{minipage}
+  \caption{A simplified version of the automata from
+    Figure~\ref{figure-assert-composition-example}, semantically identical. The
+  success states have been merged into $q_1$, and the fail states into $f$.}
+	\label{figure-assert-composition-simplified}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\subsubsection{Composition of the \textit{next} specification}
+
+The \textit{next} specification functions are the specifications that deal with
+time.  \textit{next} specifications have two composition points: one
+appropriately called \textit{next}, which is required, and one called
+\textit{tail}, which is optional. Composition using the \textit{tail}
+composition point was described above.
+
+Composition with the \textit{next} composition point, $n \, \circ_{next} \, s$
+with $A(s) = (Q, P, q_0, S, F)$ is as follows:
+
+\medskip
+\[
+  \begin{array}{rcl}
+    A(n \circ_{next} s) & = & (\{q_0'\} \cup Q, T \cup P, q_0', S, F) \\
+               T  & = & \{(q_0', q_0, \top)\}
+  \end{array}
+\]
+\medskip
+
+This is illustrated in Figure~\ref{figure-next-composition-s}.
+
+Also note that composition using the \textit{next} composition point is
+associative, as shown in Figure~\ref{figure-next-associative}.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% Composition, next o s, symbol-python-automata
+%% Associativity of the next composition point
+%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[h!]
+	\begin{minipage}{0.20\textwidth}
+		\centering
+    \[
+      s' = n \, \circ_{next} \, s
+    \]
+	\end{minipage}
+  ~
+	\begin{minipage}{0.35\textwidth}
+		\centering
+    \begin{lstlisting}
+def s'():
+  return make_next(s)
+    \end{lstlisting}
+	\end{minipage}
+  ~
+	\begin{minipage}{0.4\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=2.5cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0')	{$q_0'$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (cloud) [right of=q0'] {$A(s)$};
+			\path
+				(q0') edge node {$\top$} (cloud);
+		\end{tikzpicture}
+	\end{minipage}
+  \caption{The composition of a \textit{next} specification with any
+    specification $s$, using the \textit{next} composition point.}
+	\label{figure-next-composition-s}
+\end{figure}
+
+\begin{figure}[h!]
+	\begin{minipage}{0.9\textwidth}
+		\centering
+    \[
+      \begin{array}{rcl}
+        (n \, \circ_{next} \, s_1) \, \circ_{tail} \, (n' \, \circ_{next} \, s_2)
+        & = & n \, \circ_{next} \, t \\
+        t & = & s_1 \, \circ_{tail} \, s_2
+      \end{array}
+    \]
+	\end{minipage}
+
+  \bigskip
+
+	\begin{minipage}{0.45\textwidth}
+		\centering
+    \begin{lstlisting}
+def s():
+  return make_next(s1) +
+    make_next(s2)
+
+# equivalent to
+def s():
+  return make_next(t)
+
+def t(event):
+  return s1() + s2()
+    \end{lstlisting}
+	\end{minipage}
+  ~
+	\begin{minipage}{0.45\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=2.5cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0)	{$q_0$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (s1) [right of=q0] {$A(s_1)$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (s2) [below right of=q0] {$A(s_2)$};
+			\path
+				(q0) edge node {$\top$} (s1)
+				(q0) edge node {$\top$} (s2);
+		\end{tikzpicture}
+
+    \bigskip
+
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=2.5cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0) {$q_0$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (t) [right of=q0] {$A(t)$};
+			\path
+				(q0) edge node {$\top$} (t);
+		\end{tikzpicture}
+	\end{minipage}
+  \caption{The associativity of the \textit{next} composition point in a
+  \textit{next} formal specification function.}
+	\label{figure-next-associative}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\subsubsection{Composition of the \textit{if} specification}
+
+\textit{if} specifications have three composition points: one required,
+\textit{then}, and two optional, \textit{else} and \textit{tail}. Composition
+using the \textit{tail} composition point was described above.
+
+In an \textit{if} specification $i_E$ we consider the expression $E$ as a guard
+for the \textit{then} composition point, and $\bar{E}$ as a guard for the
+\textit{else} composition point.
+
+The composition essentially becomes to add the guard $E$ to the labels of all
+initial transitions for the automata at the \textit{then} composition point,
+and $\bar{E}$ to the labels of all initial transitions for the automata at the
+\textit{else} composition point. The guards, $E$ and $\bar{E}$ are added as
+parts of a conjunctive.
+
+Let $s_1$ be the specification attached to the \textit{then} composition point
+and an optional $s_2$ attached to the \textit{else} composition point, and
+$A(s_1) = (Q_1, T_1 \cup R_1, q_{10}, S_1, F_1)$, $A(s_2) = (Q_2, T_2 \cup R_2,
+q_{20}, S_2, F_2)$. Then:
+
+\medskip
+\[
+  \begin{array}{rcl}
+  A((i_E \circ_{then} s_1) \circ_{else} s_2) & = & (Q, P, q_0, S, F) \\
+                                           Q & = & Q_1 \cup Q_2 \cup \{q_0, q_1\} - \{q_{10}, q_{20}\} \\
+                                           P & = & T'_1 \cup T'_2 \cup R_1 \cup R_2 \cup X \\
+                                        T'_1 & = & \{(q_0, q, E       \wedge E') \, | \, (q_{10}, q, E') \in T_1\} \\
+                                        T'_2 & = & \{(q_0, q, \bar{E} \wedge E') \, | \, (q_{20}, q, E') \in T_2\} \\
+                                           X & = & \{(q_0, q_1, \top)\} \\
+                                           S & = & S_1 \cup S_2 \cup \{q_1\} \\
+                                           F & = & F_1 \cup F_2
+  \end{array}
+\]
+\medskip
+
+If the \textit{else} composition point is left out, then $Q_2 = T_2 = R_2 = S_2
+= F_2 = \emptyset$. $X$ is the fall-through transition to the success state
+$q_1$, which can always be reached. This will allow for successful verification
+when $E$ is false and there is no else clause.
+
+With these constructions in mind, the next section shows a few functioning
+examples.
+
+
+\subsection{Examples of Formal Specifications}
+\label{section-approach-examples-of-formal-specifications}
+\lstset{language=Python,numbers=none}
+
+Here follows two examples of formal \textit{pythonrv} specifications, both in
+their specification function form, written in Python and shown in
+Figure~\ref{figure-formal-syntax-example-1} and
+Figure~\ref{figure-formal-syntax-example-2}, and as automata, shown in
+Figure~\ref{figure-formal-syntax-example-1-automata} and
+Figure~\ref{figure-formal-syntax-example-2-automata}.
+
+The first example, Figure~\ref{figure-formal-syntax-example-1}
+and~\ref{figure-formal-syntax-example-1-automata}, shows a simple specification
+that makes sure that the first argument to the function \texttt{fib} in the
+module \texttt{fibmodule} is always positive. The main difference with the
+similar informal specification in Figure~\ref{figure-syntax-example-1} is that
+here we have to explicitly create a loop by composing with a \textit{next}
+specification, pointing back to \texttt{spec}. This is required so that not
+only the first event is verified.
+
+The example in Figure~\ref{figure-formal-syntax-example-2} is more complex, as
+can be seen by the sprawling automata in
+Figure~\ref{figure-formal-syntax-example-2-automata}. The specification
+verifies accepts only interleaving calls to two functions, starting with
+\texttt{mymodule.foo}, then to \texttt{mymodule.bar}. This is represented by
+the loop between the $q_0$ and $r_0$ states in the automata. Because the labels
+for the transitions between them are $\top$, i.e.\ always true, we are
+guaranteed that on every event we either transition into state $q_0$ or $q_1$,
+and verification will never be finished. The specification also asserts that if
+\texttt{foo} is called with $0$ as the first argument, the second argument must
+also be $0$. This is just to demonstrate how the \textit{if} construct works.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% formal syntax examples
+%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.9\textwidth}
+	\lstinputlisting{figures/formal_syntax_example_1.py}
+	\end{minipage}
+	\end{center}
+
+  \caption{A formal \textit{pythonrv} specification function, similar to the
+    informal specification function shown in
+    Figure~\ref{figure-syntax-example-1}. The automata for this specification
+    function is shown in Figure~\ref{figure-formal-syntax-example-1-automata}.}
+	\label{figure-formal-syntax-example-1}
+\end{figure}
+
+\begin{figure}[h!]
+	\begin{minipage}{0.9\textwidth}
+		\centering
+    \[
+      \begin{array}{rcl}
+        A(\text{spec}) & = & (Q, P, q_0, S, F) \\
+                     Q & = & \{q_0, q_1, f\} \\
+                     P & = & \{(q_0, q_1, \delta(\texttt{func.inputs$[0]$}) > 0),
+      (q_0, f, \neg(\delta(\texttt{func.inputs$[0]$}) > 0)), \\
+                       &   & \; (q_0, q_0, \top)\} \\
+                     S & = & \{q_1\} \\
+                     F & = & \{f\}
+      \end{array}
+    \]
+	\end{minipage}
+
+  \bigskip
+
+	\begin{minipage}{0.9\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=3.5cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0) {$q_0$};
+			\node[state,accepting] (q1) [below right of=q0] {$q_1$};
+      \node[state] (f) [below left of=q0] {\textit{f}};
+			\path
+        (q0) edge [loop above] node {$\top$} (q0)
+        (q0) edge node {$\delta(\texttt{func.inputs$[0]$}) > 0$} (q1)
+        (q0) edge node [above left] {$\neg(\delta(\texttt{func.inputs$[0]$}) > 0)$} (f);
+		\end{tikzpicture}
+	\end{minipage}
+  \caption{The automata for the formal \textit{pythonrv} specification function
+    in Figure~\ref{figure-formal-syntax-example-1}.}
+	\label{figure-formal-syntax-example-1-automata}
+\end{figure}
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.9\textwidth}
+	\lstinputlisting{figures/formal_syntax_example_2.py}
+	\end{minipage}
+	\end{center}
+
+  \caption{A more complex formal \textit{pythonrv} specification function. The automata for
+    this specification function is shown in
+    Figure~\ref{figure-formal-syntax-example-2-automata}.}
+	\label{figure-formal-syntax-example-2}
+\end{figure}
+
+\begin{figure}[h!]
+	\begin{minipage}{0.9\textwidth}
+		\centering
+    \[
+      \begin{array}{rcl}
+        A(\text{spec}) & = & (Q, P_1 \cup P_2 \cup P_3 \cup P_4, q_0, S, F) \\
+                     Q & = & \{q_0, q_1, f_1, q_2, q_3, f_2, r_0, r_1, f_r\} \\
+                   P_1 & = & \{(q_0, q_1, \lambda = \texttt{foo}), (q_0, f_1, \neg(\lambda = \texttt{foo}))\} \\
+                   P_2 & = & \{(q_0, q_2, G \wedge X), (q_0, f_2, G \wedge \neg X), (q_0, q_3, \top)\} \\
+                   P_3 & = & \{(q_0, r_0, \top), (r_0, q_0, \top)\} \\
+                   P_4 & = & \{(r_0, r_1, \lambda = \texttt{bar}), (r_0, f_r, \neg(\lambda = \texttt{bar}))\} \\
+                     S & = & \{q_1, q_2, q_3, r_1\} \\
+                     F & = & \{f_1, f_2, f_r\} \\
+                     G & = & \delta(\texttt{foo.inputs$[0]$}) = 0 \\
+                     X & = & \delta(\texttt{foo.inputs$[1]$}) = 0
+      \end{array}
+    \]
+	\end{minipage}
+
+  \bigskip
+
+	\begin{minipage}{0.9\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=3.5cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+
+      % first spec
+			\node[state,initial above] (q0) {$q_0$};
+			\node[state,accepting] (q1) [left of=q0] {$q_1$};
+      \node[state] (f1) [above left of=q0] {\textit{f$_1$}};
+      % if
+			\node[state,accepting] (q2) [below right of=q0] {$q_2$};
+      \node[state] (f2) [below of=q0] {\textit{f$_2$}};
+			\node[state,accepting] (q3) [below left of=q0] {$q_3$};
+
+      % second spec
+      \node[state] (r0) [right of=q0] {$r_0$};
+			\node[state,accepting] (r1) [right of=r0] {$r_1$};
+      \node[state] (fr) [above right of=r0] {\textit{f$_r$}};
+			\path
+        % first spec
+        % assert
+        (q0) edge node [above] {$\lambda = \text{foo}$} (q1)
+        (q0) edge node [above right] {$\neg(\lambda = \text{foo})$} (f1)
+        % if
+        (q0) edge node [above right] {$G \wedge X$} (q2)
+        (q0) edge node [right] {$G \wedge \neg X$} (f2)
+        (q0) edge node [above left] {$\top$} (q3)
+        % next
+        (q0) edge [bend left=20] node [above] {$\top$} (r0)
+
+        % second spec
+        % assert
+        (r0) edge node {$\lambda = \text{bar}$} (r1)
+        (r0) edge node [above left] {$\neg(\lambda = \text{bar})$} (fr)
+        % next
+        (r0) edge [bend left=20] node [above] {$\top$} (q0);
+		\end{tikzpicture}
+	\end{minipage}
+  \caption{A direct translation of the formal \textit{pythonrv} specification
+    function in Figure~\ref{figure-formal-syntax-example-2} to an automata.
+    $q_0$ is the root for the \texttt{spec} specification, and $r_0$ is the
+    root of the \texttt{spec\_bar\_called} specification. $q_1$ and $f_1$
+    relates to the assertion in \texttt{spec}, and $q_2$, $q_3$ and $f_2$ to
+    the if statement. $r_1$ and $f_r$ relates to the assertion in
+    \texttt{spec\_bar\_called}.}
+	\label{figure-formal-syntax-example-2-automata}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+

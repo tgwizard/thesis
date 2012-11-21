@@ -1,0 +1,203 @@
+%================================================
+%====== Chapter 4, Introduction to Unit Testing
+%================================================
+
+\pagestyle{newchap}
+\chapter{Introduction to Unit Testing} \label{chapter-intro-to-unit-testing}
+
+An approach to verification quite different from formal methods is
+\emph{testing}, which is the practical approach of checking that the program,
+given a certain input, produces the correct/acceptable output. Testing consists
+of a set, or \textit{suite}, of \textit{test cases}. A test case tests some
+aspect of the program, from large ("It should be possible to go through the
+shop flow and buy a product") to small ("This function should throw an
+exception when given a null argument").
+
+Testing can be either manual or \textit{automated}, or something in between. In
+manual testing a programmer, tester or other stakeholder, runs the program,
+entering some inputs and inspecting the outputs. Test cases could be documents
+describing what should happen for given inputs, where to click or type to cause
+the desired outcome. In \textit{automated} testing the test cases are
+machine-runnable, so that a computer can run them during the development
+process, or when checking code into a central repository, or during releases,
+etc.
+
+Testing is not complete (for all but the most trivial programs, it is
+impossible to write complete tests), and lacks a formal foundation, so it
+cannot be used for formal verification. Testing is popular and is used on
+virtually all development projects, taking up a large part of development time
+(see e.g.\ \cite{brooks75mythicalmanmonth}).
+
+
+\section{Unit Testing}
+
+\textit{Unit testing} is the concept of writing tests for small units in a
+program, such as functions, classes, etc. The separate parts --- silos, with
+minimum dependencies to the rest of the system --- are tested in isolation
+during development to test their functionality. The aim is to reduce the risk
+of breaking existing functionality when developing new features, or modifying
+existing code, by preventing regression. Dividing a program into units can be
+difficult, and proponents of unit testing argue that it encourages a decoupled
+and modular system design.
+
+Unit testing is quite young, perhaps having begun in earnest in the 90s, and it
+was popularized by the extreme programming (XP)
+movement\footnote{\texttt{http://www.extremeprogramming.org/}}. Testing in
+general is very old.
+
+When discussing testing, and unit testing in particular, we must mention the
+concept of test-driven development (TDD). Also made popular by XP, it consists
+of the cycle:
+\begin{inparaenum}[1\upshape)]
+  \item write a failing test;
+  \item make it pass by writing the simplest code you can; and
+  \item refactor --- rewrite the code, cleaning it up and giving it a better
+    structure.
+\end{inparaenum}
+Tests here play the part of specifications for the units of the program.
+
+
+\section{xUnit} \label{section-xunit}
+
+Kent Beck introduced the style of the modern unit testing framework in his work
+on a testing framework for Smalltalk \cite{becksmalltalktesting}. Together
+with Eric Gamma he later ported it to Java, resulting in
+\textit{JUnit}\footnote{\texttt{http://www.junit.org/}}.
+Today, this has lead to \textit{frameworks} in several programming languages,
+and they are collectively called xUnit \cite{fowlerxunit}. Examples include,
+beside JUnit for Java:
+\textit{unittest}\footnote{\texttt{http://docs.python.org/library/unittest.html}}
+for Python,
+\textit{NUnit}\footnote{\texttt{http://www.nunit.org/}} and
+\textit{xUnit.net}\footnote{\texttt{http://xunit.codeplex.com/}} for C\#
+and~.Net,
+\textit{RSpec}\footnote{\texttt{http://rspec.info/}} and the
+\textit{Test::Unit}\footnote{\texttt{http://www.ruby-doc.org/stdlib-1.9.3/libdoc/test/unit/rdoc/Test/Unit.html}}
+package for Ruby,
+and \textit{Jasmine}\footnote{\texttt{http://pivotal.github.com/jasmine/}} for
+JavaScript.
+
+The xUnit style of unit testing \cite{fowlerxunit} has given rise to unit
+testing frameworks for many programming languages. Their structure are all
+based on the same concept, and since JUnit is the canonical implementation, and
+one of the first, implementation, we will use it for a short demonstration,
+shown in Figure~\ref{figure-junit}. Jasmine, being younger and more ``hip'',
+has a slightly different syntax, but essentially the same structure; see
+Figure~\ref{figure-jasmine}.
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.9\textwidth}
+		\lstset{language=Java}
+		\lstinputlisting{figures/junit_example.java}
+	\end{minipage}
+	\end{center}
+  \caption{An example of unit testing syntax, written Java as a test case for
+    JUnit. All tests are marked with the \texttt{@Test} annotation. The
+    \texttt{assert} keyword and functions like \texttt{assertEquals} are used
+    to verify the correctness of the outputs.}
+	\label{figure-junit}
+\end{figure}
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.9\textwidth}
+		\lstset{language=JavaScript}
+		\lstinputlisting{figures/jasmine_example.js}
+	\end{minipage}
+	\end{center}
+  \caption{An example of unit testing syntax, written in JavaScript and
+    Jasmine. It consists of a \texttt{describe} test suite, and one test case
+    \texttt{it}, called a specification in jasmine parlance. The
+    \texttt{expect(\dots).toEqual(\dots)} style is used for verification.}
+	\label{figure-jasmine}
+\end{figure}
+
+In JUnit, and xUnit, you run a \textit{test suite} of \textit{test cases},
+which contain tests. The example in Figure~\ref{figure-junit}, the test suite
+is implicitly created by JUnit, although it is possible to create it and
+control it your self. A \textit{test runner} runs the test suite, reporting
+progress to the user. When the tests are finished, any errors are displayed.
+
+In the example in Figure~\ref{figure-junit} has two tests, and methods to set
+up and tear down the tests \textit{fixture}. These functions are usually called
+\textit{setUp} and \textit{tearDown}, respectively, and are called before and
+after each test. The fixture is the surrounding set of objects (environment)
+that the object under test requires to work properly.
+
+Test written in the style of Figure~\ref{figure-junit} are traditional unit
+tests.
+
+
+\section{Mocking and Faking} \label{section-mocking}
+
+A common issue when writing unit tests is that, to instantiate some object X,
+or to call some function Y, the program needs access to some other objects Z. Z
+might be something simple, which we can easily create in the test. It might
+also be a network or database connection, or something doing heavy calculation,
+or just something complex.
+
+One way to work around this is to create fake objects (also called mock-, fake-
+or spy objects). A fake network connection has the same interface as a real
+network connection, but calling it does not actually transmit anything
+anywhere, and it might return pre-defined, hard coded data. Fake objects could
+save what actions are taken upon them, and the test could then verify that
+these are according to expectations.
+
+
+\section{Expectations} \label{section-expectations}
+
+Instead of writing fake objects, we can create a mock object and pre-record
+what actions we expect to be taken upon them. This is called writing
+\textit{expectations} \cite{fowler07expectations}. A simple example of
+expectations is shown in Figure~\ref{figure-expectations}.
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.9\textwidth}
+		\lstset{language=Java}
+		\lstinputlisting{figures/expectations_example.java}
+	\end{minipage}
+	\end{center}
+
+	\caption{An example of expectations, written using jMock and JUnit.
+	Example taken from \cite{fowler07expectations}.}
+	\label{figure-expectations}
+\end{figure}
+
+Figure~\ref{figure-expectations} shows a test of a fictional shop. The test
+tests only one thing, the fill method of the Order object, but it requires a
+Warehouse object, for access to the inventory. We supply a mock Warehouse, with
+expectations on which methods should be called on it, with which arguments and
+what they should return.
+
+An expectation follows a simple pattern:
+
+\begin{itemize}
+	\item A function, with an optional object, which is expected to be called.
+	\item An invocation count of how often the function is expected to be called.
+	\item Expected arguments for the function call. These can be explicit values,
+		or generic types, or rules defining the acceptable values.
+	\item The return value and modifications to the global state; what should
+		happen when the function is called.
+	\item When the function call should happen, e.g.\ in what sequence of
+		function calls, in what global state.
+\end{itemize}
+
+There are two common ways of specifying expectations: recording and explicit
+specification. Figure~\ref{figure-expectations} shows an example of how to
+explicitly specify expectations.
+
+When recording expectations, you create a mock object and call the expected
+functions, with expected arguments and return values, in the expected order.
+Then you set the mock into replay mode, and it will replay the recorded
+expectations, and verify that they occur correctly.
+
+There are several frameworks for working with expectations, such as
+jMock\footnote{\texttt{http://www.jmock.org/}} for Java, Rhino
+Mocks\footnote{\texttt{http://ayende.com/wiki/Rhino+Mocks.ashx}} for~.Net and
+Ludibrio\footnote{\texttt{https://github.com/nsigustavo/ludibrio/}} for Python.
+
+With both runtime verification and unit testing introduced, a combination of
+the two will be the main subject in the next two chapters.
+
