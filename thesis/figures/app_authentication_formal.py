@@ -5,6 +5,7 @@ from django.core.handlers.base import BaseHandler
 rv.configure(enable_copy_args=False)
 
 @rv.monitor(bh=BaseHandler.get_response)
+@rv.spec(when=rv.POST)
 @formal_spec
 def ensure_auth(event):
   auth = make_assert(lambda e:

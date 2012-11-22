@@ -6,6 +6,7 @@ rv.configure(enable_copy_args=False)
 # monitor the main request-processing method that
 # has access to both the request and the response
 @rv.monitor(bh=BaseHandler.get_response)
+@rv.spec(when=rv.POST)
 def ensure_auth(event):
   request = event.called_function.inputs[1]
   response = event.called_function.result
