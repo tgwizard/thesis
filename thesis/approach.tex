@@ -861,7 +861,6 @@ model is of the form (the second line is a expanded form of the first):
 \[
   \begin{array}{rcl}
     \alpha & \models & \text{expression $E$ over $\alpha$} \\
-    (\lambda, \delta) & \models & \text{expression $E$ over $\lambda$ and $\delta$}
   \end{array}
 \]
 \medskip
@@ -1034,7 +1033,7 @@ work. They are defined properly below.
       \node[state] (f) [below right of=q0] {\textit{f}};
 			\path
 				(q0) edge node {$E$} (q1)
-        (q0) edge node {$\bar{E}$} (f);
+        (q0) edge node {$\neg E$} (f);
 		\end{tikzpicture}
     \subcaption{A generalized \textit{assert} specification, asserting the
       expression $E$.}
@@ -1063,7 +1062,7 @@ work. They are defined properly below.
 			\node[state,accepting] (q1) [below of=q0]	{$q_1$};
 			\path
 				(q0) edge node {$E$} (then)
-        (q0) edge node {$\bar{E}$} (q1);
+        (q0) edge node {$\neg E$} (q1);
 		\end{tikzpicture}
     \subcaption{A template for an \textit{if-then} specification.}
 	\end{minipage}
@@ -1077,7 +1076,7 @@ work. They are defined properly below.
 			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (else) [below of=then] {$A(else)$};
 			\path
 				(q0) edge node {$E$} (then)
-        (q0) edge node {$\bar{E}$} (else);
+        (q0) edge node {$\neg E$} (else);
 		\end{tikzpicture}
     \subcaption{A template for an \textit{if-then-else} specification.}
 	\end{minipage}
@@ -1114,12 +1113,12 @@ Figure~\ref{figure-basic-formal-specification-automata}~(a), is defined as:
 \medskip
 \[
   \begin{array}{rcl}
-    A(a_E) & = & (\{q_0, q_1, f\}, \{(q_0, q_1, E), (q_0, f, \bar{E})\}, q_0, \{q_1\}, \{f\})
+    A(a_E) & = & (\{q_0, q_1, f\}, \{(q_0, q_1, E), (q_0, f, \neg E)\}, q_0, \{q_1\}, \{f\})
   \end{array}
 \]
 \medskip
 
-If $\bar{E}$ is true, the fail state $f$ will be reached, and the specification
+If $\neg E$ is true, the fail state $f$ will be reached, and the specification
 has been violated.
 
 \textit{assert} specifications also have, together with all basic formal
@@ -1168,8 +1167,8 @@ same semantics, as seen in Figure~\ref{figure-assert-composition-simplified}.
 		\centering
     \[
       \begin{array}{rcl}
-        A(a_E) & = & (\{q_x, q_y, f\}, \{(q_x, q_y, E), (q_x, f, \bar{E})\}, q_x, \{q_y\}, \{f\}) \\
-    A(a'_{E'}) & = & (\{q_z, q_w, f'\}, \{(q_z, q_w, E') ,(q_z, f', \bar{E'})\}, q_z, \{q_w\}, \{f'\})
+        A(a_E) & = & (\{q_x, q_y, f\}, \{(q_x, q_y, E), (q_x, f, \neg E)\}, q_x, \{q_y\}, \{f\}) \\
+    A(a'_{E'}) & = & (\{q_z, q_w, f'\}, \{(q_z, q_w, E') ,(q_z, f', \neg E')\}, q_z, \{q_w\}, \{f'\})
       \end{array}
     \]
 		\centering
@@ -1177,7 +1176,7 @@ same semantics, as seen in Figure~\ref{figure-assert-composition-simplified}.
       \begin{array}{rcl}
         A(a_E \circ_{tail} a'_{E'}) & = & (Q, P, q_0, S, F) \\
                                  Q & = & \{q_0, q_y, f, q_w, f'\} \\
-                                 P & = & \{(q_0, q_y, E), (q_0, f, \bar{E}), (q_0, q_w, E'), (q_0, f', \bar{E'})\} \\
+                                 P & = & \{(q_0, q_y, E), (q_0, f, \neg E), (q_0, q_w, E'), (q_0, f', \neg E')\} \\
                                  S & = & \{q_y, q_w\} \\
                                  F & = & \{f, f'\}
       \end{array}
@@ -1207,8 +1206,8 @@ def s():
 			\path
         (q0) edge node [below left] {$E$} (qy)
         (q0) edge node [below right] {$E'$} (qw)
-        (q0) edge node [above right] {$\bar{E}$} (f)
-        (q0) edge node [above left] {$\bar{E'}$} (f');
+        (q0) edge node [above right] {$\neg E$} (f)
+        (q0) edge node [above left] {$\neg E'$} (f');
 		\end{tikzpicture}
 	\end{minipage}
   \caption{An example showing a composition of an \textit{assert} specification
@@ -1222,7 +1221,7 @@ def s():
 	\begin{minipage}{0.45\textwidth}
 		\centering
     \[
-      (\{q_0, q_1, f\}, \{(q_0, q_1, E \wedge E'), (q_0, f, \bar{E} \vee \bar{E'})\}, q_0, \{q_1\}, \{f\})
+      (\{q_0, q_1, f\}, \{(q_0, q_1, E \wedge E'), (q_0, f, \neg E \vee \neg E')\}, q_0, \{q_1\}, \{f\})
     \]
 	\end{minipage}
 	\begin{minipage}{0.45\textwidth}
@@ -1234,7 +1233,7 @@ def s():
 			\node[state] (f) [below right of=q0] {f};
 			\path
 				(q0) edge node {$E \wedge E'$} (q1)
-        (q0) edge node {$\bar{E} \vee \bar{E'}$} (f);
+        (q0) edge node {$\neg E \vee \neg E'$} (f);
 		\end{tikzpicture}
 	\end{minipage}
   \caption{A simplified version of the automata from
@@ -1381,14 +1380,14 @@ specifications have an additional required composition point \textit{else}.
 Composition using the \textit{tail} composition point was described above.
 
 In an \textit{if-then-else} specification $i_E$ we consider the expression $E$
-as a guard for the \textit{then} composition point, and $\bar{E}$ as a guard
+as a guard for the \textit{then} composition point, and $\neg E$ as a guard
 for the \textit{else} composition point. In \textit{if-then} specifications,
-the $\bar{E}$ guard goes to an accepting state.
+the $\neg E$ guard goes to an accepting state.
 
 The composition essentially becomes to add the guard $E$ to the labels of all
 initial transitions for the automata at the \textit{then} composition point,
-and $\bar{E}$ to the labels of all initial transitions for the automata at the
-\textit{else} composition point. The guards, $E$ and $\bar{E}$ are added as
+and $\neg E$ to the labels of all initial transitions for the automata at the
+\textit{else} composition point. The guards, $E$ and $\neg E$ are added as
 parts of a conjunctive.
 
 Let $s_1$ be the specification attached to the \textit{then} composition point
@@ -1412,7 +1411,7 @@ For \textit{if-then} specifications compositions becomes:
                         Q & = & Q_1 \cup \{q_0, q_1\} - \{q_{10}\} \\
                         P & = & T'_1 \cup R_1 \cup X \\
                      T'_1 & = & \{(q_0, q, E       \wedge E') \, | \, (q_{10}, q, E') \in T_1\} \\
-                        X & = & \{(q_0, q_1, \bar{E})\} \\
+                        X & = & \{(q_0, q_1, \neg E)\} \\
                         S & = & S_1 \cup \{q_1\} \\
                         F & = & F_1
   \end{array}
@@ -1428,7 +1427,7 @@ And for \textit{if-then-else} specifications compositions becomes:
                                            Q & = & Q_1 \cup Q_2 \cup \{q_0\} - \{q_{10}, q_{20}\} \\
                                            P & = & T'_1 \cup T'_2 \cup R_1 \cup R_2 \\
                                         T'_1 & = & \{(q_0, q, E       \wedge E') \, | \, (q_{10}, q, E') \in T_1\} \\
-                                        T'_2 & = & \{(q_0, q, \bar{E} \wedge E') \, | \, (q_{20}, q, E') \in T_2\} \\
+                                        T'_2 & = & \{(q_0, q, \neg E \wedge E') \, | \, (q_{20}, q, E') \in T_2\} \\
                                            S & = & S_1 \cup S_2 \\
                                            F & = & F_1 \cup F_2
   \end{array}
@@ -1585,7 +1584,7 @@ also be $0$. This is just to demonstrate how the \textit{if} construct works.
         % if
         (q0) edge node [above right] {$G \wedge X$} (q2)
         (q0) edge node [right] {$G \wedge \neg X$} (f2)
-        (q0) edge node [above left] {$\top$} (q3)
+        (q0) edge node [above left] {$\neg G$} (q3)
         % next
         (q0) edge [bend left=20] node [above] {$\top$} (r0)
 
