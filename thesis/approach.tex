@@ -1497,50 +1497,68 @@ specification automata.
 Here follows two examples of formal \textit{pythonrv} specifications, both in
 their specification function form, written in Python, shown in
 Figure~\ref{figure-formal-syntax-example-1} and
-Figure~\ref{figure-formal-syntax-example-2}, and as automata, shown in
-Figure~\ref{figure-formal-syntax-example-1-automata} and
-Figure~\ref{figure-formal-syntax-example-2-automata}.
+Figure~\ref{figure-formal-syntax-example-2}.
 
-The first example, Figure~\ref{figure-formal-syntax-example-1}
-and~\ref{figure-formal-syntax-example-1-automata}, shows a simple specification
-that makes sure that the first argument to the function \texttt{fib} in the
-module \texttt{fibmodule} is always positive. The main difference with the
+The first example, Figure~\ref{figure-formal-syntax-example-1}, shows a simple
+specification that makes sure that the first argument to the function
+\texttt{fib} in the module \texttt{fibmodule} is always positive (\texttt{fib}
+is relabeled \texttt{func} in the specification). The main difference with the
 similar informal specification in Figure~\ref{figure-syntax-example-1} is that
 here we have to explicitly create a loop by composing with a \textit{next}
 specification, pointing back to \texttt{spec}. This is required so that not
 only the first event is verified.
 
+In Figure~\ref{figure-formal-syntax-example-1-product} we combine this
+specification with a system model of two calls to \texttt{fib}, the first with
+the first argument as $0$, the second with the first argument as $-1$. As we
+traverse this graph, we can see that we cannot reach state $(f, s_1)$, because
+the label on the transition to it evaluates to $\bot$:
+
+\medskip
+\[
+  \begin{array}{rcl}
+    (\lambda_0, \delta_0) & \models & \neg (\delta(\texttt{func.inputs$[0]$}) > 0) \\
+    (\textit{func}, \textit{func.inputs}[0] = 0) & \models & \neg (\delta(\texttt{func.inputs$[0]$}) > 0) \\
+  \end{array}
+\]
+\medskip
+
+The first event of the system model makes it possible to reach state
+$(q_1,s_1)$, which is an accepting state. Thus we continue, and reach
+$(q_0,s_0)'$, $(q_0,s_0)''$ and $(f,s_1)'$, the last which is a fail state. The
+system model does not satisfy the specification.
+
 The example in Figure~\ref{figure-formal-syntax-example-2} is more complex, as
 can be seen by the sprawling automata in
-Figure~\ref{figure-formal-syntax-example-2-automata}. The specification
-verifies accepts only interleaving calls to two functions, starting with
-\texttt{mymodule.foo}, then to \texttt{mymodule.bar}. This is represented by
-the loop between the $q_0$ and $r_0$ states in the automata. Because the labels
-for the transitions between them are $\top$, i.e.\ always true, we are
-guaranteed that on every event we either transition into state $q_0$ or $q_1$,
-and verification will never be finished. The specification also asserts that if
-\texttt{foo} is called with $0$ as the first argument, the second argument must
-also be $0$. This is just to demonstrate how the \textit{if} construct works.
+Figure~\ref{figure-formal-syntax-example-2-automata}. The specification accepts
+only interleaving calls to two functions, starting with \texttt{mymodule.foo},
+then to \texttt{mymodule.bar}. This is represented by the loop between the
+$q_0$ and $r_0$ states in the automata. Because the labels for the transitions
+between them are $\top$, i.e.\ always true, we are guaranteed that on every
+event we either transition into a state (in the system model-specification
+product) based containing $q_0$ or $q_1$, and verification will never be
+finished. The specification also asserts that if \texttt{foo} is called with
+$0$ as the first argument, the second argument must also be $0$.  This is just
+to demonstrate how the \textit{if-then} construct works.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% formal syntax examples
 %%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% first
+%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure}[h!]
 	\begin{center}
 	\begin{minipage}{0.9\textwidth}
 	\lstinputlisting{figures/formal_syntax_example_1.py}
+    \subcaption{A Python representation of the specification.}
 	\end{minipage}
 	\end{center}
 
-  \caption{A formal \textit{pythonrv} specification function, similar to the
-    informal specification function shown in
-    Figure~\ref{figure-syntax-example-1}. The automata for this specification
-    function is shown in Figure~\ref{figure-formal-syntax-example-1-automata}.}
-	\label{figure-formal-syntax-example-1}
-\end{figure}
+  \bigskip
 
-\begin{figure}[h!]
 	\begin{minipage}{0.9\textwidth}
 		\centering
     \[
@@ -1554,6 +1572,7 @@ also be $0$. This is just to demonstrate how the \textit{if} construct works.
                      F & = & \{f\}
       \end{array}
     \]
+    \subcaption{An automata representation of the specification.}
 	\end{minipage}
 
   \bigskip
@@ -1570,11 +1589,62 @@ also be $0$. This is just to demonstrate how the \textit{if} construct works.
         (q0) edge node {$\delta(\texttt{func.inputs$[0]$}) > 0$} (q1)
         (q0) edge node [above left] {$\neg(\delta(\texttt{func.inputs$[0]$}) > 0)$} (f);
 		\end{tikzpicture}
+    \subcaption{A graphical representation of the automata.}
 	\end{minipage}
-  \caption{The automata for the formal \textit{pythonrv} specification function
-    in Figure~\ref{figure-formal-syntax-example-1}.}
-	\label{figure-formal-syntax-example-1-automata}
+  \caption{A formal \textit{pythonrv} specification, similar to the informal
+    specification shown in Figure~\ref{figure-syntax-example-1}.}
+	\label{figure-formal-syntax-example-1}
 \end{figure}
+
+\begin{figure}[h!]
+	\begin{minipage}{0.9\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=4cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (s0) {$s_0$};
+      \node[state] (s1) [above right of=s0] {$s_1$};
+      \node[state] (s2) [below right of=s1] {$s_2$};
+			\path
+      (s0) edge node {$(\lambda_0 = \textit{func}, \delta_0 = \textit{func.inputs}[0] = 0)$} (s1)
+      (s1) edge node {$(\lambda_1 = \textit{func}, \delta_1 = \textit{func.inputs}[0] = -1)$} (s2);
+		\end{tikzpicture}
+    \subcaption{A system model $M$ consisting of two function calls to
+      \texttt{func} the first with the first argument as $0$, the other with
+      it as $-1$.}
+	\end{minipage}
+
+  \bigskip
+
+	\begin{minipage}{0.95\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=3.5cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0) {$(q_0,s_0)$};
+      \node[state] (q0') [below of=q0] {$(q_0,s_0)'$};
+      \node[state,accepting] (q1) [right of=q0'] {$(q_1,s_1)$};
+      \node[state] (f1) [left of=q0'] {$(f,s_1)$};
+      \node[state] (q0'2) [below of=q0'] {$(q_0,s_0)''$};
+      \node[state,accepting] (q1') [right of=q0'2] {$(q_1,s_1)'$};
+      \node[state] (f1') [left of=q0'2] {$(f,s_1)'$};
+			\path
+        (q0) edge node {$(\lambda_0, \delta_0) \models \delta(\texttt{func.inputs$[0]$}) > 0$} (q1)
+        (q0) edge node [above left] {$(\lambda_0, \delta_0) \models \neg (\delta(\texttt{func.inputs$[0]$}) > 0)$} (f1)
+        (q0) edge node [right] {$\top$} (q0')
+        (q0') edge node {$(\lambda_1, \delta_1) \models \delta(\texttt{func.inputs$[0]$}) > 0$} (q1')
+        (q0') edge node [above left] {$(\lambda_1, \delta_1) \models \neg (\delta(\texttt{func.inputs$[0]$}) > 0)$} (f1')
+        (q0') edge node [right] {$\top$} (q0'2);
+		\end{tikzpicture}
+    \subcaption{The product of the model above and the specification.}
+	\end{minipage}
+
+  \caption{Example of creating the product of the specification from
+    Figure~\ref{figure-formal-syntax-example-1} with a system model.}
+	\label{figure-formal-syntax-example-1-product}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% second
+%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{figure}[h!]
 	\begin{center}
