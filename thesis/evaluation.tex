@@ -72,9 +72,6 @@ for all specifications or for a subset of them, to work around this issue.
 
 \section{Potential Value}
 
-Now to the most important question: what specifications could, and should, be
-written? What value do they provide?
-
 The web application is only intended for internal use, for employees.
 Authentication of employees and authorization of their access rights are very
 important. Specifications can be written to make sure all views or requests are
@@ -86,7 +83,13 @@ writing a specification function for this requirement. There are several other
 options, such as utilizing the temporal capabilities of runtime verification
 with the \texttt{event.next} function. E.g., if a request asks for a resource
 requiring authentication, we could specify that before the response is sent,
-authentication must have been done.
+authentication must have been done.Note how the use of Python in the
+specification function allows us to refactor away the condition that determines
+whether authentication should be required, leaving the specification much
+simpler and cleaner.
+
+The same specification can be written in the formal syntax, see
+Figure~\ref{figure-app-authentication-formal}.
 
 \begin{figure}[h!]
 	\begin{center}
@@ -96,13 +99,21 @@ authentication must have been done.
 	\end{center}
 
   \caption{An informal \textit{pythonrv} specification verifying that views are
-    only accessible with proper authentication. Note how the use of Python in
-    the specification function allows us to refactor away the condition that
-    determines whether authentication should be required, leaving the
-    specification much simpler and cleaner.}
+    only accessible with proper authentication. See
+    Figure~\ref{figure-app-authentication-formal} for an informal version.}
 	\label{figure-app-authentication-informal}
 \end{figure}
 
-\todo{more examples}
-Talk about where specifications would be suitable, and for what.
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.9\textwidth}
+	\lstinputlisting{figures/app_authentication_formal.py}
+	\end{minipage}
+	\end{center}
+
+  \caption{A formal \textit{pythonrv} specification verifying that views are
+    only accessible with proper authentication. See
+    Figure~\ref{figure-app-authentication-informal} for an informal version.}
+	\label{figure-app-authentication-formal}
+\end{figure}
 

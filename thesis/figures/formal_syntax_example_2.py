@@ -11,7 +11,7 @@ def spec():
   a = make_assert(
           lambda event: event.fn.foo.called)
 
-  # create if specification, with guard expression
+  # create if-then specification, with guard expression
   # and an assert specification in the then clause
   if_guard = lambda event: event.fn.foo.inputs[0] == 0
   if_then = make_assert(
@@ -20,7 +20,7 @@ def spec():
 
   # create next specification
   n = make_next(spec_bar_called)
-  # combine the three by composition
+  # combine the three by tail composition
   return a + i + n
 
 def spec_bar_called():
@@ -29,5 +29,5 @@ def spec_bar_called():
           lambda event: event.fn.bar.called)
   # create next specification
   n = make_next(spec)
-  # combine by composition
+  # combine by tail composition
   return a + n

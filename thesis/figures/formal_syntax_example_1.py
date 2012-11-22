@@ -10,6 +10,6 @@ def spec():
   a = make_assert(
           lambda event: event.fn.func.inputs[0] > 0)
   # create next specification
-  n = make_next(spec)
-  # combine by composition
+  n = make_next(lambda: spec)
+  # combine by tail composition
   return a + n

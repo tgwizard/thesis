@@ -636,13 +636,13 @@ Section~\ref{section-approach-python-subset}.
 We begin with some definitions and terms to make the following sections
 simpler. \todo{Move to where they are first used}
 
-\begin{mydef}\label{def-}
+\begin{mydef}\label{def-formal-specification-function}
 A \textit{formal specification function} is one of four basic functions
 described in Section~\ref{section-approach-python-subset}, or a composition of
 them as described in Section~\ref{section-approach-composition}.
 \end{mydef}
 
-\begin{mydef}\label{def-}
+\begin{mydef}\label{def-composition-point}
 Formal specification functions have \textit{composition points} where they can
 be combined with other formal specification functions. A formal specification
 function can have zero or more composition points. A composition point can be
@@ -651,7 +651,7 @@ composition, while closed have already been used. Composition points can be
 \textit{required} or \textit{optional}.
 \end{mydef}
 
-\begin{mydef}\label{def-}
+\begin{mydef}\label{def-composition-complete}
 A formal specification function can be either \textit{complete} or
 \textit{incomplete}. A complete formal specification function is a valid
 specification. An incomplete formal specification function is not a valid
@@ -660,7 +660,7 @@ specification functions have no open required composition points; incomplete
 formal specification functions have at least one.
 \end{mydef}
 
-\begin{mydef}\label{def-}
+\begin{mydef}\label{def-composition-operator}
 Composition is described by the $\circ$ operator. Let $f$, $g$ and $h$ be
 formal specification functions. Let $f$ have one composition point, $g$ two,
 labeled $a$ and $b$, respectively, and $h$ none. A valid composition would be:
@@ -670,7 +670,7 @@ specification functions, and it has no open required composition points (or
 optional ones).
 \end{mydef}
 
-\begin{mydef}\label{def-}
+\begin{mydef}\label{def-automata}
 Every formal specification function $s$ can be represented by a
 nondeterministic finite automata $A(s) = (Q, P, q_0, S, F)$. Each such automata
 consists of a set of states $Q$ and transitions $(a, b, E) \in P$ between them,
@@ -679,13 +679,14 @@ where $a$ is the start state, $b$ is the end state, and $E$ is a
 \textit{success states} $S$ and a set of \textit{fail states} $F$.
 \end{mydef}
 
-\begin{mydef}\label{def-}
-A state cannot be in both $S$ and $F$: $S \cap F = \emptyset$. Success states
-are depicted as \textit{accepting states} in the automata. Fail states are
-usually called \textit{fail}, $f$, etc.
+\begin{mydef}\label{def-accepting-and-fail-states}
+A state cannot be both accepting and failing --- it cannot be in both $S$ and
+$F$: $S \cap F = \emptyset$. Success states are depicted as \textit{accepting
+states} in the automata. Fail states are usually called \textit{fail}, $f$,
+etc.
 \end{mydef}
 
-\begin{mydef}\label{def-}
+\begin{mydef}\label{def-transition-labels}
 Each transition in the automata has a label --- an expression --- which is
 described in detail in Section~\ref{section-approach-semantics}. The label is
 taken from the expressions in the Python functions, as shown in
@@ -693,13 +694,13 @@ Section~\ref{section-approach-python-subset}. The label $\top$ denotes ``any
 and all expressions''.
 \end{mydef}
 
-\begin{mydef}\label{def-}
+\begin{mydef}\label{def-initial-transitions}
 The set of \textit{initial transitions} $T$, $(q_0, q', E) \in T$, $T \subseteq
 P$ are especially important for composition, see
 Section~\ref{section-approach-composition}. All initial transitions start from
 $q_0$, go to some state $q'$, and have some label $E$. When we describe an
 automata we will usually split up its transitions $P$ into two parts, the
-initial transitions $T$, and all other transitions $U$: $P = T \cup U$.
+initial transitions $T$, and all other transitions $R$: $P = T \cup R$.
 \end{mydef}
 
 Notation: Let $a_E$ be an \textit{assert} specification asserting the
@@ -732,9 +733,9 @@ system model is an abstraction of an execution of the system (the target
 program), it is necessarily finite, but of arbitrary length, and possibly
 extendible through continued execution of the program.
 
-The system model can be viewed as a directed acyclic graph (actually, a tree),
-where all nodes but the last have an edge. The first edge is labeled
-$\alpha_0$, the second is labeled $\alpha_1$, etc. See
+The system model can be viewed as a directed acyclic graph (actually, a tree
+--- even a list), where all nodes but the last have an edge. The first edge is
+labeled $\alpha_0$, the second is labeled $\alpha_1$, etc. See
 Figure~\ref{figure-deduction-example}~(a) for an example.
 
 
@@ -959,14 +960,14 @@ def next():
 def if_then():
   then = # required composition point 'then'
   i = make_if(E, then)
-  tail # optional composition point 'tail'
+  tail = # optional composition point 'tail'
   return i + tail
 
 def if_then_else():
   then = # required composition point 'then'
   els = # required composition point 'else'
   i = make_if(E, then, els)
-  tail # optional composition point 'tail'
+  tail = # optional composition point 'tail'
   return i + tail
 	\end{lstlisting}
 	\end{minipage}
