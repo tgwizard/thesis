@@ -76,14 +76,16 @@ The web application is only intended for internal use, for employees.
 Authentication of employees and authorization of their access rights are very
 important. Specifications can be written to make sure all views or requests are
 made by an authenticated user (except for the login screen), and that they are
-allowed to perform the requested action. A specification showing a
-specification verifying that proper authentication has been done is shown in
+allowed to perform the requested action.
+
+We show a specification showing a specification verifying that proper
+authentication has been done in
 Figure~\ref{figure-app-authentication-informal}. This is just one way of
 writing a specification function for this requirement. There are several other
 options, such as utilizing the temporal capabilities of runtime verification
 with the \texttt{event.next} function. E.g., if a request asks for a resource
 requiring authentication, we could specify that before the response is sent,
-authentication must have been done.Note how the use of Python in the
+authentication must have been done. Note how the use of Python in the
 specification function allows us to refactor away the condition that determines
 whether authentication should be required, leaving the specification much
 simpler and cleaner.
@@ -117,3 +119,60 @@ Figure~\ref{figure-app-authentication-formal}.
 	\label{figure-app-authentication-formal}
 \end{figure}
 
+Other specification could verify that data models are only updated with valid
+data, or that the user has sufficient privileges to perform a change, e.g.\
+update her profile data.
+
+One especially interesting class of properties to write runtime verification
+specifications for is ``if the user takes action A now, result B should happen
+afterwards''. In our application, one example of this could be that when a user
+comments on a post, all watchers of that post should be notified. Another
+example could be that after a user has updated her profile status, this should
+be visible on the ``list of statuses''-screen, which in our application is the
+start page. The code for an informal specification verifying this is shown in
+Figure~\ref{figure-app-status-update-displayed-informal}. Here we monitor two
+functions, the function \texttt{status} that changes the status message, and
+the function used for displaying the start page, \texttt{start}. When
+\texttt{status} is called, we extract the status message into
+\texttt{status\_message}, and add a specification \texttt{on\_next\_start} that
+verifies that when the start page is displayed next, it should contain
+\texttt{status\_message}. Note that we need to tell \textit{pythonrv} do verify
+this specification after the monitorees have been called (by using
+\texttt{@rv.spec(when=rv.POST)}) because we need to look at the return value of
+a monitoree (\texttt{event.fn.start.result}).
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.9\textwidth}
+	\lstinputlisting{figures/app_status_update_displayed.py}
+	\end{minipage}
+	\end{center}
+
+  \caption{An informal \textit{pythonrv} specification verifying that user
+    status updates are displayed on the start page.}
+	\label{figure-app-status-update-displayed-informal}
+\end{figure}
+
+Another, somewhat related, property to verify could be that a user should not
+be able to update her status twice without viewing the first one in between. A
+formal specification called \texttt{must\_view\_status\_update} which verifies
+this is shown in Figure~\ref{figure-app-status-update-viewed-formal}.
+
+The specification works by asserting that if the status has been updated
+(\texttt{if\_updated}) then the next call must be to \texttt{start}
+(asserted in \texttt{must\_view}). On the next-to-last line, we also add a
+``loop-back'' \textit{next} specification so that
+\texttt{must\_view\_status\_update} is verified on all calls to \texttt{status}
+and \texttt{start}, not just the first one.
+
+\begin{figure}[h!]
+	\begin{center}
+	\begin{minipage}{0.9\textwidth}
+	\lstinputlisting{figures/app_status_update_viewed.py}
+	\end{minipage}
+	\end{center}
+
+  \caption{An informal \textit{pythonrv} specification verifying that user
+    status updates are viewed before they are changed.}
+	\label{figure-app-status-update-viewed-formal}
+\end{figure}
