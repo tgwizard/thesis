@@ -559,7 +559,7 @@ Whenever a specification violation occurs, and an \texttt{AssertionError} is
 raised, it is passed to an \textit{error handler}. There are two built-in error
 handlers. One, the default, re-raises the \texttt{AssertionError} exception,
 and thus causes it to propagate up through the call stack. If the exception
-isn't caught and suppressed by code higher up the call stack, the program will
+is not caught and suppressed by code higher up the call stack, the program will
 crash. \texttt{AssertionError} are supposed to be raised when something has
 gone wrong and the operation should halt, so it is bad coding practice to
 suppress them.
@@ -1248,98 +1248,91 @@ and the associated arguments and state, $\delta$. Since the system model is an
 abstraction of an execution of the system (the target program), it is
 necessarily finite, but of arbitrary length, and possibly extendible through
 continued execution of the program.
-\end{mydef}
 
 The system model can be viewed as a directed acyclic graph (actually, a tree
---- even a list), where all nodes but the last have one edge, an edge denoting
-an event. The first edge is labeled $\alpha_0$, the second is labeled
+--- even a list), where all nodes but the last have one edge, with edges
+denoting events. The first edge is labeled $\alpha_0$, the second is labeled
 $\alpha_1$, etc. See Figure~\ref{figure-deduction-example}~(a) for an example.
+A system model $M$ represented as a graph consists of a set tuples
+$\{(s_0,s_1,\alpha_0), (s_1,s_2,\alpha_1), \dots, (s_n,s_{n+1},\alpha_n)\}$.
+\end{mydef}
+
 
 In the same way that the system model can be viewed as a graph, so can a
 specification automata, see Figure~\ref{figure-deduction-example}~(b). All
-graphs have a depth.
+graphs have a depth:
 
-\begin{mydef}[graph depth]\label{def-graph-depth}
-The \textit{depth} of a graph rooted at a node $q$ is the number of transitions
-required to reach the node farthest away from the $q$. The depth of a graph
-containing cycles is considered infinite.
+\begin{mydef}[graph levels and depth]
+The \textit{level} of a node $q$ in a graph rooted at a node $q_0$ is the
+number of transitions required to reach the $q$ starting from $q_0$. $q_0$ lies
+at level $0$. The \textit{depth} of a graph is its greatest level. The
+depth of a graph containing cycles is considered infinite, and nodes lying on a
+cycle lie at levels $i$, $i+\text{cycle circumference}$, $i+2\cdot\text{cycle
+circumference}$, etc.
 \end{mydef}
 
 The \textit{product} of a system model and a specification automata is the main
 construct used to reason about the correctness of the specification. An example
 can be seen in Figure~\ref{figure-deduction-example}~(c).
 
-\begin{mydef}[product of system model and specification]
-\label{def-system-model-specification-product}
-The \textit{product} $Z = M \times C$ of a system model $M$ and a specification
-automata $C$ is created through the following recursive procedure:
+\begin{mydef}[product of a system model and a specification]
+Let $M$ be a system model represented as a graph, rooted at $s_0$, consisting
+of tuples $(s,s',\alpha) \in M$. Let $C$ be a specification automata $(Q, P,
+q_0, S, F)$, which is rooted at $q_0$. The \textit{product} $Z = M \times C$ is
+created through a recursive procedure:
 
-\begin{enumerate}
-  \item Let $M$ be a system model rooted at $s_0$. Let $C$ be a specification
-    automata rooted at $q_0$.
+\medskip
+\[
+  Z = (L_{Q_Z}(q_0,s_0), L_{P_Z}(q_0,s_0), (q_0,s_0), L_{S_Z}(q_0,s_0), L_{F_Z}(q_0,s_0)
+\]
 
-  \item Let $(q_0,s_0)$ be the root node of our product graph.
+\[
+  \begin{array}{rcl}
+   L_{Q_Z}(q,s) & = & \cup_{(q',s') \in L_{Q'}(q,s)} L_{Q_Z}(q',s') \cup L_{Q'}(q,s) \cup \{(q,s)\} \\
+   L_{P_Z}(q,s) & = & \cup_{(q',s') \in L_{Q'}(q,s)} L_{P_Z}(q',s') \cup L_{P'}(q,s) \\
+    L_{Q'}(q,s) & = & \{(q',s') \, | \, (s,s',\alpha) \in M, (q,q',E) \in P\} \\
+    L_{P'}(q,s) & = & \{((q,s), (q',s'), \alpha \models E) \, | \, (s,s',\alpha) \in M, (q,q',E) \in P\} \\
+                & & \\
+   L_{S_Z}(q,s) & = & \{(q',s') \, | \, (q',s') \in L_{Q_Z}(q,s) \wedge q' \in S\} \\
+   L_{F_Z}(q,s) & = & \{(q',s') \, | \, (q',s') \in L_{Q_Z}(q,s) \wedge q' \in F\} \\
+  \end{array}
+\]
+\medskip
 
-  \item Merge the initial transitions in $C$ (those starting from $q_0$) with
-    the single transition in $M$ starting from $s_0$, $(s_0, s_1, \alpha_0)$.
-    This yields a set of transitions $T$:
+This essentially says that $Z$ is the level-wise merging of all states in $C$
+at level $i$ with all states in $M$ at level $i$, and with the transitions
+leading to them. $q_0$ is merged with $s_0$, and all initial transitions in $C$
+are merged with the single initial transition in $M$, and so on. We create new
+labels for each transition of the form $\alpha \models E$, where $\alpha$ is
+the label of the system model transition, and $E$ is the label of the
+specification transition. See below for what this means.
 
-    \medskip
-    \[
-      \begin{array}{rcl}
-        T & = & \{((q_0,s_0), (q,s_1), \alpha_0 \models E) \, | \, (q_0, q, E) \in T \}
-      \end{array}
-    \]
-    \medskip
-
-    The labels of the resulting transitions are of the form $\alpha \models E$,
-    where $\alpha$ is the label of the system model transition, and $E$ is the
-    label of the specification transition. See below for what this means.
-
-  \item Let $Q$ be the those nodes reachable in $T$ from $(q_0,s_0)$:
-
-    \medskip
-    \[
-      \begin{array}{rcl}
-        Q & = & \{(q,s) | (r, (q,s), \alpha \models E) \in T\}
-      \end{array}
-    \]
-    \medskip
-
-  \item Recursively create the transitions from the nodes in $(q,s) \in Q$ by
-    starting from step 2. Bottom out when there are no more transitions leading
-    out of $q$ or $s$, i.e.\ the specification automata's or the system model's
-    depth have been reached.
-
-\end{enumerate}
-
-A state $(q, s)$ of the product $Z$, where $q$ is a state from the
-specification and $s$ is from the system model, is a success state if $q$ is a
-success state, and a fail state if $q$ is a fail state.
+A state $(q,s)$ in $L_{Q_Z}(q_0,s_0)$ is a success state if $q \in S$ and a
+failure state if $q \in F$.
 
 \end{mydef}
 
 In Figure~\ref{figure-deduction-example} we show an example of a system model,
 a specification, and the resulting product of combining them.
 
-\begin{mylemma}\label{def-system-model-specification-product-is-tree}
+\begin{mylemma}[a product $Z$ is a tree]
 The product $Z$ will be a tree --- a connected, acyclic graph. This is given by
 the procedure above:
 \begin{inparaenum}[1\upshape)]
-  \item $Z$ will be connected, as each node but the root has an incoming edge
-    from the previous iteration, and is reachable from the root; and
-  \item $Z$ will be acyclic, as edges only go from nodes created in one
-    iteration to nodes created in the next iteration, and each node has at most
-    one incoming edge.
+  \item $Z$ will be connected, as each node at level $i > 0$ has an incoming
+    transition from a node at level $i-1$, and the root has transitions to all
+    nodes at level $1$; and
+  \item $Z$ will be acyclic, as edges only go from nodes at level $j$ to nodes
+    at level $j+1$, and each node has at most one incoming edge.
   \end{inparaenum}
 \end{mylemma}
 
-\begin{mylemma}\label{def-system-model-specification-product-depth}
-$Z$ will be finite and have a depth of $min(depth(M), depth(C))$, given that
-both $M$ and $C$ are finite. Each iteration in the procedure for creating $Z$
-traverses $M$ and $C$ to nodes one level deeper than the last iteration, and
-stops when traversal is impossible. The depth of $M$ is always finite, and
-traversal can become impossible either by reaching the depth of $M$ or $C$.
+\begin{mylemma}[a product $Z$ is finite]
+Nodes in $Z$ at level $i$ are created from nodes in $C$ and $M$ at level $i$
+--- if there are no nodes at level $i$ in $Z$, then are no nodes at level $i$
+in either $C$ or $M$. Since the depth of $M$ is by definition finite, there
+exists an $k$ such that there are no nodes at levels $\geq k$ in $Z$. In fact,
+$k = min(depth(M),depth(C))$.
 \end{mylemma}
 
 
@@ -1504,11 +1497,12 @@ Figure~\ref{figure-semantics-translation}, is defined as:
 \end{mydef}
 
 \begin{mydef}[transitive closure of the transition function]
-Let $A$ be the automata of $Z$, a system model - specification product, and let
-$\xrightarrow*$ be the \textit{transitive closure} of the transition function,
-with the semantics that, informally, $\langle A, q\rangle \xrightarrow* \langle
-A, q'\rangle$ means that $q'$ can be reached, starting from $q$, using the
-transition function $\rightarrow$. Formally:
+Let $A$ be the automata of $Z$, a product of a system model and a
+specification, and let $\xrightarrow*$ be the \textit{transitive closure} of
+the transition function, with the semantics that, informally, $\langle A,
+q\rangle \xrightarrow* \langle A, q'\rangle$ means that $q'$ can be reached,
+starting from $q$, using the transition function $\rightarrow$, traversing zero
+or more intermediate states. Formally:
 
 \medskip
 \[
