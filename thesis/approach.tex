@@ -73,7 +73,7 @@ Chapter~\ref{chapter-intro-to-unit-testing}.
 Specifications in \textit{pythonrv} are structured as \textit{specification
 functions}.
 
-\begin{mydef}\label{def-specification-function}
+\begin{mydef}[specification function]\label{def-specification-function}
 In \textit{pythonrv}, a \textit{specification function} is a Python function
 describing a specification, which \textit{pythonrv} can use for verification of
 the program. A specification function takes a special \textit{event} argument.
@@ -607,36 +607,27 @@ area for future work in Chapter~\ref{chapter-conclusions}.
 
 \section{Formal Foundation} \label{section-approach-formal-foundation}
 
-The purpose of a formal foundation for a verification approach is so that we
-can reason mathematically about the specifications. To this end, the
-specifications used for verification need some sort of mathematical
-representation. Different kinds of automata are often used. A model of the
-system, a system model, is also required. In this case the system model is the
-sequence of that occur during the program's execution, with their associated
-data (arguments, object state, global state, etc.). This is described in more
-detail in Section~\ref{section-approach-formal-foundation-semantics}
+The purpose of a formal foundation for a verification approach is to reason
+mathematically about the system. The specifications used for verification need
+some sort of mathematical representation. A model of the system, a system
+model, is also required. In this case the system model is the sequence of that
+occur during the program's execution, with their associated data (arguments,
+object state, global state, etc.). This is described in more detail in
+Section~\ref{section-approach-formal-foundation-semantics}
 
-A seemingly insurmountable problem quickly arises when attempting to give such
-a mathematical representation to the \textit{pythonrv} specifications described
-in Section~\ref{section-approach-syntax}. \textit{pythonrv} specifications are
-written as ordinary Python functions and, as such, are difficult to formalize.
-The Python programming language is rather informal - one implementation of it,
-CPython, serves as the reference implementation. There are no other
-specifications or formal semantics for Python\footnote{The development of
-  Python is organized mainly through the Python Enhancement Proposal (PEP)
-  process. PEPs are design documents for new features, informally describing
-their rationales and how they work.}.
+\textit{pythonrv} specifications are written as ordinary Python functions so we
+have to formalize them.  The Python programming language is rather informal -
+one implementation of it, CPython, serves as the reference implementation.
+There are no other specifications or formal semantics for Python\footnote{The
+development of Python is organized mainly through the Python Enhancement
+Proposal (PEP) process. PEPs are design documents for new features,
+informally describing their rationales and how they work.}.
 
 One way to go around this is to define formal semantics for a subset of Python,
 which is done in the following sections. This leads to a way to reason
 mathematically with and about specifications written in this subset, which we
 describe in the next section.
 
-These formal specifications can be represented as automata. The verification
-approach takes a specification automata and combines it with the system model
-(described in Section~\ref{section-approach-formal-foundation-semantics}), and
-the resulting product (a tree) can be traversed to see if the system model of
-the program satisfies the specification.
 
 
 
@@ -644,26 +635,29 @@ the program satisfies the specification.
 %====== Formal Foundation - Python Subset
 %================================================
 
-\subsection{Python Subset for Formal Specification Functions}
+\subsection{\textit{pythonrv} Language for Formal Specification Functions}
 \label{section-approach-python-subset}
 \lstset{language=Python,numbers=left}
 
+We define the formal specification language in \textit{pythonrv} as a subset of
+Python. This allows us to write \textit{formal specification functions}.
 
-The subset of Python that we can use in \textit{pythonrv} for formal
-verification allows us to write \textit{formal-specification-functions}.
-
-\begin{mydef}\label{def-formal-specification-function}
-A \textit{formal specification function} is one of four basic function
-structures: The \textit{assert}, \textit{next}, \textit{if-then} and
+\begin{mydef}[primitive formal specification functions]
+\label{def-primitive-formal-specification-function}
+A \textit{primitive formal specification function} is one of four basic
+function structures: The \textit{assert}, \textit{next}, \textit{if-then} and
 \textit{if-then-else} functions, shown in
 Figure~\ref{figure-basic-formal-specification-functions}. The expression
 \textit{E} used in the \textit{assert}, \textit{if-then} and
 \textit{if-then-else} functions (lines 2, 14 and 21 in
 Figure~\ref{figure-basic-formal-specification-functions}) denotes any
 idempotent, immutable, valid Python boolean expression (a boolean expression is
-one which evaluates to either true or false). A technical detail is that if the
-expression needs to access any properties of the \texttt{event} argument, they
-need to be of the form \texttt{lambda event: E}.
+one which evaluates to either true or false). Evaluating an expression should
+not change the program state --- it should be idempotent and immutable --- or
+the act of verifying the program against its specifications could affect the
+success of the verification. If the expression needs to access any properties
+of the \texttt{event} argument, the expression needs to be of the form
+\texttt{lambda event: E}.
 \end{mydef}
 
 \begin{figure}[h!]
@@ -701,12 +695,12 @@ def if_then_else():
 	\label{figure-basic-formal-specification-functions}
 \end{figure}
 
-These formal specification functions can be composed together to form more
+Primitive formal specification functions can be composed together to form more
 complex specifications. Composition is done at \textit{composition points},
 using the \textit{composition operator} $\circ$. We describe composition in
 Section~\ref{section-approach-composition}.
 
-\begin{mydef}\label{def-composition-point}
+\begin{mydef}[composition points]\label{def-composition-point}
 Formal specification functions have \textit{composition points} where they can
 be combined with other formal specification functions. A formal specification
 function can have zero or more composition points. A composition point can be
@@ -715,29 +709,49 @@ composition, while closed have already been used. Composition points can be
 \textit{required} or \textit{optional}.
 \end{mydef}
 
-\begin{mydef}\label{def-composition-operator}
+\begin{mydef}[complete and incomplete specifications]
+\label{def-composition-complete}
+A formal specification function can be either \textit{complete} or
+\textit{incomplete}. A complete formal specification function is a
+specification that can be used by \textit{pythonrv} for verification. An
+incomplete formal specification function cannot be used for verification yet,
+but can, with composition, become complete. Complete formal specification
+functions have no open required composition points; incomplete formal
+specification functions have at least one. Only the \textit{assert} primitive
+specification function is complete --- the other can become complete through
+composition.
+\end{mydef}
+
+\begin{mydef}[the composition operator]\label{def-composition-operator}
 Composition is described by the \textit{composition operator} $\circ$. Let $f$,
 $g$ and $h$ be formal specification functions. Let $f$ have one composition
-point, $g$ two, labeled $a$ and $b$, respectively, and $h$ none. A valid
-composition would be: $s = f \, \circ \, ((g \, \circ_{a} \, h) \, \circ_{b} \,
-h)$.  $s$ would be a complete formal specification function, as it is composed
+point, $g$ two, labeled $a$ and $b$, respectively, and $h$ none. An example
+composition could be: $s = f \, \circ \, ((g \, \circ_{a} \, h) \, \circ_{b} \,
+h)$. $s$ would be a complete formal specification function, as it is composed
 of formal specification functions, and it has no open required composition
-points (or optional ones).
+points (or optional ones). We define what composition actually means below.
 \end{mydef}
 
-\begin{mydef}\label{def-composition-complete}
-A formal specification function can be either \textit{complete} or
-\textit{incomplete}. A complete formal specification function is a valid
-specification. An incomplete formal specification function is not a valid
-specification, but can, with composition, become complete. Complete formal
-specification functions have no open required composition points; incomplete
-formal specification functions have at least one. Only the \textit{assert}
-basic specification function is complete --- the other can become complete
-through composition.
+\begin{mydef}[automata]\label{def-automata}
+Every formal specification function $s$ can be represented by a deterministic
+finite automata $A(s) = (Q, P, q_0, S, F)$. Each such automata consists of a
+set of states $Q$ and transitions $(a, b, E) \in P$ between them, where $a$ is
+the start state, $b$ is the end state, $a,b \in Q$ and $E$ is a
+\textit{transition label}. The transition label is described in detail in
+Section~\ref{section-approach-formal-foundation-semantics} An automata has one
+\textit{initial state} $q_0 \in Q$, a set of \textit{success states} $S
+\subseteq Q$ and a set of \textit{fail states} $F \subseteq Q$. $S$ and $F$ are
+disjoint. Success states are depicted as \textit{accepting states} in the
+automata. Fail states are usually called \textit{fail}, $f$, etc.
 \end{mydef}
 
-A complete and verifiable formal specification function also needs some
-boilerplate, shown in Figure~\ref{figure-formal-boilerplate}.
+The four basic formal specification functions correspond to simple,
+deterministic, finite automata, sketches of which are depicted in
+Figure~\ref{figure-basic-formal-specification-automata}. Please note that the
+automata in Figure~\ref{figure-basic-formal-specification-automata} are only
+sketches (as can be seen by the squiggly cloud-shapes), and are only supposed
+to give an overview of how they work. They are defined properly in the next
+section.
 
 \begin{figure}[h!]
 	\begin{center}
@@ -761,57 +775,14 @@ def spec():
 	\label{figure-formal-boilerplate}
 \end{figure}
 
-Notation: Let $a_E$ be an \textit{assert} specification asserting the
-expression $E$, let $n$ be a \textit{next} specifications and let $i_E$ be an
-\textit{if-then} or \textit{if-then-else} specification with the expression $E$
-guarding the \textit{then} composition point. Let $s$ be any specification.
-Appending subscripts and $'$ denotes different specifications or expressions of
-the same type. The $E$ subscript can be omitted if irrelevant to the task at
-hand.
+A complete and verifiable formal specification function also needs some
+boilerplate, shown in Figure~\ref{figure-formal-boilerplate}. Lines 1 and 5 are
+the same as for informal specification functions --- we import the
+\textit{pythonrv} \texttt{rv} package, and annotate our specification with what
+function we want to monitor. On lines 2 and 3 we import functions required for
+formal \textit{pythonrv} specifications, and line 6 is the crucial difference,
+where we say that this specification function should use formal verification.
 
-The four basic formal specification functions correspond to simple,
-deterministic, finite automata, sketches of which are depicted in
-Figure~\ref{figure-basic-formal-specification-automata}. Please note that the
-automata in Figure~\ref{figure-basic-formal-specification-automata} are only
-sketches (as can be seen by the squiggly cloud-shapes), and are only supposed
-to give an overview of how they work. They are defined properly in the next
-section.
-
-\begin{mydef}\label{def-automata}
-Every formal specification function $s$ can be represented by a deterministic
-finite automata $A(s) = (Q, P, q_0, S, F)$. Each such automata consists of a
-set of states $Q$ and transitions $(a, b, E) \in P$ between them, where $a$ is
-the start state, $b$ is the end state, and $E$ is a \textit{transition label}.
-An automata has one initial state $q_0$, a set of \textit{success states} $S$
-and a set of \textit{fail states} $F$. Note that the composition of automata
-might make them non-deterministic, i.e.\ more than one transition with the same
-label. This is dealt with in the verification, which is fully deterministic.
-\end{mydef}
-
-\begin{mydef}\label{def-success-and-fail-states}
-A state cannot be both a success state and a fail state --- it cannot be in
-both $S$ and $F$: $S \cap F = \emptyset$. Success states are depicted as
-\textit{accepting states} in the automata. Fail states are usually called
-\textit{fail}, $f$, etc.
-\end{mydef}
-
-\begin{mydef}\label{def-transition-labels}
-Each transition in the automata has a label --- an expression --- which is
-described in detail in
-Section~\ref{section-approach-formal-foundation-semantics}. The label is taken
-from the expressions in the Python functions. The label $\top$ denotes ``any
-and all expressions''.
-\end{mydef}
-
-\begin{mydef}\label{def-initial-transitions}
-The set of \textit{initial transitions} $T$, $(q_0, q', E) \in T$, $T \subseteq
-P$ are especially important for composition, see
-Section~\ref{section-approach-composition}. All initial transitions start from
-the initial state $q_0$, go to some state $q'$, and have some label $E$. When
-we describe an automata we will usually split up its transitions $P$ into two
-parts, the initial transitions $T$, and all other transitions $R$: $P = T \cup
-R$ and $T \cap R = \emptyset$.
-\end{mydef}
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% Automata for the basic formal specification functions
@@ -884,7 +855,7 @@ R$ and $T \cap R = \emptyset$.
 %%%%%%%%%%%%%%%%%%%%%%%%
 
 
-These preliminaries allow us to define each basic formal specification function
+These preliminaries allow us to define primitive formal specification functions
 mathematically as automata, and formal rules on how to compose them.
 
 
@@ -898,10 +869,18 @@ composition to build more complex and interesting specifications. Composition
 is defined inductively, preserving the semantics, which we define in
 Section~\ref{section-approach-formal-foundation-semantics}.
 
+Notation: Let $a_E$ be an \textit{assert} specification asserting the
+expression $E$, let $n$ be a \textit{next} specifications and let $i_E$ be an
+\textit{if-then} or \textit{if-then-else} specification with the expression $E$
+guarding the \textit{then} composition point. Let $s$ be any specification.
+Appending subscripts and $'$ denotes different specifications or expressions of
+the same type. The $E$ subscript can be omitted if irrelevant to the task at
+hand.
+
 \subsubsection{The \textit{assert} specification, and composition with the
 \textit{tail} composition point}
 
-The \textit{assert} specifications are the only basic formal specification
+The \textit{assert} specifications are the only primitive formal specification
 functions that are complete, without the need to compose them with other
 specifications. The automata $A(a_E)$ for a standalone \textit{assert}
 specification $a_E$, depicted in
@@ -918,15 +897,27 @@ Figure~\ref{figure-basic-formal-specification-automata}~(a), is defined as:
 If $\neg E$ is true, the fail state $f$ will be reached, and the specification
 has been violated.
 
-\textit{assert} specifications also have, together with all basic formal
+To make future composition definitions easier we introduce the concept of
+\textit{initial transitions}:
+
+\begin{mydef}[initial transitions]\label{def-initial-transitions}
+The set of \textit{initial transitions} $T$, $(q_0, q', E) \in T$,
+$T \subseteq P$ consists of those transitions in $P$ that start from the
+initial state $q_0$ of the automata, go to some state $q'$, and have some label
+$E$. Below we will sometimes split up the transitions $P$ of automata into two
+parts, the initial transitions $T$, and all other transitions $R$: $P = T \cup
+R$ and $T \cap R = \emptyset$.
+\end{mydef}
+
+\textit{assert} specifications also have, together with all primitive formal
 specification functions and compositions thereof, at least one open composition
 point, the \textit{tail} composition point. Compositions using the
 \textit{tail} composition point are commutative: $s \, \circ_{tail} \, s' = s'
-\, \circ_{tail} \, s$. Composition using the \textit{tail} composition point is
-essentially just a merge of the initial states of the two specifications,
+\, \circ_{tail} \, s$. Composition using the \textit{tail} composition point
+is essentially just a merge of the initial states of the two specifications,
 making the initial transitions of both specifications go out from the same
-state $q_0$, and merging the success states and fail states of the automata. Given two
-specifications $s$ and $s'$, where:
+state $q_0$, and merging the success states and fail states of the automata.
+Given two specifications $s$ and $s'$, where:
 
 \medskip
 \[
@@ -1198,7 +1189,7 @@ and $s_2$ attached to the \textit{else} composition point, and:
 \]
 \medskip
 
-For \textit{if-then} specifications compositions becomes:
+For \textit{if-then} specifications composition becomes:
 
 \medskip
 \[
@@ -1214,7 +1205,7 @@ For \textit{if-then} specifications compositions becomes:
 \]
 \medskip
 
-And for \textit{if-then-else} specifications compositions becomes:
+And for \textit{if-then-else} specifications composition becomes:
 
 \medskip
 \[
@@ -1249,7 +1240,7 @@ of such a model.
 
 The system model in \textit{pythonrv} is quite simple.
 
-\begin{mydef}\label{def-system-model}
+\begin{mydef}[\textit{pythonrv} system model]\label{def-system-model}
 The \textit{system model} consists of a sequence of \textit{events} of function
 calls, $S = (\alpha_0, \alpha_1, \dots, \alpha_n)$. Each event $\alpha_i =
 (\lambda_i, \delta_i)$ is a two-part structure: The function called, $\lambda$,
@@ -1260,27 +1251,28 @@ continued execution of the program.
 \end{mydef}
 
 The system model can be viewed as a directed acyclic graph (actually, a tree
---- even a list), where all nodes but the last have one edge, leading to the
-next event. The first edge is labeled $\alpha_0$, the second is labeled
+--- even a list), where all nodes but the last have one edge, an edge denoting
+an event. The first edge is labeled $\alpha_0$, the second is labeled
 $\alpha_1$, etc. See Figure~\ref{figure-deduction-example}~(a) for an example.
 
 In the same way that the system model can be viewed as a graph, so can a
 specification automata, see Figure~\ref{figure-deduction-example}~(b). All
 graphs have a depth.
 
-\begin{mydef}\label{def-graph-depth}
+\begin{mydef}[graph depth]\label{def-graph-depth}
 The \textit{depth} of a graph rooted at a node $q$ is the number of transitions
 required to reach the node farthest away from the $q$. The depth of a graph
 containing cycles is considered infinite.
 \end{mydef}
 
-\begin{mydef}\label{def-system-model-specification-product}
+The \textit{product} of a system model and a specification automata is the main
+construct used to reason about the correctness of the specification. An example
+can be seen in Figure~\ref{figure-deduction-example}~(c).
+
+\begin{mydef}[product of system model and specification]
+\label{def-system-model-specification-product}
 The \textit{product} $Z = M \times C$ of a system model $M$ and a specification
-automata $C$ is the main construct used to reason about the correctness of the
-specification. An example can be seen in
-Figure~\ref{figure-deduction-example}~(c). The product $Z$ will be a tree of
-depth $min(depth(M), depth(C))$, and it is created through the following
-recursive procedure:
+automata $C$ is created through the following recursive procedure:
 
 \begin{enumerate}
   \item Let $M$ be a system model rooted at $s_0$. Let $C$ be a specification
@@ -1329,6 +1321,26 @@ success state, and a fail state if $q$ is a fail state.
 
 In Figure~\ref{figure-deduction-example} we show an example of a system model,
 a specification, and the resulting product of combining them.
+
+\begin{mylemma}\label{def-system-model-specification-product-is-tree}
+The product $Z$ will be a tree --- a connected, acyclic graph. This is given by
+the procedure above:
+\begin{inparaenum}[1\upshape)]
+  \item $Z$ will be connected, as each node but the root has an incoming edge
+    from the previous iteration, and is reachable from the root; and
+  \item $Z$ will be acyclic, as edges only go from nodes created in one
+    iteration to nodes created in the next iteration, and each node has at most
+    one incoming edge.
+  \end{inparaenum}
+\end{mylemma}
+
+\begin{mylemma}\label{def-system-model-specification-product-depth}
+$Z$ will be finite and have a depth of $min(depth(M), depth(C))$, given that
+both $M$ and $C$ are finite. Each iteration in the procedure for creating $Z$
+traverses $M$ and $C$ to nodes one level deeper than the last iteration, and
+stops when traversal is impossible. The depth of $M$ is always finite, and
+traversal can become impossible either by reaching the depth of $M$ or $C$.
+\end{mylemma}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -1428,21 +1440,21 @@ using the values of an event $\alpha$.
 	\begin{minipage}{0.9\textwidth}
 		\centering
     \begin{tabular}{r c l}
-      $PE(\texttt{True)})$ & = & $\top$ \\
-      $PE(\texttt{False)})$ & = & $\bot$ \\
-      $PE(\texttt{event.fn.x.called})$ & = & $\lambda = x$ \\
-      $PE(\texttt{event.called\_function == x})$ & = & $\lambda = x$ \\
-      $PE(\texttt{event.fn.x.property})$ & = & $\delta(x.\texttt{property})$ \\
-      $PE(\texttt{not a)})$ & = & $\neg PE(\texttt{a})$ \\
-      $PE(\texttt{a == b)})$ & = & $PE(\texttt{a}) = PE(\texttt{b})$ \\
-      $PE(\texttt{a != b)})$ & = & $PE(\texttt{a}) \neq PE(\texttt{b})$ \\
-      $PE(\texttt{a and b)})$ & = & $PE(\texttt{a}) \wedge PE(\texttt{b})$ \\
-      $PE(\texttt{a or b)})$ & = & $PE(\texttt{a}) \vee PE(\texttt{b})$ \\
-      $PE(\textit{A Python function or property})$ & = & \textit{The return value} \\
+      $B(\texttt{True)})$ & = & $\top$ \\
+      $B(\texttt{False)})$ & = & $\bot$ \\
+      $B(\texttt{event.fn.x.called})$ & = & $\lambda = x$ \\
+      $B(\texttt{event.called\_function == x})$ & = & $\lambda = x$ \\
+      $B(\texttt{event.fn.x.property})$ & = & $\delta(x.\texttt{property})$ \\
+      $B(\texttt{not a)})$ & = & $\neg B(\texttt{a})$ \\
+      $B(\texttt{a == b)})$ & = & $B(\texttt{a}) = B(\texttt{b})$ \\
+      $B(\texttt{a != b)})$ & = & $B(\texttt{a}) \neq B(\texttt{b})$ \\
+      $B(\texttt{a and b)})$ & = & $B(\texttt{a}) \wedge B(\texttt{b})$ \\
+      $B(\texttt{a or b)})$ & = & $B(\texttt{a}) \vee B(\texttt{b})$ \\
+      $B(\textit{A Python function or property})$ & = & \textit{The return value} \\
     \end{tabular}
   \end{minipage}
   \caption{A sketch of the translation procedure of Python expressions to
-    specification expressions. $PE$ is the mapping function, replacing the
+    specification expressions. $B$ is the mapping function, replacing the
     Python syntax with mathematics syntax.}
   \label{figure-semantics-translation}
 \end{figure}
@@ -1453,13 +1465,11 @@ A product $Z$ of a system model and a specification can be used to determine
 whether that specification would accept or reject the system model --- or not
 know to do either or, yet.
 
-\begin{mydef}\label{def-verification-procedure}
-The \textit{verification procedure} is defined as follows:
+Informally, the \textit{verification procedure} is to:
 
 \begin{enumerate}
   \item Compute the product $Z$ of the specification $C$ and the system model
-    $M$, as described in
-    Definition~\ref{def-system-model-specification-product}.
+    $M$, as described above.
 
   \item Traverse $Z$, starting at the root node, following all transitions
     which labels evaluate to true.
@@ -1473,6 +1483,60 @@ The \textit{verification procedure} is defined as follows:
         success state, the system model could, if it were extended, either
         satisfy or violate the specification.
     \end{enumerate}
+\end{enumerate}
+
+This can be formally captured with \textit{operational semantics}:
+
+
+\begin{mydef}[transition function]
+Given a product $Z$ of a specification $C$ and a system model $M$, such that
+$Z$ is an automata $(Q, P, q_0, S, F)$, the semantics of a transition
+$\rightarrow$ between two states $q$ and $q'$, where $q,q' \in Q$ and
+\textit{B} is the mapping function from
+Figure~\ref{figure-semantics-translation}, is defined as:
+
+\medskip
+\[
+  \frac{\exists (q, q', E) \in P, \textit{B}(E) = \top}
+  {\langle(Q, P, q_0, S, F), x\rangle \rightarrow \langle(Q, P, q_0, S, F), x'\rangle}
+\]
+\medskip
+\end{mydef}
+
+\begin{mydef}[transitive closure of the transition function]
+Let $A$ be the automata of $Z$, a system model - specification product, and let
+$\xrightarrow*$ be the \textit{transitive closure} of the transition function,
+with the semantics that, informally, $\langle A, q\rangle \xrightarrow* \langle
+A, q'\rangle$ means that $q'$ can be reached, starting from $q$, using the
+transition function $\rightarrow$. Formally:
+
+\medskip
+\[
+  \frac{}
+  {\langle A, q\rangle \xrightarrow* \langle A, q\rangle}
+  \quad
+  \frac{\langle A, q\rangle \rightarrow \langle A, q'\rangle}
+  {\langle A, q\rangle \xrightarrow* \langle A, q'\rangle}
+  \quad
+  \frac{\langle A, q\rangle \xrightarrow* \langle A, q''\rangle, \langle A, q''\rangle \rightarrow \langle A, q'\rangle}
+  {\langle A, q\rangle \xrightarrow* \langle A, q'\rangle}
+\]
+\medskip
+\end{mydef}
+
+\begin{mydef}[formal verification]
+
+With this we can determine whether the system model $M$ satisfies, violates or
+neither-satisfies-nor-violates the specification $C$:
+
+\begin{enumerate}
+  \item If $\exists q' \in F, q_0 \xrightarrow* q'$ then $M$ violates $C$.
+    There exists a failure state that is reachable from $q_0$.
+  \item If $\forall q' \in Q, q_0 \xrightarrow* q' \Rightarrow q' \in S$ then
+    $M$ satisfies $C$. All states reachable from $q_0$ are success states.
+  \item If neither condition 1 or condition 2 holds, then $M$ neither satisfies
+    nor violates $C$ yet. There exists a state reachable from $q_0$ that is
+    neither a success state nor a failure state.
 \end{enumerate}
 
 \end{mydef}
