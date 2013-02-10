@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Test-inspirerad runtime-verifiering - Adam Renberg</title>
+    <style>
+      article {
+        margin: 40px;
+        width: 38em;
+        font-family: Palatino Linotype, Palatino, Book Antiqua, serif;
+        font-size: 14px;
+      }
+      h1 {
+        font-size: 200%;
+      }
+      h2 {
+        font-size: 130%;
+      }
+    </style>
+  </head>
+  <body>
+    <article>
+    <h1>Test-inspirerad runtime-verifiering</h1>
+    <div class="author">Adam Renberg</div>
+    <h2>Sammanfattning</h2>
+<p>
+Mjukvarusystem växer sig allt mer komplexa, och mer sofistikerade verktyg
+krävs för att säkerställa att system fungerar korrekt &mdash; att de opererar
+enligt sina specifikationer. Traditionella tillvägagångssätt för
+programverifiering tillför mycket, men de har också sina nackdelar. Formella
+metoder kan ge användbara matematiska bevis om korrektheten av program, men de
+är komplexa och är svåra att använda. Ofta opererar de bara på en
+konstruerad systemmodell, inte det faktiska programmet. Testning, som metod,
+har å andra sidan en enkel syntax och bra verktygsstöd, och används i stor
+utsträckning. Men testning är informell och ofullständig, och testar bara de
+specifika testfall som testkrivarna kan komma på.
+</p>
+<p>
+En relativt ny metod, kallad <em>runtime-verifiering</em>, är tänkt som ett
+lättviktigt alternativ som verifierar ett programs faktiska <em>exekvering</em>
+mot dess specifikation, eventuellt även medan programmet kör.
+</p>
+<p>
+Avsikten här har varit att undersöka hur testning, och specifikt
+enhetstestning, kan kombineras med runtime-verifiering. Detta genom att visa
+hur syntaxen för enhetstester, skrivna i programmets programmeringsspråk, kan
+användas som inspiration för specifikationer för runtime-verifiering.
+</p>
+<p>
+En proof-of-concept-implementation för Python kallad <em>pythonrv</em>
+implementeras och beskrivs, och testas på en verklig applikation. En formell
+grund framställs för specifikationer skrivna i en delmängd av Python, vilket
+möjliggör formell verifiering. Informella specifikationer stöds också, med hela
+kraften av Python som specifikationsspråk.
+</p>
+<p>
+Resultaten visar att proof-of-concept-implemenationen möjliggör en effektiv
+användning av runtime-verifiering. Den är enkel att integrera i existerande
+program, och den informella specifikationssyntaxen är förhållandevis enkel. Den
+visar också att formella specifikationer kan skrivas i Python, men i en mer
+omständigt syntax och struktur än den informella. Många intressanta egenskaper,
+som vanliga tester skulle ha problem med, kan verifieras med denna metod.
+</p>
+<p>
+Rekommendationen för framtida arbete är att förbättra specifikationssyntaxen,
+genom att använda koncept från enhetstestning såsom förväntningar, och genom
+att göra den formella specifikationssyntaxen mer som den av sin informella
+kusin.
+</p>
+    </article>
+  </body>
+</html>

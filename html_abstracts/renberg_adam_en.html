@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Test-inspired runtime verification - Adam Renberg</title>
+    <style>
+      article {
+        margin: 40px;
+        width: 38em;
+        font-family: Palatino Linotype, Palatino, Book Antiqua, serif;
+        font-size: 14px;
+      }
+      h1 {
+        font-size: 200%;
+      }
+      h2 {
+        font-size: 130%;
+      }
+    </style>
+  </head>
+  <body>
+    <article>
+    <h1>Test-inspired runtime verification</h1>
+    <h2>Using a unit test-like specification syntax for runtime
+      verification</h2>
+    <div class="author">Adam Renberg</div>
+    <h2>Abstract</h2>
+<p>
+Computer software is growing ever more complex, and more sophisticated tools
+are required to make sure the software operates in a correct way &mdash; i.e.
+according to its specification. Traditional approaches to program verification
+have much to give, but they also have their disadvantages. While formal methods
+can give useful mathematical proofs about the correctness of programs, they
+suffer from complexity and are difficult to use. Often they work only on a
+constructed system model, not the actual program. Testing, on the other hand,
+has a simple syntax and great tool support, and it is in widespread use. But it
+is informal and incomplete, only testing the specific test cases that the
+test-writers can come up with.
+</p>
+<p>
+A relatively new approach called <em>runtime verification</em> is an attempt
+for a lightweight alternative. It verifies a program's actual
+<em>execution</em> against its specification, possibly while the program is
+running.
+</p>
+<p>
+This work investigates how testing, and specifically unit testing, can be
+combined with runtime verification. It shows how the syntax of unit tests,
+written in the target program's programming language, can be used to inspire
+the syntax for specifications for runtime verification. Both informal and
+formal specifications are described and supported.
+</p>
+<p>
+A proof-of-concept framework for Python called <em>pythonrv</em> is implemented
+and described, and it is tested on a real-life application. A formal foundation
+is constructed for specifications written in a subset of Python, enabling
+formal verification. Informal specifications are also supported, with the full
+power of Python as specification language.
+</p>
+<p>
+The result shows that the proof-of-concept framework allow for effective use of
+runtime verification. It is easy to integrate into existing programs, and the
+informal specification syntax is relatively simple. It also shows that formal
+specifications can be written in Python, but in a more unwieldy syntax and
+structure than the informal one. Many interesting properties can be verified
+using it that ordinary tests would have trouble with.
+</p>
+<p>
+The recommendation for future work lies in improving the specification syntax,
+using unit testing concepts such as expectations, and on working to make the
+formal specification syntax more like that of its informal sibling.
+</p>
+    </article>
+  </body>
+</html>
