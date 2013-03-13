@@ -12,34 +12,30 @@ structured similar to unit tests. To this end, there are four issues we
 address:
 
 \begin{itemize}
-  \item[\textbf{Syntax}] We define the syntax and general structure of
-    specification function in the next section.
-  \item[\textbf{Instrumentation}] How these specifications gain access to the
-    target system is described in
-    Section~\ref{section-approach-instrumentation}.
-  \item[\textbf{Formalization}] A subset of python, using a special structure
+  \item \textbf{Syntax}. We define the syntax and general structure of
+    specification function (Section~\ref{section-approach-syntax}).
+  \item \textbf{Instrumentation}. How these specifications gain access to the
+    target system (Section~\ref{section-approach-instrumentation}).
+  \item \textbf{Formalization}. A subset of python, using a special structure
     and methods, is given a formal foundation, and specifications written are
-    considered formal. This is described in
-    Section~\ref{section-approach-formal-foundation}.
-  \item[\textbf{Verification}] We have chosen to perform verification online
+    considered formal (Section~\ref{section-approach-formal-foundation}).
+  \item \textbf{Verification}. We have chosen to perform verification online
     and synchronous with the target system. The technique for verification
-    differs for informal and formal specification functions.  See
+    differs for informal and formal specification functions (see
     Sections~\ref{section-approach-verification}
-    and~\ref{section-approach-formal-foundation}, respectively.
+    and~\ref{section-approach-formal-foundation}, respectively).
 \end{itemize}
 
-This chapter is a documentation on how we have chosen to solve these issues.
-The following sections are each dedicated to one issue, and shows a
-proof-of-concept of these ideas. The implementation, called \textit{pythonrv},
-can be found online\footnote{\texttt{https://github.com/tgwizard/pythonrv}}.
+This chapter explains how we have addressed these issues. The implementation,
+called \textit{pythonrv}, can be found
+online\footnote{\texttt{https://github.com/tgwizard/pythonrv}}.
 
 During the development of this proof-of-concept, the biggest factor in deciding
 what language to use was how it would assist in instrumentation. The language
 should also be in wide use, support quick development, and have an active
-testing culture.
-
-Easy access to a non-trivial and actively used system for real-world testing
-would be a plus. More on this in Chapter~\ref{chapter-evaluation}.
+testing culture. Easy access to a non-trivial and actively used system for
+real-world testing would be a plus. More on this in
+Chapter~\ref{chapter-evaluation}.
 
 Python\footnote{\texttt{http://www.python.org}}, among several languages, fits
 these criteria, and was chosen as the implementation language. Python is a
@@ -65,7 +61,7 @@ Not much development has happened on it in the last years. Many new frameworks
 have have spawned, such as PyUnit, Nose and py.test. They build upon the style
 of unittest and mostly add new miscellaneous features, such as better test
 reporting. The original structure of the unit tests is still prevalent ---
-unittest builds on the xUnit style of unit testing, discussed in
+unittest builds on the xUnit style of unit testing, which was discussed in
 Chapter~\ref{chapter-intro-to-unit-testing}.
 
 \subsection{General Structure of a Specification}
@@ -77,13 +73,13 @@ functions}.
 In \textit{pythonrv}, a \textit{specification function} is a Python function
 describing a specification, which \textit{pythonrv} can use for verification of
 the program. A specification function takes a special \textit{event} argument.
-A specification \textit{monitors} points of the program, and the points being
-monitored are called \textit{monitorees}. \textit{pythonrv} supports only
-monitoring of function calls.
+A specification monitors points of the program, and the points being monitored
+are called \textit{monitorees}. \textit{pythonrv} supports only monitoring of
+function calls.
 \end{mydef}
 
-The restriction that \textit{pythonrv} only support monitoring of function
-calls is not a very limiting one. For example, in Python, operators such as $+$
+The restriction that \textit{pythonrv} only supports monitoring of function
+calls is not very limiting. For example, in Python, operators such as $+$
 and $-$ are functions, and reading and writing variables can be turned into
 function calls through the $property$ construct and other so-called magic
 functions. See the Python documentation\footnote{Specifically
@@ -91,32 +87,33 @@ functions. See the Python documentation\footnote{Specifically
 \textit{pythonrv} thus supports monitoring of these events as well.
 
 A specification function consists of any valid Python code. It is passed the
-special \texttt{event} during verification, which gives the specification
-function access to data about the current event.
+special \texttt{event} argument during verification, which allows the
+specification function to access data about the current event.
 
-In Figure~\ref{figure-specification-flow} we show what happens when a monitored
-function is called. The monitoree is wrapped, so the function call first
-reaches the verification code. This will do some setup and pre-processing and
-then pass the event on to the specifications monitoring this function. If these
-do not find any violations, the actual function is called, and the return value
-is sent back to the system. As we'll see later in this section and in
+In Figure~\ref{figure-specification-flow} we show the sequence of actions when
+a monitored function \textit{f} is called. The monitoree (\textit{f}) is
+wrapped, so the function call first reaches the verification code. This will do
+some setup and pre-processing and then pass the event on to the specification
+function \textit{s} monitoring this function. If no violations happen, the
+actual function (\textit{f}) is called, and the return value is sent back to
+the caller \textit{c}. As we'll see later in this section and in
 Section~\ref{section-approach-instrumentation}, this is a somewhat simplified
 version. Verification can, at the discretion of the specification writer, occur
 after the function call.
 
 \begin{figure}[h!]
   \begin{center}
-    \begin{minipage}{0.7\textwidth}
+    \begin{minipage}{0.8\textwidth}
       \begin{sequencediagram}
-        \newthread{system}{System}
-        \newinst{function}{Function}
-        \newinst[1]{verifier}{Verifier}
-        \newinst[1]{specification}{Specification}
+        \newthread{system}{Caller: c}
+        \newinst{function}{Function: f}
+        \newinst[2]{verifier}{Verifier}
+        \newinst{specification}{Specification function: s}
 
-        \begin{call}{system}{call}{verifier}{return}
+        \begin{call}{system}{intercepted call}{verifier}{return}
           \begin{call}{verifier}{verify event}{specification}{}
           \end{call}
-          \begin{call}{verifier}{call}{function}{return}
+          \begin{call}{verifier}{call (no violation)}{function}{return}
           \end{call}
         \end{call}
       \end{sequencediagram}
@@ -130,12 +127,10 @@ The structure of a informal \textit{pythonrv} specification function is shown
 in pseudo-code in Figure~\ref{figure-pseudo-spec}, and the structure of the
 special \texttt{event} parameter is shown in
 Figures~\ref{figure-event-functions},~\ref{figure-event-data}
-and~\ref{figure-event-function-call}.
-
-Note that the Python \texttt{assert} statement raises an
-\texttt{AssertionError} exception when its argument evaluates to
-\texttt{False}. This is used in \textit{pythonrv} to represent a specification
-violation, see Section~\ref{section-approach-verification}.
+and~\ref{figure-event-function-call}. Note that the Python \texttt{assert}
+statement raises an \texttt{AssertionError} exception when its argument
+evaluates to \texttt{False}. This is used in \textit{pythonrv} to represent a
+specification violation (see Section~\ref{section-approach-verification}).
 
 \begin{figure}[h!]
 	\begin{center}
@@ -185,16 +180,15 @@ class Event:
     # verification - on the next
     # event only
   def next_called_shoud_be(monitoree):
-    # on the next Event, the function
-    # called should be monitoree. Verify
+    # on the next Event, the called
+    # function should be monitoree. Verify
     # this
 	\end{lstlisting}
 	\end{minipage}
 	\end{center}
 
   \caption{The structure of the special \textit{event} argument passed to
-    \textit{pythonrv} specification functions. The example is written in
-    pseudo-python.}
+    \textit{pythonrv} specification functions. In pseudo Python.}
 	\label{figure-event-functions}
 \end{figure}
 
@@ -221,8 +215,7 @@ event.called_function
 	\end{center}
 
   \caption{The structure of the data in the \textit{event} argument passed to
-    \textit{pythonrv} specification functions. The example is written in
-    pseudo-python.}
+    \textit{pythonrv} specification functions. In pseudo Python.}
 	\label{figure-event-data}
 \end{figure}
 
@@ -253,8 +246,7 @@ fc.result
 	\end{center}
 
   \caption{The structure of the function call structures in the \textit{event}
-    argument passed to \textit{pythonrv} specification functions. The example
-    is written in pseudo-python.}
+    argument passed to \textit{pythonrv} specification functions. In pseudo Python.}
 	\label{figure-event-function-call}
 \end{figure}
 
@@ -279,6 +271,7 @@ We now proceed with a few simple examples to show how informal
 \textit{pythonrv} specifications can be written. More realistic examples are
 shown in Chapter~\ref{chapter-evaluation}.
 
+\paragraph{Example 1: Fibonnaci}
 The first example, in Figure~\ref{figure-syntax-example-1}, shows the basics of
 a \textit{pythonrv} specification function. The specification just verifies,
 through the \texttt{assert} statement, that the first input to the monitored
@@ -298,10 +291,9 @@ decorators and \texttt{rv.monitor}.)
 On line 5 we define the specification as an ordinary Python function called
 \texttt{spec}, taking one argument, \texttt{event}. On line 6, the array of
 input arguments used to call \texttt{fib} is accessed to check that the first
-argument is greater than zero.
-
-The specification function in Figure~\ref{figure-syntax-example-1} will be
-called upon every invocation to \texttt{fibmodule.fib}.
+argument is greater than zero. The specification function in
+Figure~\ref{figure-syntax-example-1} will be called upon every invocation to
+\texttt{fibmodule.fib}.
 
 \begin{figure}[h!]
 	\begin{center}
@@ -311,10 +303,12 @@ called upon every invocation to \texttt{fibmodule.fib}.
 	\end{center}
 
   \caption{A \textit{pythonrv} specification that monitors two functions,
-    \texttt{mymodule.foo} and \texttt{mymodule.bar}.}
+    \texttt{mymodule.foo} and \texttt{mymodule.bar}, utilizing
+    \texttt{event.prev} and \texttt{event.history}.}
 	\label{figure-syntax-example-2}
 \end{figure}
 
+\paragraph{Example 2: Multiple functions}
 In the second example, Figure~\ref{figure-syntax-example-2}, we show how a
 specification function can monitor two functions. The specification function
 will be called whenever either of the monitored functions are called. The
@@ -363,17 +357,14 @@ The specification is split into two parts, \texttt{spec} and \texttt{followup}.
 \texttt{spec} verifies that \texttt{foo} is called first, and then that
 \texttt{followup} should be verified on the following event. After that, on
 line 11, \texttt{spec} notifies that it has finished its verification, and
-should not be used in the future --- it ``unsubscribes'' from future events.
-
-On line 10 the function \texttt{followup} is added to be executed on the next
+should not be used in the future --- it ``unsubscribes'' from future events. On
+line 10 the function \texttt{followup} is added to be executed on the next
 event. We use \texttt{followup} to accept any calls to \texttt{baz} (with the
 first argument set to \texttt{True}). \texttt{followup} finishes its
-verification when \texttt{bar} has been called.
-
-Since \texttt{followup} is added to the verification machinery through the
-\texttt{event.next} function --- as a ``oneshot'' specification function --- it
-needs to add itself using \texttt{next} for verification on subsequent events.
-We do this on line 24.
+verification when \texttt{bar} has been called. Since \texttt{followup} is
+added to the verification machinery through the \texttt{event.next} function
+--- as a ``oneshot'' specification function --- it needs to add itself using
+\texttt{next} for verification on subsequent events. We do this on line 24.
 
 
 
@@ -388,7 +379,7 @@ values in parentheses):
   \item[\texttt{when}] (\texttt{rv.PRE}). This argument allows the
     specification writer to determine when the specification should be
     verified, before or after the monitorees are called. The valid arguments
-    \texttt{rv.PRE} and \texttt{rv.POST}, respectively. Only when
+    are \texttt{rv.PRE} and \texttt{rv.POST}, respectively. Only when
     \texttt{when=rv.POST} does the specification function have access to the
     monitorees' return values.
 
@@ -399,11 +390,11 @@ values in parentheses):
     memory resources.
 
   \item[\texttt{level}] (\texttt{rv.ERROR}). Specifies how severe or important
-    the specification is. Any value can be used; \texttt{DEBUG}, \texttt{INFO},
-    \texttt{WARNING}, \texttt{ERROR}, \texttt{CRITICAL} are supplied by
-    \texttt{pythonrv}. With these levels we can have more control over what
-    should happen when a specification violation occurs, see
-    Section~\ref{section-approach-verification}.
+    the specification is. Any value can be used; \texttt{rv.DEBUG},
+    \texttt{rv.INFO}, \texttt{rv.WARNING}, \texttt{rv.ERROR},
+    \texttt{rv.CRITICAL} are supplied by \texttt{pythonrv}. With these levels
+    we can have more control over what should happen when a specification
+    violation occurs (see Section~\ref{section-approach-verification}).
 \end{itemize}
 
 
@@ -451,9 +442,9 @@ The decorator in Figure~\ref{figure-function-decorator} caches the return
 values for functions on which it is applied, so that future calls to a
 decorated function with the same arguments will short-circuit and return the
 cached value directly, never entering the function itself. As is shown in
-Figure~\ref{figure-function-decorator-usages}, the decorator is something that
-can be attached with a special syntax, using the \texttt{@} operator. The
-decorated function does not need any further modifications.
+Figure~\ref{figure-function-decorator-usages}, the decorator can be attached
+with a special syntax, using the \texttt{@} operator. The decorated function
+does not need any further modifications.
 
 \texttt{rv.monitor} is a decorator similar to the \texttt{cache} decorator
 above. It takes to set of arguments, first what functions should be monitored
@@ -493,8 +484,7 @@ myfunc(x, y, z) # will call myspec first
 	\end{center}
 
 	\caption{An overview of the \textit{pythonrv} instrumentation process,
-		written in pseudo-Python. This is just for illustrative purposes and not
-		how \textit{pythonrv} actually does the instrumentation.}
+		in pseudo Python.}
 	\label{figure-instrumentation-overview}
 \end{figure}
 
@@ -515,10 +505,10 @@ keys in this case are function names and the values are objects representing
 the function code. (There are other types of values in these containers as
 well, which we can ignore).
 
-\footnotetext[4]{This is not true of closures --- functions defined inside other
-  functions. These functions cannot be directly referenced or modified from
-  outside the defining function. \textit{pythonrv} does not (as of writing)
-  support monitoring of closures.}
+\footnotetext[4]{This is not true for closures --- functions defined inside
+  other functions. These functions cannot be directly referenced or modified
+  from outside of the defining function. \textit{pythonrv} does not (as of
+  writing) support monitoring of closures.}
 
 So in the \textit{pythonrv} instrumentation process, the parent container of
 each monitoree is extracted, and the reference to the monitoree is overwritten
@@ -532,7 +522,9 @@ of how many specifications want to monitor it. The wrappers then iterate over
 the relevant specifications, passes the control (and an event) to them, and
 then runs the monitoree. As we stated in section~\ref{section-approach-syntax},
 a specification can either be verified before or after the function call. The
-wrapper function handles this.
+wrapper function handles this. Multiple specification functions for the same
+monitoree are processed in the order they were registered to monitor the
+monitoree through \texttt{rv.monitor}.
 
 
 
@@ -610,10 +602,10 @@ area for future work in Chapter~\ref{chapter-conclusions}.
 The purpose of a formal foundation for a verification approach is to reason
 mathematically about the system. The specifications used for verification need
 some sort of mathematical representation. A model of the system, a system
-model, is also required. In this case the system model is the sequence of that
-occur during the program's execution, with their associated data (arguments,
-object state, global state, etc.). This is described in more detail in
-Section~\ref{section-approach-formal-foundation-semantics}
+model, is also required. In this case the system model is the sequence of
+events that occur during the program's execution, with their associated data
+(arguments, object state, global state, etc.). This is described in more detail
+in Section~\ref{section-approach-formal-foundation-semantics}
 
 \textit{pythonrv} specifications are written as ordinary Python functions so we
 have to formalize them.  The Python programming language is rather informal -
@@ -635,12 +627,13 @@ describe in the next section.
 %====== Formal Foundation - Python Subset
 %================================================
 
-\subsection{\textit{pythonrv} Language for Formal Specification Functions}
+\subsection{\textit{f-pythonrv} --- Formal \textit{pythonrv} Specification Functions}
 \label{section-approach-python-subset}
 \lstset{language=Python,numbers=left}
 
-We define the formal specification language in \textit{pythonrv} as a subset of
-Python. This allows us to write \textit{formal specification functions}.
+We define \textit{f-pythonrv}, the formal specification language in
+\textit{pythonrv}, as a subset of Python. This allows us to write
+\textit{formal specification functions}.
 
 \begin{mydef}[primitive formal specification functions]
 \label{def-primitive-formal-specification-function}
@@ -855,27 +848,27 @@ where we say that this specification function should use formal verification.
 %%%%%%%%%%%%%%%%%%%%%%%%
 
 
-These preliminaries allow us to define primitive formal specification functions
-mathematically as automata, and formal rules on how to compose them.
 
 
 
-\subsection{Automata Representation and Rules for Composition}
+\subsection{Formal Semantics of \textit{f-pythonrv}}
 \label{section-approach-composition}
 \lstset{language=Python,numbers=none}
 
-With each formal specification function represented as an automaton, we can use
-composition to build more complex and interesting specifications. Composition
-is defined inductively, preserving the semantics, which we define in
-Section~\ref{section-approach-formal-foundation-semantics}.
+These preliminaries allow us to define primitive formal specification functions
+mathematically as automata, and formal rules on how to compose them. With
+primitive each formal specification function represented as an automaton, we
+can use composition to build more complex and interesting specifications.
+Composition is defined inductively, preserving the semantics, which we define
+in Section~\ref{section-approach-formal-foundation-semantics}.
 
-Notation: Let $a_E$ be an \textit{assert} specification asserting the
+Let $a_E$ be an \textit{assert} specification asserting the
 expression $E$, let $n$ be a \textit{next} specifications and let $i_E$ be an
 \textit{if-then} or \textit{if-then-else} specification with the expression $E$
 guarding the \textit{then} composition point. Let $s$ be any specification.
-Appending subscripts and $'$ denotes different specifications or expressions of
-the same type. The $E$ subscript can be omitted if irrelevant to the task at
-hand.
+Appending subscripts and superscripts denotes different specifications or
+expressions of the same kind. The $E$ subscript can be omitted if irrelevant to
+the task at hand.
 
 \subsubsection{The \textit{assert} specification, and composition with the
 \textit{tail} composition point}
@@ -894,8 +887,8 @@ Figure~\ref{figure-basic-formal-specification-automata}~(a), is defined as:
 \]
 \medskip
 
-If $\neg E$ is true, the fail state $f$ will be reached, and the specification
-has been violated.
+If $E$ does not hold the fail state $f$ will be reached, which means the
+specification $a_E$ has been violated.
 
 To make future composition definitions easier we introduce the concept of
 \textit{initial transitions}:
@@ -904,9 +897,9 @@ To make future composition definitions easier we introduce the concept of
 The set of \textit{initial transitions} $T$, $(q_0, q', E) \in T$,
 $T \subseteq P$ consists of those transitions in $P$ that start from the
 initial state $q_0$ of the automata, go to some state $q'$, and have some label
-$E$. Below we will sometimes split up the transitions $P$ of automata into two
-parts, the initial transitions $T$, and all other transitions $R$: $P = T \cup
-R$ and $T \cap R = \emptyset$.
+$E$. The transitions $P$ of an automata are split into two parts: the initial
+transitions $T$, and non-initial transitions $R$, i.e.\ $P = T \cup R$ and
+$T \cap R = \emptyset$.
 \end{mydef}
 
 \textit{assert} specifications also have, together with all primitive formal
@@ -1228,7 +1221,7 @@ And for \textit{if-then-else} specifications composition becomes:
 %====== Formal Foundation - Semantics
 %================================================
 
-\subsection{Semantics} \label{section-approach-formal-foundation-semantics}
+\subsection{Formal Verification} \label{section-approach-formal-foundation-semantics}
 
 The semantics for the formal specifications described above is quite
 straightforward. The automata representations and composition rules preserve
@@ -1243,11 +1236,12 @@ The system model in \textit{pythonrv} is quite simple.
 \begin{mydef}[\textit{pythonrv} system model]\label{def-system-model}
 The \textit{system model} consists of a sequence of \textit{events} of function
 calls, $S = (\alpha_0, \alpha_1, \dots, \alpha_n)$. Each event $\alpha_i =
-(\lambda_i, \delta_i)$ is a two-part structure: The function called, $\lambda$,
-and the associated arguments and state, $\delta$. Since the system model is an
-abstraction of an execution of the system (the target program), it is
-necessarily finite, but of arbitrary length, and possibly extendible through
-continued execution of the program.
+(\lambda_i, \delta_i)$ is a two-part structure: the called function, $\lambda$,
+and the associated arguments and state, $\delta$.
+
+Since the system model is an abstraction of an execution of the system (the
+target program), it is necessarily finite, but of arbitrary length, and
+possibly extendible through continued execution of the program.
 
 The system model can be viewed as a directed acyclic graph (actually, a tree
 --- even a list), where all nodes but the last have one edge, with edges
@@ -1408,7 +1402,7 @@ $k = min(depth(M),depth(C))$.
 %%%%%%%%%%%%%%%%%%%%%%%%
 
 
-\subsubsection{Verification}
+\subsubsection{Procedure for Verification}
 
 The transition labels for the product of a specification automata and a system
 model is of the form (the second line is a expanded form of the first):
@@ -1458,7 +1452,8 @@ A product $Z$ of a system model and a specification can be used to determine
 whether that specification would accept or reject the system model --- or not
 know to do either or, yet.
 
-Informally, the \textit{verification procedure} is to:
+Informally, the \textit{verification procedure} includes two steps, product
+computation and traversing the product:
 
 \begin{enumerate}
   \item Compute the product $Z$ of the specification $C$ and the system model
