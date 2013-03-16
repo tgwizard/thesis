@@ -10,8 +10,7 @@ verification specifications in the programming language Python and in a manner
 more similar to unit testing. Our approach utilizes the dynamic nature of
 Python to do instrumentation. We use decorators to mark what functions should
 be monitored for a specification, and reflection to deduce the properties of
-the monitorees. We also use the fact that each function has a parent container,
-so it can be rewritten during runtime with the monitoring code.
+the monitorees.
 
 However, our approach would work in other programming languages as well if they
 support hot-swapping of code --- replacing objects during runtime, injecting

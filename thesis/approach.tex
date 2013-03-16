@@ -635,8 +635,6 @@ We define \textit{f-pythonrv}, the formal specification language in
 \textit{pythonrv}, as a subset of Python. This allows us to write
 \textit{formal specification functions}.
 
-\begin{mydef}[primitive formal specification functions]
-\label{def-primitive-formal-specification-function}
 A \textit{primitive formal specification function} is one of four basic
 function structures: The \textit{assert}, \textit{next}, \textit{if-then} and
 \textit{if-then-else} functions, shown in
@@ -651,7 +649,6 @@ the act of verifying the program against its specifications could affect the
 success of the verification. If the expression needs to access any properties
 of the \texttt{event} argument, the expression needs to be of the form
 \texttt{lambda event: E}.
-\end{mydef}
 
 \begin{figure}[h!]
 	\begin{center}
@@ -693,17 +690,13 @@ complex specifications. Composition is done at \textit{composition points},
 using the \textit{composition operator} $\circ$. We describe composition in
 Section~\ref{section-approach-composition}.
 
-\begin{mydef}[composition points]\label{def-composition-point}
-Formal specification functions have \textit{composition points} where they can
-be combined with other formal specification functions. A formal specification
+Formal specification functions have composition points where they can be
+combined with other formal specification functions. A formal specification
 function can have zero or more composition points. A composition point can be
 \textit{open} or \textit{closed} --- open composition points can be used in
 composition, while closed have already been used. Composition points can be
 \textit{required} or \textit{optional}.
-\end{mydef}
 
-\begin{mydef}[complete and incomplete specifications]
-\label{def-composition-complete}
 A formal specification function can be either \textit{complete} or
 \textit{incomplete}. A complete formal specification function is a
 specification that can be used by \textit{pythonrv} for verification. An
@@ -713,7 +706,6 @@ functions have no open required composition points; incomplete formal
 specification functions have at least one. The only complete primitive
 specification function is \textit{assert} --- the other can become complete
 through composition.
-\end{mydef}
 
 \begin{mydef}[the composition operator]\label{def-composition-operator}
 Composition is described by the \textit{composition operator} $\circ$. Let $f$,
