@@ -167,7 +167,32 @@ and differences, with other verification approaches. In
 \cite{delgado04taxonomy}, Delgado et al.\ classify and review several different
 approaches to and frameworks for runtime verification.
 
-The next chapter examines RV in more detail.
+The following sections examine RV in more detail. In short, there are two
+general approaches to runtime verification:
+
+\begin{itemize}
+
+\item The formal specification languages used are mostly LTL or variations
+  thereof, and either written as comments or special attributes in code, or as
+  separate specification files. See e.g.\ Bauer et al.\
+  \cite{bauer06monitoring}, Bodden \cite{bodden05efficientrv}, Kähkönen et al.\
+  \cite{kahkonen09lime}, Java PathExplorer by Havelund et al.\
+  \cite{havelund04jpax}, Temporal Rover by Drusinsky
+  \cite{drusinsky00temporalrover}; these all use a language for specifications
+  separate from the target program's programming language.
+
+\item The informal approaches, like some implementations of Design by Contract,
+  and simple assertions, often use the target program's programming language.
+  The contracts and assertions are often heavily attached to the code they
+  verify, e.g.\ in \cite{bartetzko01jass,meyer92applyingdbc}.
+
+\end{itemize}
+
+\textsc{LogScope} \cite{barringer09tutorial} is one of the few runtime
+verification approaches that are written in Python. It is very different from
+the approach presented in this report --- its specifications are written in a
+temporal logic based on \textsc{RuleR} \cite{barringer07ruler}, and it builds
+its system model from log files, working completely offline.
 
 
 \section{Specifications} \label{section-specifications}

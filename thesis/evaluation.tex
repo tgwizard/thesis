@@ -7,11 +7,9 @@
 
 To see how \textit{pythonrv} would work in a real-world setting it was
 incorporated into a real-time web application for Valtech Sweden, a
-medium-sized Swedish company.
-
-The web application is written in Python 2.7 using the
-Django\footnote{\texttt{https://www.djangoproject.com/}} web framework. It has
-approximately 10000 lines of code.
+medium-sized Swedish company. The web application is written in Python 2.7
+using the Django\footnote{\texttt{https://www.djangoproject.com/}} web
+framework. It has approximately 10000 lines of code.
 
 There are two questions we need to answer when writing specifications for a
 program. First, when, in the life-cycle of the program, should we attach the
@@ -19,7 +17,7 @@ specifications? In other words, when should the code instrumentation be done?
 And second, and most important: what specifications should be written, and for
 which functions?
 
-We can answer the first question first. It requires a bit of knowledge on the
+We can answer the first question first. It requires a bit of knowledge of the
 start up sequence for, and structure of, Django applications.
 
 
@@ -59,23 +57,25 @@ that.
 
 \subsection{Technical Issues}
 
-Early in the process of using \textit{pythonrv} in the web application it was
-discovered that the copying of data, such as function arguments, that
-\textit{pythonrv} does would not work with Django. The latest version of
-Django, v1.4.1, uses a module called \texttt{cStringIO}, which produces objects
-that cannot be copied. All functions dealing with web requests are affected by
-this. This has been fixed in the development branch of Django, but in the
-meantime, \textit{pythonrv} has an option to disable argument copying, either
-for all specifications or for a subset of them, to work around this issue.
+Early in the process of using \textit{pythonrv} in the web application we
+discovered that the copying of data that \textit{pythonrv} does, such as
+function arguments, would not work with Django. The latest version of Django,
+v1.4.1, uses a module called \texttt{cStringIO}, which produces objects that
+cannot be copied. All functions dealing with web requests are affected by this.
+This has been fixed in the development branch of Django, but in the meantime,
+\textit{pythonrv} has an option to disable argument copying, either for all
+specifications or for a subset of them, to work around this issue.
 
 
-\section{Potential Value}
+\section{Specifications for the Application}
 
-The web application is intended for internal use, by employees.  Authentication
-of employees and authorization of their access rights are very important.
-Specifications can be written to make sure all views or requests are made by an
-authenticated user (except for the login screen), and that they are allowed to
-perform the requested action.
+The web application is intended for internal use, by employees. It is a
+communication portal, used for sharing information, scheduling activities,
+etc., with social-media aspects, such as commenting and status updates.
+Authentication of employees and authorization of their access rights are very
+important. Specifications can be written to make sure all views or requests
+are made by an authenticated user (except for the login screen), and that they
+are allowed to perform the requested action.
 
 We show a specification showing a specification verifying that proper
 authentication has been done in
@@ -89,8 +89,8 @@ specification function allows us to refactor away the condition that determines
 whether authentication should be required, leaving the specification much
 simpler and cleaner.
 
-The same specification can be written in the formal syntax, see
-Figure~\ref{figure-app-authentication-formal}.
+The same specification can be written in the formal syntax of
+\textit{f-pythonrv}, see Figure~\ref{figure-app-authentication-formal}.
 
 \begin{figure}[h!]
 	\begin{center}
@@ -101,7 +101,7 @@ Figure~\ref{figure-app-authentication-formal}.
 
   \caption{An informal \textit{pythonrv} specification verifying that views are
     only accessible with proper authentication. See
-    Figure~\ref{figure-app-authentication-formal} for an informal version.}
+    Figure~\ref{figure-app-authentication-formal} for a formal version.}
 	\label{figure-app-authentication-informal}
 \end{figure}
 
@@ -112,7 +112,7 @@ Figure~\ref{figure-app-authentication-formal}.
 	\end{minipage}
 	\end{center}
 
-  \caption{A formal \textit{pythonrv} specification verifying that views are
+  \caption{A formal \textit{f-pythonrv} specification verifying that views are
     only accessible with proper authentication. See
     Figure~\ref{figure-app-authentication-informal} for an informal version.}
 	\label{figure-app-authentication-formal}
@@ -171,7 +171,7 @@ and \texttt{start}, not just the first one.
 	\end{minipage}
 	\end{center}
 
-  \caption{A formal \textit{pythonrv} specification verifying that user status
-    updates are viewed before they are changed.}
+  \caption{A formal \textit{f-pythonrv} specification verifying that user status
+    updates are viewed before they are changed again.}
 	\label{figure-app-status-update-viewed-formal}
 \end{figure}

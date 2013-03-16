@@ -447,7 +447,7 @@ with a special syntax, using the \texttt{@} operator. The decorated function
 does not need any further modifications.
 
 \texttt{rv.monitor} is a decorator similar to the \texttt{cache} decorator
-above. It takes to set of arguments, first what functions should be monitored
+above. It takes two sets of arguments, first what functions should be monitored
 (the monitorees), and second the specification function. However, the
 \texttt{rv.monitor} decorator does not modify the function which it decorates,
 which here is the specification function, but instead finds the monitorees and
@@ -657,7 +657,7 @@ of the \texttt{event} argument, the expression needs to be of the form
 	\begin{center}
 	\begin{minipage}{0.7\textwidth}
 	\begin{lstlisting}
-def spec():
+def assert():
   a = make_assert(E)
   tail = # optional composition point 'tail'
   return a + tail
@@ -710,9 +710,9 @@ specification that can be used by \textit{pythonrv} for verification. An
 incomplete formal specification function cannot be used for verification yet,
 but can, with composition, become complete. Complete formal specification
 functions have no open required composition points; incomplete formal
-specification functions have at least one. Only the \textit{assert} primitive
-specification function is complete --- the other can become complete through
-composition.
+specification functions have at least one. The only complete primitive
+specification function is \textit{assert} --- the other can become complete
+through composition.
 \end{mydef}
 
 \begin{mydef}[the composition operator]\label{def-composition-operator}
@@ -733,9 +733,11 @@ the start state, $b$ is the end state, $a,b \in Q$ and $E$ is a
 \textit{transition label}. The transition label is described in detail in
 Section~\ref{section-approach-formal-foundation-semantics} An automata has one
 \textit{initial state} $q_0 \in Q$, a set of \textit{success states} $S
-\subseteq Q$ and a set of \textit{fail states} $F \subseteq Q$. $S$ and $F$ are
-disjoint. Success states are depicted as \textit{accepting states} in the
-automata. Fail states are usually called \textit{fail}, $f$, etc.
+\subseteq Q$ and a set of \textit{fail states} $F \subseteq Q$. $S \cap F =
+\emptyset$.
+
+Success states are depicted as \textit{accepting states} in the automata. Fail
+states are usually called \textit{fail}, $f$, etc.
 \end{mydef}
 
 The four basic formal specification functions correspond to simple,
@@ -894,12 +896,12 @@ To make future composition definitions easier we introduce the concept of
 \textit{initial transitions}:
 
 \begin{mydef}[initial transitions]\label{def-initial-transitions}
-The set of \textit{initial transitions} $T$, $(q_0, q', E) \in T$,
-$T \subseteq P$ consists of those transitions in $P$ that start from the
-initial state $q_0$ of the automata, go to some state $q'$, and have some label
-$E$. The transitions $P$ of an automata are split into two parts: the initial
-transitions $T$, and non-initial transitions $R$, i.e.\ $P = T \cup R$ and
-$T \cap R = \emptyset$.
+Given an automata $A = (Q, P, q_0, S, F)$, the set of \textit{initial
+transitions} $T$, $(q_0, q', E) \in T$ consists of those transitions in $P$
+that start from the initial state $q_0$ of the automata: $T = \{(q', q'', E)
+\in P \, | \, q' = q_0 \}$, i.e.\ the transitions $P$ of an automata are split
+into two parts, the initial transitions $T$, and non-initial transitions $R$,
+i.e.\ $P = T \cup R$ and $T \cap R = \emptyset$.
 \end{mydef}
 
 \textit{assert} specifications also have, together with all primitive formal
@@ -1161,8 +1163,8 @@ Composition using the \textit{tail} composition point was described above.
 
 In an \textit{if-then-else} specification $i_E$ we consider the expression $E$
 as a guard for the \textit{then} composition point, and $\neg E$ as a guard
-for the \textit{else} composition point. In \textit{if-then} specifications,
-the $\neg E$ guard goes to a success state.
+for the \textit{else} composition point. In \textit{if-then} specification
+compositions, the $\neg E$ guard goes to a success state.
 
 The composition essentially becomes to add the guard $E$ to the labels of all
 initial transitions for the automata at the \textit{then} composition point,
@@ -1223,11 +1225,11 @@ And for \textit{if-then-else} specifications composition becomes:
 
 \subsection{Formal Verification} \label{section-approach-formal-foundation-semantics}
 
-The semantics for the formal specifications described above is quite
-straightforward. The automata representations and composition rules preserve
-the semantics of the Python code, and together with a description of a system
-model we can deduce whether a specification would accept or reject an instance
-of such a model.
+The automata representations and composition rules attempt to preserve the
+informal semantics of the Python code, and together with a description of a
+system model we can deduce whether a specification would accept or reject an
+instance of such a model.
+
 
 \subsubsection{Generating a System Model-Specification Product}
 
@@ -1269,7 +1271,7 @@ The \textit{product} of a system model and a specification automata is the main
 construct used to reason about the correctness of the specification. An example
 can be seen in Figure~\ref{figure-deduction-example}~(c).
 
-\begin{mydef}[product of a system model and a specification]
+\begin{mydef}[product of a system model and a specification automata]
 Let $M$ be a system model represented as a graph, rooted at $s_0$, consisting
 of tuples $(s,s',\alpha) \in M$. Let $C$ be a specification automata $(Q, P,
 q_0, S, F)$, which is rooted at $q_0$. The \textit{product} $Z = M \times C$ is
