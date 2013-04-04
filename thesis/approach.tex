@@ -850,11 +850,11 @@ where we say that this specification function should use formal verification.
 \lstset{language=Python,numbers=none}
 
 These preliminaries allow us to define primitive formal specification functions
-mathematically as automata, and formal rules on how to compose them. With
-primitive each formal specification function represented as an automaton, we
-can use composition to build more complex and interesting specifications.
-Composition is defined inductively, preserving the semantics, which we define
-in Section~\ref{section-approach-formal-foundation-semantics}.
+mathematically as automata, and formal rules on how to compose them. With each
+primitive formal specification function represented as an automaton, we can use
+composition to build more complex and interesting specifications. Composition
+is defined inductively, preserving the semantics, which we define in
+Section~\ref{section-approach-formal-foundation-semantics}.
 
 Let $a_E$ be an \textit{assert} specification asserting the
 expression $E$, let $n$ be a \textit{next} specifications and let $i_E$ be an
@@ -1222,200 +1222,65 @@ informal semantics of the Python code, and together with a description of a
 system model we can deduce whether a specification would accept or reject an
 instance of such a model.
 
+First we recall some theory about automata define simple properties about them,
+taking inspiration from \cite{chaki04lks, schneider04kripke}. Then we show how
+to use these to define the system model of \textit{f-pythonrv}, the
+satisfaction of specification properties when applied to an event, and how to
+verify a specification given a system model.
 
-\subsubsection{Generating a System Model-Specification Product}
 
-The system model in \textit{pythonrv} is quite simple.
+\subsubsection{The product of automata}
 
-\begin{mydef}[\textit{pythonrv} system model]\label{def-system-model}
-The \textit{system model} consists of a sequence of \textit{events} of function
-calls, $S = (\alpha_0, \alpha_1, \dots, \alpha_n)$. Each event $\alpha_i =
-(\lambda_i, \delta_i)$ is a two-part structure: the called function, $\lambda$,
-and the associated arguments and state, $\delta$.
+Given two automata as defined above we can define a product of them, following
+a similar procedure as \cite{chaki04lks, schneider04kripke} and others. Let $M
+= (Q_M,P_M,m_0,S_M,F_M)$ and $A = (Q_A,P_A,a_0,S_A,F_A)$ be automata as defined
+above. We define a simple product $M \times A = (Q',P',i',S',F')$ as:
+
+\begin{enumerate}
+  \item $Q' = Q_M \times Q_A$
+  \item $(q_m,q_a) \xrightarrow{(\alpha_m,\alpha_a)} (q_m',q_a')
+    \Leftrightarrow q_m \xrightarrow{\alpha_m} q_m' \wedge q_a \xrightarrow{\alpha_a} q_a'$,\\
+    i.e.\\
+    $P' = \{((q_m,q_a),(q_m',q_a'),(\alpha_m,\alpha_a)) \in (Q_M \times Q_A)
+    \times (Q_M \times Q_A)\\
+    | \; (q_m,q_m',\alpha_m) \in P_M \wedge (q_a,q_a',\alpha_a) \in P_A\}$
+  \item $i' = (m_0,a_0)$
+  \item $S' = \{(q_m,q_a) \in Q' \; | \; q_m \in S_M \wedge q_a \in S_A\}$
+  \item $F' = \{(q_m,q_a) \in Q' \; | \; q_m \in F_M \vee q_a \in F_A\}$
+\end{enumerate}
+
+
+\subsubsection{The \textit{f-pythonrv} system model}
+
+The system model in \textit{f-pythonrv} consists of a sequence of
+\textit{events} of function calls. The system model can be modeled as an
+automata $(Q, P, q_0, Q, \emptyset)$, where each event $\alpha_i$ is
+represented as a transition: $P = \{(q_i, q_{i+i}, \alpha_i\}$, and $i$ ranging
+from $0$ to $n-1$, with $n$ events, with $Q = \{q_i | i \in Z^n\}$. Note that
+all of $Q$ is defined as success states, and that no states in the system model
+are failure states.
+
+Each event $alpha_i$ consists of two parts: the called function $lambda_i$ and
+the associated data $\delta_i$. $\delta_i$ is a snapshot of the data in the
+system at the time the function $\lambda_i$ was called --- in a simple case
+just the arguments passed as parameters.
 
 Since the system model is an abstraction of an execution of the system (the
 target program), it is necessarily finite, but of arbitrary length, and
 possibly extendible through continued execution of the program.
 
-The system model can be viewed as a directed acyclic graph (actually, a tree
---- even a list), where all nodes but the last have one edge, with edges
-denoting events. The first edge is labeled $\alpha_0$, the second is labeled
-$\alpha_1$, etc. See Figure~\ref{figure-deduction-example}~(a) for an example.
-A system model $M$ represented as a graph consists of a set tuples
-$\{(s_0,s_1,\alpha_0), (s_1,s_2,\alpha_1), \dots, (s_n,s_{n+1},\alpha_n)\}$.
-\end{mydef}
 
+\subsubsection{Satisfaction of a \textit{f-pythonrv} property}
 
-In the same way that the system model can be viewed as a graph, so can a
-specification automata, see Figure~\ref{figure-deduction-example}~(b). All
-graphs have a depth:
-
-\begin{mydef}[graph levels and depth]
-The \textit{level} of a node $q$ in a graph rooted at a node $q_0$ is the
-number of transitions required to reach the $q$ starting from $q_0$. $q_0$ lies
-at level $0$. The \textit{depth} of a graph is its greatest level. The
-depth of a graph containing cycles is considered infinite, and nodes lying on a
-cycle lie at levels $i$, $i+\text{cycle circumference}$, $i+2\cdot\text{cycle
-circumference}$, etc.
-\end{mydef}
-
-The \textit{product} of a system model and a specification automata is the main
-construct used to reason about the correctness of the specification. An example
-can be seen in Figure~\ref{figure-deduction-example}~(c).
-
-\begin{mydef}[product of a system model and a specification automata]
-Let $M$ be a system model represented as a graph, rooted at $s_0$, consisting
-of tuples $(s,s',\alpha) \in M$. Let $C$ be a specification automata $(Q, P,
-q_0, S, F)$, which is rooted at $q_0$. The \textit{product} $Z = M \times C$ is
-created through a recursive procedure:
-
-\medskip
-\[
-  Z = (L_{Q_Z}(q_0,s_0), L_{P_Z}(q_0,s_0), (q_0,s_0), L_{S_Z}(q_0,s_0), L_{F_Z}(q_0,s_0))
-\]
-
-\[
-  \begin{array}{rcl}
-   L_{Q_Z}(q,s) & = & \cup_{(q',s') \in L_{Q'}(q,s)} L_{Q_Z}(q',s') \cup L_{Q'}(q,s) \cup \{(q,s)\} \\
-   L_{P_Z}(q,s) & = & \cup_{(q',s') \in L_{Q'}(q,s)} L_{P_Z}(q',s') \cup L_{P'}(q,s) \\
-    L_{Q'}(q,s) & = & \{(q',s') \, | \, (s,s',\alpha) \in M, (q,q',E) \in P\} \\
-    L_{P'}(q,s) & = & \{((q,s), (q',s'), \alpha \models E) \, | \, (s,s',\alpha) \in M, (q,q',E) \in P\} \\
-                & & \\
-   L_{S_Z}(q,s) & = & \{(q',s') \, | \, (q',s') \in L_{Q_Z}(q,s) \wedge q' \in S\} \\
-   L_{F_Z}(q,s) & = & \{(q',s') \, | \, (q',s') \in L_{Q_Z}(q,s) \wedge q' \in F\} \\
-  \end{array}
-\]
-\medskip
-
-This essentially says that $Z$ is the level-wise merging of all states in $C$
-at level $i$ with all states in $M$ at level $i$, and with the transitions
-leading to them. $q_0$ is merged with $s_0$, and all initial transitions in $C$
-are merged with the single initial transition in $M$, and so on. We create new
-labels for each transition of the form $\alpha \models E$, where $\alpha$ is
-the label of the system model transition, and $E$ is the label of the
-specification transition. See below for what this means.
-
-A state $(q,s)$ in $L_{Q_Z}(q_0,s_0)$ is a success state if $q \in S$ and a
-failure state if $q \in F$.
-
-\end{mydef}
-
-In Figure~\ref{figure-deduction-example} we show an example of a system model,
-a specification, and the resulting product of combining them.
-
-\begin{mylemma}[a product $Z$ is a tree]
-The product $Z$ will be a tree --- a connected, acyclic graph. This is given by
-the procedure above:
-\begin{inparaenum}[1\upshape)]
-  \item $Z$ will be connected, as each node at level $i > 0$ has an incoming
-    transition from a node at level $i-1$, and the root has transitions to all
-    nodes at level $1$; and
-  \item $Z$ will be acyclic, as edges only go from nodes at level $j$ to nodes
-    at level $j+1$, and each node has at most one incoming edge.
-  \end{inparaenum}
-\end{mylemma}
-
-\begin{mylemma}[a product $Z$ is finite]
-Nodes in $Z$ at level $i$ are created from nodes in $C$ and $M$ at level $i$
---- if there are no nodes at level $i$ in $Z$, then are no nodes at level $i$
-in either $C$ or $M$. Since the depth of $M$ is by definition finite, there
-exists an $k$ such that there are no nodes at levels $\geq k$ in $Z$. In fact,
-$k = min(depth(M),depth(C))$.
-\end{mylemma}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%
-%% Deduction example
-%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{figure}[h!]
-	\begin{minipage}{0.9\textwidth}
-		\centering
-		\begin{tikzpicture}[->,shorten >=1pt,node distance=3cm,on
-      grid,auto,scale=.5,semithick,>=stealth]
-			\node[state,initial] (s0) {$s_0$};
-      \node[state] (s1) [right of=s0] {$s_1$};
-      \node[state] (s2) [right of=s1] {$s_2$};
-      \node[state] (s3) [right of=s2] {$s_3$};
-			\path
-				(s0) edge node {$\alpha_0 = (a, \epsilon)$} (s1)
-				(s1) edge node {$\alpha_1 = (b, \epsilon)$} (s2)
-				(s2) edge node {$\alpha_2$} (s3);
-		\end{tikzpicture}
-    \subcaption{The system model $M$ consisting of two function calls, to $a$
-    and $b$, and an unspecified event $\alpha_2$.}
-	\end{minipage}
-
-  \bigskip
-
-	\begin{minipage}{0.90\textwidth}
-		\centering
-		\begin{tikzpicture}[->,shorten >=1pt,node distance=3cm,on
-      grid,auto,scale=.5,semithick,>=stealth]
-			\node[state,initial] (q0) {$q_0$};
-      \node[state] (q1) [below right of=q0] {$q_1$};
-      \node[state] (f) [below left of=q0] {$f$};
-      \node[state,accepting] (q2) [below right of=q1] {$q_2$};
-			\path
-        (q0) edge node {$\lambda = a$} (q1)
-        (q0) edge node [above left] {$\lambda \neq a$} (f)
-        (q1) edge node {$\lambda = b$} (q2)
-        (q1) edge node [above] {$\lambda \neq b$} (f);
-		\end{tikzpicture}
-    \subcaption{The specification automata $C$. This automata is designed to
-      accept system models that consists of one call to $a$ followed by a call to
-      $b$. After that, verification is complete and any events are accepted.
-      $f$ is a fail state and $q_2$ is a success state.}
-	\end{minipage}
-
-  \bigskip
-
-	\begin{minipage}{0.90\textwidth}
-		\centering
-		\begin{tikzpicture}[->,shorten >=1pt,node distance=3cm,on
-      grid,auto,scale=.5,semithick,>=stealth]
-			\node[state,initial] (q0) {$q_0,s_0$};
-      \node[state] (q1) [below right of=q0] {$q_1,s_1$};
-      \node[state] (f1) [below left of=q0] {$f_1,s_1$};
-      \node[state,accepting] (q2) [below right of=q1] {$q_2,s_2$};
-      \node[state] (f2) [below left of=q1] {$f_2,s_2$};
-			\path
-        (q0) edge node {$(a, \epsilon) \models \lambda = a$} (q1)
-        (q0) edge node [above left] {$(a, \epsilon) \models \lambda \neq a$} (f1)
-        (q1) edge node {$(b, \epsilon) \models \lambda = b$} (q2)
-        (q1) edge node [above left] {$(b, \epsilon) \models \lambda \neq b$} (f2);
-		\end{tikzpicture}
-    \subcaption{The product of the model and the specification, $M \times C$.
-    $(f_1,s_1)$ and $(f_2,s_2)$ are fail states; $(q_2,s_2)$ is a success state.}
-	\end{minipage}
-
-  \caption{Deduction example.}
-	\label{figure-deduction-example}
-\end{figure}
-%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-\subsubsection{Procedure for Verification}
-
-The transition labels for the product of a specification automata and a system
-model is of the form (the second line is a expanded form of the first):
-
-\medskip
-\[
-  \begin{array}{rcl}
-    \alpha = (\lambda, \delta) & \models & \text{expression $E$ over $\alpha (\lambda, \delta)$} \\
-  \end{array}
-\]
-\medskip
-
-The expression $E$ is translated directly from Python expressions in the
-specification function. An incomplete sketch of the translation procedure,
-shown in Figure~\ref{figure-semantics-translation}, is just syntax replacement.
-The resulting specification expression has the same semantics as the Python
-expression. In the same way that the Python specification operates on an event,
-a specification expression is evaluated to true ($\top$) or false ($\bot$)
-using the values of an event $\alpha$.
+The edges of the specification automata defined above were labelled with
+expressions $E$. An expression $E$ is translated directly from Python
+expressions in the specification function. An incomplete sketch of the
+translation procedure, shown in Figure~\ref{figure-semantics-translation}, is
+just syntax replacement. The resulting specification expression has the same
+semantics as the Python expression. In the same way that the Python
+specification operates on an event, a specification expression is evaluated to
+true ($\top$) or false ($\bot$) using the values of an event $\alpha$ --- the
+called function $\lambda$ and the associated data $\delta$.
 
 \begin{figure}[h!]
 	\begin{minipage}{0.9\textwidth}
@@ -1441,94 +1306,134 @@ using the values of an event $\alpha$.
 \end{figure}
 
 
-
-A product $Z$ of a system model and a specification can be used to determine
-whether that specification would accept or reject the system model --- or not
-know to do either or, yet.
-
-Informally, the \textit{verification procedure} includes two steps, product
-computation and traversing the product:
-
-\begin{enumerate}
-  \item Compute the product $Z$ of the specification $C$ and the system model
-    $M$, as described above.
-
-  \item Traverse $Z$, starting at the root node, following all transitions
-    which labels evaluate to true.
-
-    \begin{enumerate}
-      \item If a fail state is reached, the system model violates the
-        specification.
-      \item If only success states are reached, the system model satisfies the
-        specification.
-      \item If some traversal ends in a state that is neither a fail or a
-        success state, the system model could, if it were extended, either
-        satisfy or violate the specification.
-    \end{enumerate}
-\end{enumerate}
-
-This can be formally captured with \textit{operational semantics}:
+Give an event $\alpha$ and an expression $E$ we say that $\alpha \models E$
+($\alpha$ satisfies $E$) if the result of evaluating $E$ given $\alpha$,
+according to Figure~\ref{figure-semantics-translation}, evaluates to true
+($\top$).
 
 
-\begin{mydef}[transition function]
-Given a product $Z$ of a specification $C$ and a system model $M$, such that
-$Z$ is an automata $(Q, P, q_0, S, F)$, the semantics of a transition
-$\rightarrow$ between two states $q$ and $q'$, where $q,q' \in Q$ and
-\textit{B} is the mapping function from
-Figure~\ref{figure-semantics-translation}, is defined as:
+\subsubsection{Reachable satisfying states and leaf states}
+
+Let $A = (Q,P,q_0,S,F)$ be an automaton, where the transition labels are tuples
+$(\alpha, E)$, $\alpha$ being an event from the system model and $E$ being an
+expression. We define the set of \textit{reachable satisfying states} $R(q)$:
 
 \medskip
 \[
-  \frac{\exists (q, q', E) \in P, \textit{B}(E) = \top}
-  {\langle(Q, P, q_0, S, F), x\rangle \rightarrow \langle(Q, P, q_0, S, F), x'\rangle}
+  R(q) = q \cup \{R(q') \; | \; (q,q',(\alpha,E)) \in P \wedge \alpha \models E\}
 \]
 \medskip
-\end{mydef}
 
-\begin{mydef}[transitive closure of the transition function]
-Let $A$ be the automata of $Z$, a product of a system model and a
-specification, and let $\xrightarrow*$ be the \textit{transitive closure} of
-the transition function, with the semantics that, informally, $\langle A,
-q\rangle \xrightarrow* \langle A, q'\rangle$ means that $q'$ can be reached,
-starting from $q$, using the transition function $\rightarrow$, traversing zero
-or more intermediate states. Formally:
+Also, we define the set of reachable satisfying states that have no neighbours
+--- \textit{leaf states} --- as $L(q) = R(q) \cap N(q)$, with $N(q) = \{q' \; |
+\; q' \ R(q) \wedge (q,q',x) \in P\}$ as the directly reachable satisfying
+neighbours of $q$.
+
+
+\subsubsection{\textit{f-pythonrv} verification procedure}
+
+Given a system model $M$ and a specification automaton $A$, we say that $M$
+violates $A$ if any of the reachable states in $M \times A = (Q', P', q_0', S',
+F')$ are failure states:
 
 \medskip
 \[
-  \frac{}
-  {\langle A, q\rangle \xrightarrow* \langle A, q\rangle}
-  \quad
-  \frac{\langle A, q\rangle \rightarrow \langle A, q'\rangle}
-  {\langle A, q\rangle \xrightarrow* \langle A, q'\rangle}
-  \quad
-  \frac{\langle A, q\rangle \xrightarrow* \langle A, q''\rangle, \langle A, q''\rangle \rightarrow \langle A, q'\rangle}
-  {\langle A, q\rangle \xrightarrow* \langle A, q'\rangle}
+  M \not\models A \Leftrightarrow R(q_0') \cap F' \neq \emptyset \\
 \]
 \medskip
-\end{mydef}
 
-\begin{mydef}[formal verification]
+We say that $M$ satisfies $A$ if it does not violate it and if all leaf states
+of $A$ are success states:
 
-With this we can determine whether the system model $M$ satisfies, violates or
-neither-satisfies-nor-violates the specification $C$:
+\medskip
+\[
+  M \models A \Leftrightarrow (M \not\models A) \wedge L(q_0') \subseteq S
+\]
+\medskip
 
-\begin{enumerate}
-  \item If $\exists q' \in F, q_0 \xrightarrow* q'$ then $M$ violates $C$.
-    There exists a failure state that is reachable from $q_0$.
-  \item If $\forall q' \in Q, q_0 \xrightarrow* q' \Rightarrow q' \in S$ then
-    $M$ satisfies $C$. All states reachable from $q_0$ are success states.
-  \item If neither condition 1 or condition 2 holds, then $M$ neither satisfies
-    nor violates $C$ yet. There exists a state reachable from $q_0$ that is
-    neither a success state nor a failure state.
-\end{enumerate}
+If $M$ neither satisfies nor violates $A$ then further execution is required to
+determine the system model's satisfaction of the specification.
 
-\end{mydef}
+An example of a product of a simple specification automata and a satisfying
+system model is shown in Figure~\ref{figure-product-example}. In the example we
+see a system model $M$ consisting of two function calls, first to $a$ and then
+to $b$, and an unspecified event $\alpha_2$. The specification automata $A$ is
+designed to accept system models that consists of one call to $a$ followed by a
+call to $b$. After that, verification is complete and any events are accepted.
+$f$ is a fail state and $q_2$ is a success state. In the product, $(f_1,s_1)$
+and $(f_2,s_2)$ are fail states; $(q_2,s_2)$ is a success state. Only
+(satisfying and non-satisfying) reachable states are shown for the product.
 
-Formal \textit{pythonrv} specifications are verified using this procedure,
-although in an incremental manner. The verification is done online, so as soon
-as a new event is added to the system model, it is combined with the
-specification automata.
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% Deduction example
+%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[h!]
+	\begin{minipage}{0.9\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=3cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (s0) {$s_0$};
+      \node[state] (s1) [right of=s0] {$s_1$};
+      \node[state] (s2) [right of=s1] {$s_2$};
+      \node[state] (s3) [right of=s2] {$s_3$};
+			\path
+				(s0) edge node {$\alpha_0 = (a, \epsilon)$} (s1)
+				(s1) edge node {$\alpha_1 = (b, \epsilon)$} (s2)
+				(s2) edge node {$\alpha_2$} (s3);
+		\end{tikzpicture}
+    \subcaption{The system model $M$.}
+	\end{minipage}
 
+  \bigskip
+
+	\begin{minipage}{0.90\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=3cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0) {$q_0$};
+      \node[state] (q1) [below right of=q0] {$q_1$};
+      \node[state] (f) [below left of=q0] {$f$};
+      \node[state,accepting] (q2) [below right of=q1] {$q_2$};
+			\path
+        (q0) edge node {$\lambda = a$} (q1)
+        (q0) edge node [above left] {$\lambda \neq a$} (f)
+        (q1) edge node {$\lambda = b$} (q2)
+        (q1) edge node [above] {$\lambda \neq b$} (f);
+		\end{tikzpicture}
+    \subcaption{The specification automata $A$.}
+	\end{minipage}
+
+  \bigskip
+
+	\begin{minipage}{0.90\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=3cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0) {$q_0,s_0$};
+      \node[state] (q1) [below right of=q0] {$q_1,s_1$};
+      \node[state] (f1) [below left of=q0] {$f_1,s_1$};
+      \node[state,accepting] (q2) [below right of=q1] {$q_2,s_2$};
+      \node[state] (f2) [below left of=q1] {$f_2,s_2$};
+			\path
+        (q0) edge node {$(a, \epsilon) \models \lambda = a$} (q1)
+        (q0) edge node [above left] {$(a, \epsilon) \models \lambda \neq a$} (f1)
+        (q1) edge node {$(b, \epsilon) \models \lambda = b$} (q2)
+        (q1) edge node [above left] {$(b, \epsilon) \models \lambda \neq b$} (f2);
+		\end{tikzpicture}
+    \subcaption{The product of the system model and the specification, $M
+      \times A$. }
+	\end{minipage}
+
+  \caption{Product example.}
+	\label{figure-product-example}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+In the \textit{pythonrv} implementation, this formal verification procedure for
+\textit{f-pythonrv} is executed iteratively, as each event of the system model
+occurs.
 
 
 
@@ -1541,10 +1446,11 @@ specification automata.
 \label{section-approach-examples-of-formal-specifications}
 \lstset{language=Python,numbers=none}
 
+
 Here follows two examples of formal \textit{pythonrv} specifications, both in
-their specification function form, written in Python, shown in
-Figure~\ref{figure-formal-syntax-example-1} and
-Figure~\ref{figure-formal-syntax-example-2}.
+their specification function form, written in Python, and in their automata
+form (see Figure~\ref{figure-formal-syntax-example-1} and
+Figure~\ref{figure-formal-syntax-example-2}).
 
 The first example, Figure~\ref{figure-formal-syntax-example-1}, shows a simple
 specification that makes sure that the first argument to the function
@@ -1555,38 +1461,34 @@ here we have to explicitly create a loop by composing with a \textit{next}
 specification, pointing back to \texttt{spec}. This is required so that not
 only the first event is verified.
 
-In Figure~\ref{figure-formal-syntax-example-1-product} we combine this
-specification with a system model of two calls to \texttt{fib}, the first with
-the first argument as $0$, the second with the first argument as $-1$. As we
-traverse this graph, we can see that we cannot reach state $(f, s_1)$, because
-the label on the transition to it evaluates to $\bot$:
+In Figure~\ref{figure-formal-syntax-example-1-product} we show a system model
+of two calls to \texttt{fib}, the first with the first argument as $17$, the
+second with the first argument as $-1$, as well as the product of it with
+the specification from Figure~\ref{figure-formal-syntax-example-1}. The set of
+reachable satisfying states from the initial state are:
 
 \medskip
 \[
-  \begin{array}{rcl}
-    (\lambda_0, \delta_0) & \models & \neg (\delta(\texttt{func.inputs$[0]$}) > 0) \\
-    (\textit{func}, \textit{func.inputs}[0] = 0) & \models & \neg (\delta(\texttt{func.inputs$[0]$}) > 0) \\
-  \end{array}
+  R((q_0,s_0)) = \{(q_0,s_0)', (q_1,s_1), (f,s_1)', (q_0,s_0)''\}
 \]
 \medskip
 
-The first event of the system model makes it possible to reach state
-$(q_1,s_1)$, which is an accepting state. Thus we continue, and reach
-$(q_0,s_0)'$, $(q_0,s_0)''$ and $(f,s_1)'$, the last which is a fail state. The
-system model does not satisfy the specification.
+Since $R((q_0,s_0))$ contains a failure statue --- $(f,s_1)'$ ---, the model
+violates the specification.
 
-The example in Figure~\ref{figure-formal-syntax-example-2} is more complex, as
-can be seen by the sprawling automata in
-Figure~\ref{figure-formal-syntax-example-2-automata}. The specification accepts
-only interleaving calls to two functions, starting with \texttt{mymodule.foo},
-then to \texttt{mymodule.bar}. This is represented by the loop between the
-$q_0$ and $r_0$ states in the automata. Because the labels for the transitions
-between them are $\top$, i.e.\ always true, we are guaranteed that on every
-event we either transition into a state (in the system model-specification
-product) based containing $q_0$ or $q_1$, and verification will never be
-finished. The specification also asserts that if \texttt{foo} is called with
-$0$ as the first argument, the second argument must also be $0$.  This is just
-to demonstrate how the \textit{if-then} construct works.
+The next example shows just a specification. The specification function
+(Figure~\ref{figure-formal-syntax-example-2}) is more complex, as can be seen
+by the sprawling automata
+(Figure~\ref{figure-formal-syntax-example-2-automata}). The specification
+accepts only interleaving calls to two functions, starting with
+\texttt{mymodule.foo}, then to \texttt{mymodule.bar}. This is represented by
+the loop between the $q_0$ and $r_0$ states in the automata. Because the labels
+for the transitions between them are $\top$, i.e.\ always true, we are
+guaranteed that on every event we either transition into a state (in the system
+model-specification product) based containing $q_0$ or $q_1$, and verification
+will never be finished. The specification also asserts that if \texttt{foo} is
+called with $0$ as the first argument, the second argument must also be $0$.
+This is just to demonstrate how the \textit{if-then} construct works.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -1652,12 +1554,10 @@ to demonstrate how the \textit{if-then} construct works.
       \node[state] (s1) [above right of=s0] {$s_1$};
       \node[state] (s2) [below right of=s1] {$s_2$};
 			\path
-      (s0) edge node {$(\lambda_0 = \textit{func}, \delta_0 = \textit{func.inputs}[0] = 0)$} (s1)
+      (s0) edge node {$(\lambda_0 = \textit{func}, \delta_0 = \textit{func.inputs}[0] = 17)$} (s1)
       (s1) edge node {$(\lambda_1 = \textit{func}, \delta_1 = \textit{func.inputs}[0] = -1)$} (s2);
 		\end{tikzpicture}
-    \subcaption{A system model $M$ consisting of two function calls to
-      \texttt{func} the first with the first argument as $0$, the other with
-      it as $-1$.}
+    \subcaption{A system model $M$.}
 	\end{minipage}
 
   \bigskip
@@ -1685,7 +1585,7 @@ to demonstrate how the \textit{if-then} construct works.
 	\end{minipage}
 
   \caption{Example of creating the product of the specification from
-    Figure~\ref{figure-formal-syntax-example-1} with a system model.}
+    Figure~\ref{figure-formal-syntax-example-1} with the system model $M$.}
 	\label{figure-formal-syntax-example-1-product}
 \end{figure}
 
