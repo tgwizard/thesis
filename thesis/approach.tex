@@ -1286,16 +1286,16 @@ called function $\lambda$ and the associated data $\delta$.
 	\begin{minipage}{0.9\textwidth}
 		\centering
     \begin{tabular}{r c l}
-      $B(\texttt{True)})$ & = & $\top$ \\
-      $B(\texttt{False)})$ & = & $\bot$ \\
+      $B(\texttt{True})$ & = & $\top$ \\
+      $B(\texttt{False})$ & = & $\bot$ \\
       $B(\texttt{event.fn.x.called})$ & = & $\lambda = x$ \\
       $B(\texttt{event.called\_function == x})$ & = & $\lambda = x$ \\
       $B(\texttt{event.fn.x.property})$ & = & $\delta(x.\texttt{property})$ \\
-      $B(\texttt{not a)})$ & = & $\neg B(\texttt{a})$ \\
-      $B(\texttt{a == b)})$ & = & $B(\texttt{a}) = B(\texttt{b})$ \\
-      $B(\texttt{a != b)})$ & = & $B(\texttt{a}) \neq B(\texttt{b})$ \\
-      $B(\texttt{a and b)})$ & = & $B(\texttt{a}) \wedge B(\texttt{b})$ \\
-      $B(\texttt{a or b)})$ & = & $B(\texttt{a}) \vee B(\texttt{b})$ \\
+      $B(\texttt{not a})$ & = & $\neg B(\texttt{a})$ \\
+      $B(\texttt{a == b})$ & = & $B(\texttt{a}) = B(\texttt{b})$ \\
+      $B(\texttt{a != b})$ & = & $B(\texttt{a}) \neq B(\texttt{b})$ \\
+      $B(\texttt{a and b})$ & = & $B(\texttt{a}) \wedge B(\texttt{b})$ \\
+      $B(\texttt{a or b})$ & = & $B(\texttt{a}) \vee B(\texttt{b})$ \\
       $B(\textit{A Python function or property})$ & = & \textit{The return value} \\
     \end{tabular}
   \end{minipage}
@@ -1347,7 +1347,7 @@ of $A$ are success states:
 
 \medskip
 \[
-  M \models A \Leftrightarrow (M \not\models A) \wedge L(q_0') \subseteq S
+  M \models A \Leftrightarrow \neg(M \not\models A) \wedge L(q_0') \subseteq S
 \]
 \medskip
 
