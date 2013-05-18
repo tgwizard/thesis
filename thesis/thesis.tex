@@ -1,5 +1,12 @@
 % :autocmd BufWritePost * !pdflatex thesis.tex
+% from http://tex.stackexchange.com/questions/87075/name-clash-ifpdf-is-already-defined-between-jhep3-cls-and-ifpdf-sty
+\RequirePackage{ifpdf}
 \documentclass[a4paper,11pt]{kth-mag}
+
+% from http://tex.stackexchange.com/questions/11414/package-ifpdf-error
+%\let\ifpdf\relax
+%\usepackage{ifpdf}
+
 \usepackage[T1]{fontenc}
 \usepackage{textcomp}
 \usepackage{lmodern}
