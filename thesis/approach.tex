@@ -773,13 +773,13 @@ as an automaton, we can use composition to build more complex and interesting
 specifications. Composition is defined inductively.
 
 Every formal specification function $s$ can be represented by a deterministic
-finite automata $A(s)$:
+finite automata $\llbracket s \rrbracket$:
 
 \begin{mydef}[automata]\label{def-automata}
-An automata $A(s) = (Q, P, q_0, S, F)$ consists of a set of states $Q$ and
-transitions $(a, b, E) \in P$ between them, where $a$ is the start state, $b$
-is the end state, $a,b \in Q$ and $E$ is a \textit{transition label}. The
-transition label is described in detail in
+An automata $\llbracket s \rrbracket = (Q, P, q_0, S, F)$ consists of a set of
+states $Q$ and transitions $(a, b, E) \in P$ between them, where $a$ is the
+start state, $b$ is the end state, $a,b \in Q$ and $E$ is a \textit{transition
+label}. The transition label is described in detail in
 Section~\ref{section-approach-formal-foundation-semantics} An automata has one
 \textit{initial state} $q_0 \in Q$, a set of \textit{success states} $S
 \subseteq Q$ and a set of \textit{fail states} $F \subseteq Q$ where $S \cap F
@@ -822,7 +822,7 @@ section.
 		\begin{tikzpicture}[->,shorten >=1pt,node distance=2.5cm,on
       grid,auto,scale=.5,semithick,>=stealth]
 			\node[state,initial] (q0)	{$q_0$};
-			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (cloud) [right of=q0] {$A(next)$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (cloud) [right of=q0] {$\llbracket next \rrbracket$};
 			\path
 				(q0) edge node {$\top$} (cloud);
 		\end{tikzpicture}
@@ -836,7 +836,7 @@ section.
 		\begin{tikzpicture}[->,shorten >=1pt,node distance=2.5cm,on
       grid,auto,scale=.5,semithick,>=stealth]
 			\node[state,initial] (q0)	{$q_0$};
-			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (then) [right of=q0] {$A(then)$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (then) [right of=q0] {$\llbracket then \rrbracket$};
 			\node[state,accepting] (q1) [below of=q0]	{$q_1$};
 			\path
 				(q0) edge node {$E$} (then)
@@ -850,8 +850,8 @@ section.
 		\begin{tikzpicture}[->,shorten >=1pt,node distance=2.5cm,on
       grid,auto,scale=.5,semithick,>=stealth]
 			\node[state,initial] (q0)	{$q_0$};
-			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (then) [right of=q0] {$A(then)$};
-			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (else) [below of=then] {$A(else)$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (then) [right of=q0] {$\llbracket then \rrbracket$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (else) [below of=then] {$\llbracket else \rrbracket$};
 			\path
 				(q0) edge node {$E$} (then)
         (q0) edge node {$\neg E$} (else);
@@ -860,7 +860,7 @@ section.
 	\end{minipage}
 
   \caption{Sketches of automata for the four basic formal specification
-    functions. The squiggles around $A(next)$, $A(then)$ and $A(else)$ denote
+    functions. The squiggles around $\llbracket next \rrbracket$, $\llbracket then \rrbracket$ and $\llbracket else \rrbracket$ denote
     that some composition is required there.}
 	\label{figure-basic-formal-specification-automata}
 \end{figure}
@@ -882,14 +882,14 @@ to the task at hand.
 
 The \texttt{assert} specifications are the only primitive formal specification
 functions that are complete, without the need to compose them with other
-specifications. The automata $A(s_a(E))$ for a standalone \texttt{assert}
-specification $s_a(E)$, depicted in
+specifications. The automata $\llbracket s_a(E) \rrbracket$ for a standalone
+\texttt{assert} specification $s_a(E)$, depicted in
 Figure~\ref{figure-basic-formal-specification-automata}~(a), is defined as:
 
 \medskip
 \[
   \begin{array}{rcl}
-    A(s_a(E)) & = & (\{q_0, q_1, f\}, \{(q_0, q_1, E), (q_0, f, \neg E)\}, q_0, \{q_1\}, \{f\})
+    \llbracket s_a(E) \rrbracket & = & (\{q_0, q_1, f\}, \{(q_0, q_1, E), (q_0, f, \neg E)\}, q_0, \{q_1\}, \{f\})
   \end{array}
 \]
 \medskip
@@ -922,8 +922,8 @@ Given two specifications $s$ and $s'$, where:
 \medskip
 \[
   \begin{array}{rcl}
-    A(s) & = & (Q_s, T_s \cup R_s, q_{0s}, S_s, F_s) \\
-   A(s') & = & (Q_{s'}, T_{s'} \cup R_{s'}, q_{0s'}, S_{s'}, F_{s'})
+    \llbracket s \rrbracket & = & (Q_s, T_s \cup R_s, q_{0s}, S_s, F_s) \\
+   \llbracket s' \rrbracket & = & (Q_{s'}, T_{s'} \cup R_{s'}, q_{0s'}, S_{s'}, F_{s'})
   \end{array}
 \]
 \medskip
@@ -933,7 +933,7 @@ Then:
 \medskip
 \[
   \begin{array}{rcl}
-    A(s \circ_{tail} s') & = & (Q, P, q_0, S_s \cup S_{s'}, F_s \cup F_{s'}) \\
+    \llbracket s \circ_{tail} s' \rrbracket & = & (Q, P, q_0, S_s \cup S_{s'}, F_s \cup F_{s'}) \\
                        Q & = & \{q_0\} \cup Q_s \cup Q_{s'} - \{q_{0s}, q_{0s'}\} \\
                        P & = & T \cup R_s \cup R_{s'} \\
                        T & = & \{(q_0, q', E) \, | \, (q, q', E) \in (T_s \cup T_{s'})\} \\
@@ -955,14 +955,14 @@ same semantics, as seen in Figure~\ref{figure-assert-composition-simplified}.
 		\centering
     \[
       \begin{array}{rcl}
-        A(s_a(E)) & = & (\{q_x, q_y, f\}, \{(q_x, q_y, E), (q_x, f, \neg E)\}, q_x, \{q_y\}, \{f\}) \\
-    A(s_a(E')) & = & (\{q_z, q_w, f'\}, \{(q_z, q_w, E') ,(q_z, f', \neg E')\}, q_z, \{q_w\}, \{f'\})
+        \llbracket s_a(E) \rrbracket & = & (\{q_x, q_y, f\}, \{(q_x, q_y, E), (q_x, f, \neg E)\}, q_x, \{q_y\}, \{f\}) \\
+       \llbracket s_a(E') \rrbracket & = & (\{q_z, q_w, f'\}, \{(q_z, q_w, E') ,(q_z, f', \neg E')\}, q_z, \{q_w\}, \{f'\})
       \end{array}
     \]
 		\centering
     \[
       \begin{array}{rcl}
-        A(s_a(E) \circ_{tail} s_a(E')) & = & (Q, P, q_0, S, F) \\
+        \llbracket s_a(E) \circ_{tail} s_a(E') \rrbracket & = & (Q, P, q_0, S, F) \\
                                  Q & = & \{q_0, q_y, f, q_w, f'\} \\
                                  P & = & \{(q_0, q_y, E), (q_0, f, \neg E), (q_0, q_w, E'), (q_0, f', \neg E')\} \\
                                  S & = & \{q_y, q_w\} \\
@@ -1000,8 +1000,9 @@ def s():
 	\end{minipage}
   \caption{An example showing a composition of an \texttt{assert} specification
     $s_a(E)$ with another \texttt{assert} specification $s_a(E)$. Only the
-    resulting $A(s_a(E) \, \circ_{tail} \, s_a(E))$ automata is shown. $q_y$ and
-    $q_w$ are success states; $f$ and $f'$ are fail states.}
+    resulting $\llbracket s_a(E) \, \circ_{tail} \, s_a(E) \rrbracket$ automata
+    is shown. $q_y$ and $q_w$ are success states; $f$ and $f'$ are fail
+    states.}
 	\label{figure-assert-composition-example}
 \end{figure}
 
@@ -1047,12 +1048,12 @@ appropriately called \texttt{next}, which is required, and one called
 composition point was described above.
 
 Composition with the \texttt{next} composition point, $s_n \, \circ_{next} \, s$
-with $A(s) = (Q, P, q_0, S, F)$ is as follows:
+with $\llbracket s \rrbracket = (Q, P, q_0, S, F)$ is as follows:
 
 \medskip
 \[
   \begin{array}{rcl}
-    A(s_n \circ_{next} s) & = & (\{q_0'\} \cup Q, T \cup P, q_0', S, F) \\
+    \llbracket s_n \circ_{next} s \rrbracket & = & (\{q_0'\} \cup Q, T \cup P, q_0', S, F) \\
                T  & = & \{(q_0', q_0, \top)\}
   \end{array}
 \]
@@ -1086,7 +1087,7 @@ def s'():
 		\begin{tikzpicture}[->,shorten >=1pt,node distance=2.5cm,on
       grid,auto,scale=.5,semithick,>=stealth]
 			\node[state,initial] (q0')	{$q_0'$};
-			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (cloud) [right of=q0'] {$A(s)$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (cloud) [right of=q0'] {$\llbracket s \rrbracket$};
 			\path
 				(q0') edge node {$\top$} (cloud);
 		\end{tikzpicture}
@@ -1115,24 +1116,23 @@ and $\neg E$ to the labels of all initial transitions for the automata at the
 \textit{else} composition point. The guards, $E$ and $\neg E$ are added as
 parts of a conjunctive.
 
-Let $s_1$ be the specification attached to the \textit{then} composition point
-and $s_2$ attached to the \textit{else} composition point, and:
+Suppose two arbitrary specifications $s_1$ and $s_2$ with semantics defined as:
 
 \medskip
 \[
   \begin{array}{rcl}
-    A(s_1) & = & (Q_1, T_1 \cup R_1, q_{10}, S_1, F_1) \\
-    A(s_2) & = & (Q_2, T_2 \cup R_2, q_{20}, S_2, F_2)
+    \llbracket s_1 \rrbracket & = & (Q_1, T_1 \cup R_1, q_{10}, S_1, F_1) \\
+    \llbracket s_2 \rrbracket & = & (Q_2, T_2 \cup R_2, q_{20}, S_2, F_2)
   \end{array}
 \]
 \medskip
 
-For \texttt{if-then} specifications composition becomes:
+We define the semantics of $\texttt{if} \; E \; \texttt{then} \; s_1$ as:
 
 \medskip
 \[
   \begin{array}{rcl}
-  A(s_i(E) \circ_{then} s_1) & = & (Q, P, q_0, S, F) \\
+  \llbracket s_i(E) \circ_{then} s_1 \rrbracket & = & (Q, P, q_0, S, F) \\
                         Q & = & Q_1 \cup \{q_0, q_1\} - \{q_{10}\} \\
                         P & = & T'_1 \cup R_1 \cup X \\
                      T'_1 & = & \{(q_0, q, E       \wedge E') \, | \, (q_{10}, q, E') \in T_1\} \\
@@ -1143,12 +1143,14 @@ For \texttt{if-then} specifications composition becomes:
 \]
 \medskip
 
-And for \texttt{if-then-else} specifications composition becomes:
+
+Furthermore, we define the semantics of $\texttt{if} \; E \; \texttt{then} \;
+s_1 \; \texttt{else} \; s_2$ as follows:
 
 \medskip
 \[
   \begin{array}{rcl}
-  A((s_i(E) \circ_{then} s_1) \circ_{else} s_2) & = & (Q, P, q_0, S, F) \\
+  \llbracket (s_i(E) \circ_{then} s_1) \circ_{else} s_2 \rrbracket & = & (Q, P, q_0, S, F) \\
                                            Q & = & Q_1 \cup Q_2 \cup \{q_0\} - \{q_{10}, q_{20}\} \\
                                            P & = & T'_1 \cup T'_2 \cup R_1 \cup R_2 \\
                                         T'_1 & = & \{(q_0, q, E       \wedge E') \, | \, (q_{10}, q, E') \in T_1\} \\
@@ -1182,11 +1184,10 @@ verify a specification given a system model.
 
 \subsubsection{The product of automata}
 
-Given two automata as defined above we can define a product of them, following
-a similar procedure as \cite{chaki04lks, schneider04kripke} and others. Let $M
-= (Q_M,P_M,m_0,S_M,F_M)$ and $A = (Q_A,P_A,a_0,S_A,F_A)$ be two arbitrary
-automata as defined above. We define their product denoted by $M \times A =
-(Q,P,i,S,F)$ as:
+\begin{mydef}[automata product]
+Let $M = (Q_M,P_M,m_0,S_M,F_M)$ and $A = (Q_A,P_A,a_0,S_A,F_A)$ be two
+arbitrary automata as defined above. We define their product denoted by $M
+\times A = (Q,P,i,S,F)$ as:
 
 \begin{enumerate}
   \item $Q \subseteq Q_M \times Q_A$
@@ -1200,6 +1201,10 @@ automata as defined above. We define their product denoted by $M \times A =
   \item $F = \{(q_m,q_a) \in Q \; | \; q_m \in F_M \vee q_a \in F_A\}$
 \end{enumerate}
 
+\end{mydef}
+
+For similar procedures for computing the product of automata, see e.g.\
+\cite{chaki04lks, schneider04kripke}.
 
 \subsubsection{The \textit{f-pythonrv} system model}
 
@@ -1462,7 +1467,7 @@ This is just to demonstrate how the \texttt{if-then} construct works.
 		\centering
     \[
       \begin{array}{rcl}
-        A(\text{spec}) & = & (Q, P, q_0, S, F) \\
+        \llbracket \text{spec} \rrbracket & = & (Q, P, q_0, S, F) \\
                      Q & = & \{q_0, q_1, f\} \\
                      P & = & \{(q_0, q_1, \delta(\texttt{func.inputs$[0]$}) > 0),
       (q_0, f, \neg(\delta(\texttt{func.inputs$[0]$}) > 0)), \\
@@ -1561,7 +1566,7 @@ This is just to demonstrate how the \texttt{if-then} construct works.
 		\centering
     \[
       \begin{array}{rcl}
-        A(\text{spec}) & = & (Q, P_1 \cup P_2 \cup P_3 \cup P_4, q_0, S, F) \\
+        \llbracket \text{spec} \rrbracket & = & (Q, P_1 \cup P_2 \cup P_3 \cup P_4, q_0, S, F) \\
                      Q & = & \{q_0, q_1, f_1, q_2, q_3, f_2, r_0, r_1, f_r\} \\
                    P_1 & = & \{(q_0, q_1, \lambda = \texttt{foo}), (q_0, f_1, \neg(\lambda = \texttt{foo}))\} \\
                    P_2 & = & \{(q_0, q_2, G \wedge X), (q_0, f_2, G \wedge \neg X), (q_0, q_3, \top)\} \\
