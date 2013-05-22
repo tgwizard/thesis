@@ -658,26 +658,26 @@ verification. If the expression needs to access any properties of the
 	\begin{lstlisting}
 def assert():
   a = make_assert(E)
-  tail = # optional composition point 'tail'
+  tail = # 'optional conjunctively composed specification'
   return a + tail
 
 def next():
-  x = # required composition point 'next'
-  n = make_next(x)
-  tail = # optional composition point 'tail'
+  s = # inner specification
+  n = make_next(s)
+  tail = # 'optional conjunctively composed specification'
   return n + tail
 
 def if_then():
-  then = # required composition point 'then'
+  then = # specification for then clause
   i = make_if(E, then)
-  tail = # optional composition point 'tail'
+  tail = # 'optional conjunctively composed specification'
   return i + tail
 
 def if_then_else():
-  then = # required composition point 'then'
-  els = # required composition point 'else'
+  then = # specification for then clause
+  els = # specification for else clause
   i = make_if(E, then, els)
-  tail = # optional composition point 'tail'
+  tail = # 'optional conjunctively composed specification'
   return i + tail
 	\end{lstlisting}
 	\end{minipage}
@@ -687,36 +687,26 @@ def if_then_else():
 	\label{figure-basic-formal-specification-functions}
 \end{figure}
 
-Primitive formal specification functions can be composed together to form more
-complex specifications. Composition is done at \textit{composition points},
-using the \textit{composition operator} $\circ$. Formal specification functions
-have composition points where they can be combined with other formal
-specification functions. A formal specification function can have zero or more
-composition points. A composition point can be \textit{open} or \textit{closed}
---- open composition points can be used in composition, while closed have
-already been used. Composition points can be \textit{required} or
-\textit{optional}.
 
-A formal specification function can be either \textit{complete} or
-\textit{incomplete}. A complete formal specification function is a
-specification that can be used by \textit{pythonrv} for verification. An
-incomplete formal specification function cannot be used for verification unless
-it is composed with other specifications to become complete. Complete formal
-specification functions have no open required composition points; incomplete
-formal specification functions have at least one. The only complete primitive
-specification function is \texttt{assert} --- the other can become complete
-through composition.
+A syntactically valid specification $s$ is thus of the form:
 
-\begin{mydef}[the composition operator]\label{def-composition-operator}
-Composition is described by the \textit{composition operator} $\circ$. Let $f$,
-$g$ and $h$ be formal specification functions. Let $f$ have one composition
-point, $g$ two, labeled $a$ and $b$, respectively, and $h$ none. An example
-composition could be: $s = f \, \circ \, ((g \, \circ_{a} \, h) \, \circ_{b} \,
-h)$. $s$ would be a complete formal specification function, as it is composed
-of formal specification functions, and it has no open required composition
-points (or optional ones). We define what composition actually means in the
-next section.
-\end{mydef}
+\medskip
+\[
+  \begin{array}{rrl}
+    s & ::= & \epsilon \\
+      &   | & \texttt{assert} \; E \\
+      &   | & \texttt{next} \; s \\
+      &   | & \texttt{if} \; E \; \texttt{then} \; s \\
+      &   | & \texttt{if} \; E \; \texttt{then} \; s \; \texttt{else} \; s' \\
+      &   | & s \; ; \; s'
+  \end{array}
+\]
+\medskip
+
+$s \; ; \; s'$ denotes a \textit{conjunctive composition} in that both
+$s$ and $s'$ must hold, i.e.\ not sequential composition. Sequential (in time)
+composition is denoted by $\texttt{next} \; s$.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% Boilerplate code for f-pythonrv specifications
@@ -733,7 +723,7 @@ from pythonrv.formalrv import (formal_spec,
 @formal_spec
 def spec():
   # spec is a formal specification function
-  # - assert, next, if-then or if-then-else
+  # - assert, next, if_then or if_then_else
 	\end{lstlisting}
 	\end{minipage}
 	\end{center}
@@ -789,7 +779,7 @@ Success states are depicted as \textit{accepting states} in the automata. Fail
 states are usually called \textit{fail}, $f$, etc.
 \end{mydef}
 
-The four basic formal specification functions correspond to simple,
+The four primitive formal specification functions correspond to simple,
 deterministic, finite automata, sketches of which are depicted in
 Figure~\ref{figure-basic-formal-specification-automata}. Please note that the
 automata in Figure~\ref{figure-basic-formal-specification-automata} are only
@@ -869,35 +859,96 @@ section.
 %%%%%%%%%%%%%%%%%%%%%%%%
 
 
-Let $s_a(E)$ be an \texttt{assert} specification asserting the expression $E$,
-let $s_n$ be a \texttt{next} specification and let $s_i(E)$ be an
-\texttt{if-then} or \texttt{if-then-else} specification with the expression $E$
-guarding the \textit{then} composition point. Let $s$ be any specification.
-Appending subscripts and superscripts denotes different specifications or
-expressions of the same kind. The expression $E$ can be omitted if irrelevant
-to the task at hand.
-
-\subsubsection{The \texttt{assert} specification, and composition with the
-\textit{tail} composition point}
+\subsubsection{The \texttt{assert} specification}
 
 The \texttt{assert} specifications are the only primitive formal specification
 functions that are complete, without the need to compose them with other
-specifications. The automata $\llbracket s_a(E) \rrbracket$ for a standalone
-\texttt{assert} specification $s_a(E)$, depicted in
+specifications. The automata $\llbracket \texttt{assert} \; E \rrbracket$ for a
+standalone \texttt{assert} specification $\texttt{assert} \; E$, depicted in
 Figure~\ref{figure-basic-formal-specification-automata}~(a), is defined as:
 
 \medskip
 \[
   \begin{array}{rcl}
-    \llbracket s_a(E) \rrbracket & = & (\{q_0, q_1, f\}, \{(q_0, q_1, E), (q_0, f, \neg E)\}, q_0, \{q_1\}, \{f\})
+    \llbracket \texttt{assert} \; E \rrbracket & = & (\{q_0, q_1, f\}, \{(q_0, q_1, E), (q_0, f, \neg E)\}, q_0, \{q_1\}, \{f\})
   \end{array}
 \]
 \medskip
 
 If $E$ does not hold the fail state $f$ will be reached, which means the
-specification $s_a(E)$ has been violated.
+specification $\texttt{assert} \; E$ has been violated.
 
-To make future composition definitions easier we introduce the concept of
+
+\subsubsection{The \texttt{next} specification}
+
+The \texttt{next} specification functions are the specifications that deal with
+time. The \texttt{next} specification asserts nothing about the current event,
+but makes its inner specification $s$ verify the next event.
+
+Given $\llbracket s \rrbracket = (Q, P, q_0, S, F)$, the semantics of
+$\texttt{next} \; s$ is:
+
+\medskip
+\[
+  \begin{array}{rcl}
+    \llbracket \texttt{next} \; s \rrbracket & = & (\{q_0'\} \cup Q, T \cup P, q_0', S, F) \\
+               T  & = & \{(q_0', q_0, \top)\}
+  \end{array}
+\]
+\medskip
+
+This is illustrated in Figure~\ref{figure-next-composition-s}.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% Composition, next s, symbol-python-automata
+%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[h!]
+	\begin{minipage}{0.25\textwidth}
+		\centering
+    \[
+      \llbracket s' \rrbracket = \llbracket \texttt{next} \; s \rrbracket
+    \]
+	\end{minipage}
+  ~
+	\begin{minipage}{0.35\textwidth}
+		\centering
+    \begin{lstlisting}
+def s'():
+  return make_next(s)
+    \end{lstlisting}
+	\end{minipage}
+  ~
+	\begin{minipage}{0.35\textwidth}
+		\centering
+		\begin{tikzpicture}[->,shorten >=1pt,node distance=2.5cm,on
+      grid,auto,scale=.5,semithick,>=stealth]
+			\node[state,initial] (q0')	{$q_0'$};
+			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (cloud) [right of=q0'] {$\llbracket s \rrbracket$};
+			\path
+				(q0') edge node {$\top$} (cloud);
+		\end{tikzpicture}
+	\end{minipage}
+  \caption{The semantics for a $\texttt{next} \; s$ specification, given an
+    arbitrary specification $s$.}
+	\label{figure-next-composition-s}
+\end{figure}
+
+
+\subsubsection{The \texttt{if-then} and \texttt{if-then-else} specifications}
+
+
+\texttt{if-then} specifications are of the form $\texttt{if} \; E \;
+\texttt{then} \; s_1$, and \texttt{if-then-else} specifications of the form
+$\texttt{if} \; E \; \texttt{then} \; s_1 \; \texttt{else} \; s_2$.
+
+In an \texttt{if-then-else} specification we consider the expression $E$ as a
+guard for the specification $s_1$ in the \textit{then} clause, and $\neg E$ as a
+guard for the specification $s_2$ in the \textit{else} clause. In
+\texttt{if-then} specifications, the $\neg E$ guard goes to a success state.
+
+To make the definitions below simpler we introduce the concept of
 \textit{initial transitions}:
 
 \begin{mydef}[initial transitions]\label{def-initial-transitions}
@@ -909,15 +960,72 @@ into two parts, the initial transitions $T$, and non-initial transitions $R$,
 i.e.\ $P = T \cup R$ and $T \cap R = \emptyset$.
 \end{mydef}
 
-\texttt{assert} specifications also have, together with all primitive formal
-specification functions and compositions thereof, at least one open composition
-point, the \textit{tail} composition point. Compositions using the
-\textit{tail} composition point are commutative: $s \, \circ_{tail} \, s' = s'
-\, \circ_{tail} \, s$. Composition using the \textit{tail} composition point
-is essentially just a merge of the initial states of the two specifications,
-making the initial transitions of both specifications go out from the same
-state $q_0$, and merging the success states and fail states of the automata.
-Given two specifications $s$ and $s'$, where:
+The automata of \texttt{if-then} and \texttt{if-then-else} specifications
+essentially becomes to add the guard $E$ to the labels of all initial
+transitions for the automata $\llbracket s_1 \rrbracket$ at the \textit{then}
+clause, and $\neg E$ to the labels of all initial transitions for the automata
+$\llbracket s_2 \rrbracket$ at the \textit{else} clause. The guards, $E$ and
+$\neg E$ are added to the transitions as parts of a conjunctive.
+
+Given two arbitrary specifications $s_1$ and $s_2$ with semantics defined as:
+
+\medskip
+\[
+  \begin{array}{rcl}
+    \llbracket s_1 \rrbracket & = & (Q_1, T_1 \cup R_1, q_{10}, S_1, F_1) \\
+    \llbracket s_2 \rrbracket & = & (Q_2, T_2 \cup R_2, q_{20}, S_2, F_2)
+  \end{array}
+\]
+\medskip
+
+We define the semantics of $\texttt{if} \; E \; \texttt{then} \; s_1$ as:
+
+\medskip
+\[
+  \begin{array}{rcl}
+  \llbracket \texttt{if} \; E \; \texttt{then} \; s_1 \rrbracket & = & (Q, P, q_0, S, F) \\
+                        Q & = & Q_1 \cup \{q_0, q_1\} - \{q_{10}\} \\
+                        P & = & T'_1 \cup R_1 \cup X \\
+                     T'_1 & = & \{(q_0, q, E       \wedge E') \, | \, (q_{10}, q, E') \in T_1\} \\
+                        X & = & \{(q_0, q_1, \neg E)\} \\
+                        S & = & S_1 \cup \{q_1\} \\
+                        F & = & F_1
+  \end{array}
+\]
+\medskip
+
+
+Furthermore, we define the semantics of $\texttt{if} \; E \; \texttt{then} \;
+s_1 \; \texttt{else} \; s_2$ as follows:
+
+\medskip
+\[
+  \begin{array}{rcl}
+  \llbracket \texttt{if} \; E \; \texttt{then} \; s_1 \; \texttt{else} \; s_2 \rrbracket & = & (Q, P, q_0, S, F) \\
+           Q & = & Q_1 \cup Q_2 \cup \{q_0\} - \{q_{10}, q_{20}\} \\
+           P & = & T'_1 \cup T'_2 \cup R_1 \cup R_2 \\
+        T'_1 & = & \{(q_0, q, E       \wedge E') \, | \, (q_{10}, q, E') \in T_1\} \\
+        T'_2 & = & \{(q_0, q, \neg E \wedge E') \, | \, (q_{20}, q, E') \in T_2\} \\
+           S & = & S_1 \cup S_2 \\
+           F & = & F_1 \cup F_2
+  \end{array}
+\]
+\medskip
+
+
+
+
+\subsubsection{Conjunctive composition}
+
+Two specifications $s_1$ and $s_2$ can be conjunctively composed as $s = s_1 \;
+; \; s_2$, meaning that for $s$ to hold, both $s_1$ and $s_2$ must hold.
+Conjunctive composition is commutative: $s_1 \; ; \; s_2 = s_2 \; ; \; s_1$.
+
+Conjunctive composition is essentially just a merge of the initial states of
+the two specifications, making the initial transitions of both specifications
+go out from the same state $q_0$, and merging the success states and fail
+states of the automata. Given two arbitrary specifications $s_1$ and $s_2$ with
+semantics defined as:
 
 \medskip
 \[
@@ -933,7 +1041,7 @@ Then:
 \medskip
 \[
   \begin{array}{rcl}
-    \llbracket s \circ_{tail} s' \rrbracket & = & (Q, P, q_0, S_s \cup S_{s'}, F_s \cup F_{s'}) \\
+    \llbracket s \; ; \; s' \rrbracket & = & (Q, P, q_0, S_s \cup S_{s'}, F_s \cup F_{s'}) \\
                        Q & = & \{q_0\} \cup Q_s \cup Q_{s'} - \{q_{0s}, q_{0s'}\} \\
                        P & = & T \cup R_s \cup R_{s'} \\
                        T & = & \{(q_0, q', E) \, | \, (q, q', E) \in (T_s \cup T_{s'})\} \\
@@ -941,32 +1049,32 @@ Then:
 \]
 \medskip
 
-An example for composing two \texttt{assert} specifications is shown in
-Figure~\ref{figure-assert-composition-example}. The resulting automata is
+An example for composing two \texttt{assert} specifications this way is shown
+in Figure~\ref{figure-assert-composition-example}. The resulting automata is
 unnecessarily complex, and can be simplified to a smaller automata with the
 same semantics, as seen in Figure~\ref{figure-assert-composition-simplified}.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%
-%% Composition, assert o s, symbol-python-automata
+%% Composition, assert E ; assert E', symbol-python-automata
 %%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure}[h!]
 	\begin{minipage}{0.90\textwidth}
 		\centering
     \[
       \begin{array}{rcl}
-        \llbracket s_a(E) \rrbracket & = & (\{q_x, q_y, f\}, \{(q_x, q_y, E), (q_x, f, \neg E)\}, q_x, \{q_y\}, \{f\}) \\
-       \llbracket s_a(E') \rrbracket & = & (\{q_z, q_w, f'\}, \{(q_z, q_w, E') ,(q_z, f', \neg E')\}, q_z, \{q_w\}, \{f'\})
+        \llbracket \texttt{assert} \; E \rrbracket & = & (\{q_x, q_y, f\}, \{(q_x, q_y, E), (q_x, f, \neg E)\}, q_x, \{q_y\}, \{f\}) \\
+       \llbracket \texttt{assert} \; E' \rrbracket & = & (\{q_z, q_w, f'\}, \{(q_z, q_w, E') ,(q_z, f', \neg E')\}, q_z, \{q_w\}, \{f'\})
       \end{array}
     \]
 		\centering
     \[
       \begin{array}{rcl}
-        \llbracket s_a(E) \circ_{tail} s_a(E') \rrbracket & = & (Q, P, q_0, S, F) \\
-                                 Q & = & \{q_0, q_y, f, q_w, f'\} \\
-                                 P & = & \{(q_0, q_y, E), (q_0, f, \neg E), (q_0, q_w, E'), (q_0, f', \neg E')\} \\
-                                 S & = & \{q_y, q_w\} \\
-                                 F & = & \{f, f'\}
+        \llbracket \texttt{assert} \; E \; ; \; \texttt{assert} \; E' \rrbracket & = & (Q, P, q_0, S, F) \\
+                 Q & = & \{q_0, q_y, f, q_w, f'\} \\
+                 P & = & \{(q_0, q_y, E), (q_0, f, \neg E), (q_0, q_w, E'), (q_0, f', \neg E')\} \\
+                 S & = & \{q_y, q_w\} \\
+                 F & = & \{f, f'\}
       \end{array}
     \]
 	\end{minipage}
@@ -998,11 +1106,9 @@ def s():
         (q0) edge node [above left] {$\neg E'$} (f');
 		\end{tikzpicture}
 	\end{minipage}
-  \caption{An example showing a composition of an \texttt{assert} specification
-    $s_a(E)$ with another \texttt{assert} specification $s_a(E)$. Only the
-    resulting $\llbracket s_a(E) \, \circ_{tail} \, s_a(E) \rrbracket$ automata
-    is shown. $q_y$ and $q_w$ are success states; $f$ and $f'$ are fail
-    states.}
+  \caption{An example showing $\texttt{assert} \; E \; ; \; \texttt{assert} \;
+    E'$ automata is shown. $q_y$ and $q_w$ are success states; $f$ and $f'$ are
+    fail states.}
 	\label{figure-assert-composition-example}
 \end{figure}
 
@@ -1030,137 +1136,13 @@ def s():
 	\end{minipage}
   \caption{A simplified version of the automata from
     Figure~\ref{figure-assert-composition-example}, semantically identical. The
-  success states have been merged into $q_1$, and the fail states into $f$.}
+    success states have been merged into $q_1$, and the fail states into $f$.}
 	\label{figure-assert-composition-simplified}
 \end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%
-
-
-\subsubsection{The \texttt{next} specification}
-
-The \texttt{next} specification functions are the specifications that deal with
-time.  \texttt{next} specifications have two composition points: one
-appropriately called \texttt{next}, which is required, and one called
-\textit{tail}, which is optional. Composition using the \textit{tail}
-composition point was described above.
-
-Composition with the \texttt{next} composition point, $s_n \, \circ_{next} \, s$
-with $\llbracket s \rrbracket = (Q, P, q_0, S, F)$ is as follows:
-
-\medskip
-\[
-  \begin{array}{rcl}
-    \llbracket s_n \circ_{next} s \rrbracket & = & (\{q_0'\} \cup Q, T \cup P, q_0', S, F) \\
-               T  & = & \{(q_0', q_0, \top)\}
-  \end{array}
-\]
-\medskip
-
-This is illustrated in Figure~\ref{figure-next-composition-s}.
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%
-%% Composition, next o s, symbol-python-automata
-%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{figure}[h!]
-	\begin{minipage}{0.20\textwidth}
-		\centering
-    \[
-      s' = s_n \, \circ_{next} \, s
-    \]
-	\end{minipage}
-  ~
-	\begin{minipage}{0.35\textwidth}
-		\centering
-    \begin{lstlisting}
-def s'():
-  return make_next(s)
-    \end{lstlisting}
-	\end{minipage}
-  ~
-	\begin{minipage}{0.4\textwidth}
-		\centering
-		\begin{tikzpicture}[->,shorten >=1pt,node distance=2.5cm,on
-      grid,auto,scale=.5,semithick,>=stealth]
-			\node[state,initial] (q0')	{$q_0'$};
-			\node[cloud, cloud puffs=15.7, cloud ignores aspect, align=center, draw] (cloud) [right of=q0'] {$\llbracket s \rrbracket$};
-			\path
-				(q0') edge node {$\top$} (cloud);
-		\end{tikzpicture}
-	\end{minipage}
-  \caption{The composition of a \texttt{next} specification with any
-    specification $s$, using the \texttt{next} composition point.}
-	\label{figure-next-composition-s}
-\end{figure}
-
-
-\subsubsection{The \texttt{if-then} and \texttt{if-then-else} specifications}
-
-\texttt{if-then} specifications have two composition points: one required,
-\textit{then}, and one optional, \textit{tail}. \texttt{if-then-else}
-specifications have an additional required composition point \textit{else}.
-Composition using the \textit{tail} composition point was described above.
-
-In an \texttt{if-then-else} specification $s_i(E)$ we consider the expression $E$
-as a guard for the \textit{then} composition point, and $\neg E$ as a guard
-for the \textit{else} composition point. In \texttt{if-then} specification
-compositions, the $\neg E$ guard goes to a success state.
-
-The composition essentially becomes to add the guard $E$ to the labels of all
-initial transitions for the automata at the \textit{then} composition point,
-and $\neg E$ to the labels of all initial transitions for the automata at the
-\textit{else} composition point. The guards, $E$ and $\neg E$ are added as
-parts of a conjunctive.
-
-Suppose two arbitrary specifications $s_1$ and $s_2$ with semantics defined as:
-
-\medskip
-\[
-  \begin{array}{rcl}
-    \llbracket s_1 \rrbracket & = & (Q_1, T_1 \cup R_1, q_{10}, S_1, F_1) \\
-    \llbracket s_2 \rrbracket & = & (Q_2, T_2 \cup R_2, q_{20}, S_2, F_2)
-  \end{array}
-\]
-\medskip
-
-We define the semantics of $\texttt{if} \; E \; \texttt{then} \; s_1$ as:
-
-\medskip
-\[
-  \begin{array}{rcl}
-  \llbracket s_i(E) \circ_{then} s_1 \rrbracket & = & (Q, P, q_0, S, F) \\
-                        Q & = & Q_1 \cup \{q_0, q_1\} - \{q_{10}\} \\
-                        P & = & T'_1 \cup R_1 \cup X \\
-                     T'_1 & = & \{(q_0, q, E       \wedge E') \, | \, (q_{10}, q, E') \in T_1\} \\
-                        X & = & \{(q_0, q_1, \neg E)\} \\
-                        S & = & S_1 \cup \{q_1\} \\
-                        F & = & F_1
-  \end{array}
-\]
-\medskip
-
-
-Furthermore, we define the semantics of $\texttt{if} \; E \; \texttt{then} \;
-s_1 \; \texttt{else} \; s_2$ as follows:
-
-\medskip
-\[
-  \begin{array}{rcl}
-  \llbracket (s_i(E) \circ_{then} s_1) \circ_{else} s_2 \rrbracket & = & (Q, P, q_0, S, F) \\
-                                           Q & = & Q_1 \cup Q_2 \cup \{q_0\} - \{q_{10}, q_{20}\} \\
-                                           P & = & T'_1 \cup T'_2 \cup R_1 \cup R_2 \\
-                                        T'_1 & = & \{(q_0, q, E       \wedge E') \, | \, (q_{10}, q, E') \in T_1\} \\
-                                        T'_2 & = & \{(q_0, q, \neg E \wedge E') \, | \, (q_{20}, q, E') \in T_2\} \\
-                                           S & = & S_1 \cup S_2 \\
-                                           F & = & F_1 \cup F_2
-  \end{array}
-\]
-\medskip
-
 
 
 
