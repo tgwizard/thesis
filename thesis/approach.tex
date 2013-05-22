@@ -1278,7 +1278,7 @@ P', q_0', S', F')$ that is a failure state:
 \]
 \medskip
 
-We say that $M$ strongly satisfies $A$ if it does not violate it and if all
+We say that $M$ \textit{strongly} satisfies $A$ if it does not violate it and if all
 leaf states of $M \times A$ are success states:
 
 \medskip
@@ -1288,7 +1288,8 @@ leaf states of $M \times A$ are success states:
 \medskip
 
 If $M$ neither satisfies nor violates $A$ then further execution is required to
-determine the system model's satisfaction of the specification.
+determine the system model's satisfaction of the specification. We call this
+\textit{weak} satisfiability.
 
 An example of a product of a simple specification automata and a satisfying
 system model is shown in Figure~\ref{figure-product-example}. In the example we
@@ -1351,10 +1352,10 @@ and $(f_2,s_2)$ are fail states; $(q_2,s_2)$ is a success state. Only
       \node[state,accepting] (q2) [below right of=q1] {$q_2,s_2$};
       \node[state] (f2) [below left of=q1] {$f_2,s_2$};
 			\path
-        (q0) edge node {$(a, \epsilon) \models \lambda = a$} (q1)
-        (q0) edge node [above left] {$(a, \epsilon) \models \lambda \neq a$} (f1)
-        (q1) edge node {$(b, \epsilon) \models \lambda = b$} (q2)
-        (q1) edge node [above left] {$(b, \epsilon) \models \lambda \neq b$} (f2);
+        (q0) edge node {$((a, \epsilon), \lambda = a)$} (q1)
+        (q0) edge node [above left] {$((a, \epsilon), \lambda \neq a)$} (f1)
+        (q1) edge node {$((b, \epsilon), \lambda = b)$} (q2)
+        (q1) edge node [above left] {$((b, \epsilon), \lambda \neq b)$} (f2);
 		\end{tikzpicture}
     \subcaption{The product of the system model and the specification, $M
       \times A$. }
@@ -1410,7 +1411,7 @@ The set of reachable satisfying states from the initial state are:
 \]
 \medskip
 
-Since $R((q_0,s_0))$ contains a failure statue --- $(f,s_1)'$ ---, the model
+Since $R((q_0,s_0))$ contains a failure state --- $(f,s_1)'$ ---, the model
 violates the specification.
 
 The next example shows just a specification. The specification function
@@ -1511,11 +1512,11 @@ This is just to demonstrate how the \texttt{if-then} construct works.
       \node[state,accepting] (q1') [right of=q0'2] {$(q_1,s_1)'$};
       \node[state] (f1') [left of=q0'2] {$(f,s_1)'$};
 			\path
-        (q0) edge node {$(\lambda_0, \delta_0) \models \delta(\texttt{func.inputs$[0]$}) > 0$} (q1)
-        (q0) edge node [above left] {$(\lambda_0, \delta_0) \models \neg (\delta(\texttt{func.inputs$[0]$}) > 0)$} (f1)
+        (q0) edge node {$((\lambda_0, \delta_0), \delta(\texttt{func.inputs$[0]$}) > 0)$} (q1)
+        (q0) edge node [above left] {$((\lambda_0, \delta_0), \neg (\delta(\texttt{func.inputs$[0]$}) > 0))$} (f1)
         (q0) edge node [right] {$\top$} (q0')
-        (q0') edge node {$(\lambda_1, \delta_1) \models \delta(\texttt{func.inputs$[0]$}) > 0$} (q1')
-        (q0') edge node [above left] {$(\lambda_1, \delta_1) \models \neg (\delta(\texttt{func.inputs$[0]$}) > 0)$} (f1')
+        (q0') edge node {$((\lambda_1, \delta_1), \delta(\texttt{func.inputs$[0]$}) > 0)$} (q1')
+        (q0') edge node [above left] {$((\lambda_1, \delta_1), \neg (\delta(\texttt{func.inputs$[0]$}) > 0))$} (f1')
         (q0') edge node [right] {$\top$} (q0'2);
 		\end{tikzpicture}
     \subcaption{The product of the model above and the specification.}
