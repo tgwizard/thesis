@@ -37,9 +37,8 @@ requirements we want for the system. Verification is concerned with assuring us
 that the program follows its specifications, and it is verification in which
 this report takes an interest. Verification includes everything from manually
 running the program and parsing through the output, to automated testing
-setups, to formal methods.
-
-Both formal methods and testing are thus included in the term verification.
+setups, to formal methods. Both formal methods and testing are thus included in
+the term verification.
 
 An essential concept in verification is that of a \textit{system model}. A
 system model is a construct that represents and describes the behaviour of a
@@ -68,11 +67,9 @@ Formal methods are verification techniques, based in mathematics, for the
 specification and verification of systems. There are several approaches, with
 their respective advantages and disadvantages. \textit{Theorem proving} and
 \textit{model checking} will be discussed below. They both rely heavily on the
-concept of a proof of correctness.
-
-A correctness proof is a certificate, based in mathematics and logics, that a
-program/system/function follows its specifications, i.e.\ does what it is
-supposed to do.
+concept of a proof of correctness. A correctness proof is a certificate, based
+in mathematics and logics, that a program/system/function follows its
+specifications, i.e.\ does what it is supposed to do.
 
 Research of interest include the early work on formal methods, e.g.\ by Hoare
 \cite{hoare69} and Floyd \cite{floyd67}, and work on logics , e.g.\ linear
@@ -84,19 +81,16 @@ used for specifications in runtime verification.
 \textit{Theorem proving}, as started by Hoare \cite{hoare69}, Floyd
 \cite{floyd67} and others, is the manual, semi-automated, or (not so often)
 fully automated process of mathematically proving that the system follows its
-specification. There are many ways of doing such proofs.
-
-One way is to prove that at all points in the program, given inputs satisfying
-some pre-conditions, the outputs will satisfy the post-conditions. By
-formulating post-conditions for the exit point(s) of the program so that they
-follow the specification, and by linking together the pre-conditions of program
-points with their preceding program points' post-conditions, we know that
-correct input data will yield correct results.
-
-This way of proving correctness often yields very good results --- a complete
-and thorough correctness proof for the program. But it is slow, hard to
-automate completely, and therefore requires much manual work.  Wading through
-large programs thus often becomes impractical.
+specification. There are many ways of doing such proofs. One way is to prove
+that at all points in the program, given inputs satisfying some pre-conditions,
+the outputs will satisfy the post-conditions. By formulating post-conditions
+for the exit point(s) of the program so that they follow the specification, and
+by linking together the pre-conditions of program points with their preceding
+program points' post-conditions, we know that correct input data will yield
+correct results. This way of proving correctness often yields very good results
+--- a complete and thorough correctness proof for the program. But it is slow,
+hard to automate completely, and therefore requires much manual work.  Wading
+through large programs thus often becomes impractical.
 
 \textit{Model checking} is the concept of verifying that a \textit{model} of a
 system (the \textit{system model}) follows its specification. This requires
@@ -105,32 +99,29 @@ formalism. Given this, the task becomes to see if the model satisfies the
 logical formula of the specification. It is often simpler than theorem proving,
 and can be automated.
 
-The model of the system is usually structured as a finite state machine (FSM),
-and verification means visiting all accessible states, checking that they
-follow the specification (which also can be represented as an FSM). This can be
-problematic, especially when the state space becomes very big, something known
-as the \textit{state explosion problem}. There are approaches to address this
-issue, such as \textit{bounded model checking}, or by using higher-level
-abstractions.
+The model of the system is usually structured as a labeled transition system
+(e.g.\ Kripke structure), and verification means visiting all accessible
+states, checking that they follow the specification. This can be problematic,
+especially when the state space becomes very big, something known as the
+\textit{state explosion problem}. There are approaches to address this issue,
+such as \textit{bounded model checking}, or by using higher-level abstractions.
 
 Proving that a model of a system is correct can be very useful, but it suffers
-from the inherent flaw of only verifying the model, not the actual system. The
-model can be difficult to construct, or deviate too far from the system. It can
-not take the dynamic properties and configuration of the executing code into
-account.
-
-Runtime verification attempts to solve this by dealing directly with the
-system, creating its model at runtime.
+from the inherent flaw of only verifying for an abstract model, not the actual
+system. The model can be difficult to construct, or deviate too far from the
+real system. It can not take the dynamic properties and configuration of the
+executing code into account. Runtime verification attempts to solve this by
+dealing directly with the system, creating its model at runtime.
 
 
 \section{Runtime Verification} \label{section-rv}
 
-Runtime verification (RV) is a dynamic approach to checking program
-correctness, in contrast to testing and the more traditional formal static
-analysis techniques discussed in the previous section. Runtime verification
-aspires to be a light-weight formal verification technique, see e.g.\
-\cite{leucker09abriefaccount,delgado04taxonomy}. It verifies whether properties
-of a specification hold \textit{during the execution} of a program.
+Runtime verification (RV) \cite{leucker09abriefaccount,delgado04taxonomy} is a
+dynamic approach to checking program correctness, in contrast to testing and
+the more traditional formal static analysis techniques discussed in the
+previous section. Runtime verification aspires to be a light-weight formal
+verification technique. It verifies whether properties of a
+specification hold \textit{during the execution} of a program.
 
 Runtime verification can be both formal, if the specifications are given a
 formal semantics, or informal, if they are more like tests or other program
@@ -174,10 +165,9 @@ general approaches to runtime verification:
 
 \item The formal specification languages used are mostly LTL or variations
   thereof, and either written as comments or special attributes in code, or as
-  separate specification files. See e.g.\ Bauer et al.\
-  \cite{bauer06monitoring}, Bodden \cite{bodden05efficientrv}, Kähkönen et al.\
-  \cite{kahkonen09lime}, Java PathExplorer by Havelund et al.\
-  \cite{havelund04jpax}, Temporal Rover by Drusinsky
+  separate specification files. See e.g.\
+  \cite{bauer06monitoring,bodden05efficientrv,kahkonen09lime}, Java
+  PathExplorer \cite{havelund04jpax}, Temporal Rover
   \cite{drusinsky00temporalrover}; these all use a language for specifications
   separate from the target program's programming language.
 
@@ -195,9 +185,9 @@ temporal logic based on \textsc{RuleR} \cite{barringer07ruler}, and it builds
 its system model from log files, working completely offline.
 
 
-\section{Specifications} \label{section-specifications}
+\section{Specification Languages} \label{section-specifications}
 
-A \textit{specification} is essentially something that describes the correct
+A \textit{specification} is essentially a statement that describes the correct
 behaviour of a system. Specifications come in many forms, from the informal
 ones like ``I want it have cool buttons'', to the contractual ones written
 between companies and their clients, to reference implementations\footnote{For

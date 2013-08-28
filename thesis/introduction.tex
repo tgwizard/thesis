@@ -6,10 +6,10 @@
 \chapter{Introduction} \label{chapter-introduction}
 
 Due to the increasing size and complexity of computer software it has become
-increasingly difficult, if not impossible, to assure oneself that the software
+increasingly difficult, if not impossible, to assure that the software
 works as desired. This is where verification can be helpful. Of the various
 approaches used for verification, \textit{testing}, in all its forms, is the
-one familiar to most developers, and in it is widespread use. The introduction
+one familiar to most developers, and it it is widespread use. The introduction
 of agile development practices and test-driven development has also popularized
 the concept of \textit{unit testing}, a form of testing in which small modules
 of a program or system are tested individually.
@@ -24,9 +24,8 @@ However, they suffer from complexity problems (such as \textit{incompleteness},
 
 A relatively new approach in this area is \textit{runtime verification}, in
 which the program \textit{execution} is verified against its specification, at
-runtime. With the specification written in a suitably formal language, the
-execution can be given a mathematical proof that it follows the program's
-specification.
+runtime. With the specification written in a suitably formal language, we can
+verify the correctness of the program using formal approaches.
 
 This is where this report takes off, with formal verification on one side and
 testing on the other, and with runtime verification somewhere in between. In
@@ -36,12 +35,12 @@ used to improve the ease of using runtime verification.
 
 \section{Problem Statement} \label{section-problem-statement}
 
-How can runtime verification specifications be written in a manner that uses
-the syntax of the target program's programming language, and resembles the
-structure of unit tests? Can we still give a formal semantics to the
-specification language, or a part of it? How can we bridge the spectrum of
-different approaches for verification, creating something in between the formal
-and informal techniques?
+In this report we are concerned with the following questions. How can runtime
+verification specifications be written in a manner that uses the syntax of the
+target program's programming language, and resembles the structure of unit
+tests? Can we still give a formal semantics to the specification language, or a
+part of it? How can we bridge the spectrum of different approaches for
+verification, creating something in between the formal and informal techniques?
 
 
 \section{Motivation}
@@ -50,7 +49,7 @@ Checking that a program works correctly is of great interest to software
 developers. Formal verification techniques are helpful, but as mentioned above,
 traditional methods can be impractical with larger programs, and verification
 by testing is informal and incomplete. Runtime verification can here be a
-lightweight addition to the toolbox of verification techniques.
+lightweight addition to the set of verification techniques.
 
 The specification languages used by runtime verification approaches are often
 based on formal languages/formalisms (e.g.\ logic or algebra) and not written
@@ -58,20 +57,16 @@ in the target program's programming language. This means that writing the
 specifications requires specific knowledge and expertise in mathematics. It
 also requires mental context-switching, between writing the program and writing
 the specification, and special tools to support this specialised language's
-syntax.
-
-In contrast, unit testing frameworks often utilise the programming language to
-great effect, and they are a common part of the software development process.
-
-However, formal specifications allow for mathematical reasoning and proofs
-about properties of the program. A combination of the simpleness of the syntax
-and tool-support for testing with the mathematical properties of formal
-specifications could add more certainty to the verification in software
-development.
-
-If runtime verification specifications more resembled unit tests, and were
-written in the target program's programming language, it might popularise the
-use of runtime verification for checking the correctness of programs.
+syntax. In contrast, unit testing frameworks often utilise the programming
+language to great effect, and they are a common part of the software
+development process. However, formal specifications allow for mathematical
+reasoning and proofs about properties of the program. A combination of the
+simpleness of the syntax and tool-support for testing with the mathematical
+properties of formal specifications could add more certainty to the
+verification in software development. If runtime verification specifications
+more resembled unit tests, and were written in the target program's programming
+language, it might popularise the use of runtime verification for checking the
+correctness of programs.
 
 
 \section{Contribution}
@@ -79,23 +74,21 @@ use of runtime verification for checking the correctness of programs.
 In this report we give a background on runtime verification and unit testing,
 and describe a proof-of-concept implementation called \textit{pythonrv}.
 \textit{pythonrv} is a runtime verification framework for Python. It allows the
-specification writer to write specifications, both formal and informal,
+us to write specifications, both formal and informal,
 directly in Python. It makes good use of the Python decorator syntax, and gives
 a clean separation between the program and the specifications, while allowing
 the specifications to use the power of Python. It is the approach to formal
 verification for specifications written in Python that is our main
 contribution.
 
-Naturally, there are some areas that are left out-of-scope for this report. We
+Naturally, there are some areas which are left out-of-scope for this report. We
 give a formalization for only a subset of Python --- for specifications
-constructed in a special way. We do not attempt to formalize Python.
-
-Also, we only deal with a single thread of execution --- no multi-threading or
-multiple processes --- and we do not handle real-time specifications. No
-performance testing or benchmarking is done on the implementation.
-
-These limitations to this work are of course all very interesting, and would be
-very suitable for future work in this area.
+constructed in a special way. We do not attempt to formalize Python. Also, we
+only deal with a single thread of execution --- no multi-threading or multiple
+processes --- and we do not handle real-time specifications. No performance
+testing or benchmarking is done on the implementation. These limitations to
+this work are of course all very interesting, and would be very suitable for
+future work in this area.
 
 
 \section{Report Organization}
@@ -113,10 +106,10 @@ solve the problem stated in Section~\ref{section-problem-statement}. We
 describe the syntax, instrumentation and verification techniques used in a
 proof-of-concept implementation, and give a formal foundation to a subset of
 the syntax. In Chapter~\ref{chapter-evaluation} we then give an evaluation of
-applying this work on a real-life web application.
+the framework by applying it on a real-life web application.
 
 Finally, in Chapter~\ref{chapter-conclusions} we draw some conclusions and
-discuss this and future work.
+discuss this and potential future work.
 
 The first time an important concept is introduced it is written in
 \textit{italics}. If such a concept is not explained in the text, it has a
