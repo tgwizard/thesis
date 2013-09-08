@@ -194,9 +194,10 @@ between companies and their clients, to reference implementations\footnote{For
 instance, the only specification for Python is the canonical CPython
 implementation. Python is defined as ``what CPython does''.}, to tests (see
 e.g.\ Chapter~\ref{chapter-intro-to-unit-testing}), and to \textit{formal
-specifications}, written in formal languages, specifying properties that should
-verifiably hold for the program. They are is a mathematical constructs that can
-be used in verification proofs to show that a program works correctly.
+specifications}, written in formal languages which have formal semantics,
+specifying properties that should verifiably hold for the program. These are
+mathematical constructs that can be used in verification proofs to show that a
+program works correctly.
 
 It is these last two types of specifications, tests and formal specifications,
 that we are interested in in this report, and which play an important role in
@@ -215,20 +216,20 @@ to the program. They can be used in specialized model-checking tools, in tools
 for theorem proving, in test suites, etc.
 
 Runtime verification requires that the specifications are accessible when
-building and running the program. The program needs to be instrumented to
-expose the correct system model so that the specification can be verified. It
-is sometimes desired in runtime verification to do online verification, and
-then the specifications need to be available and embedded into the system. A
-few different approaches have been tried to support this.
+building and running the program. The program also  needs to be instrumented to 
+expose the required data to build the system model. It is sometimes desired in
+runtime verification to do online verification, and then the specifications
+need to be available and embedded into the system. A few different approaches
+have been tried to support this.
 
 There are several common formalisms for writing specifications, and many papers
 that expand, rephrase and illuminate on them. Although they can be quite
 different, they share a common origin in the work done by Floyd \cite{floyd67},
-Hoare \cite{hoare69}, and others before them. Floyd wrote of formulas as
-specifying in/out properties of statements, and chaining these together to form
-a formal proof for the program. Hoare elaborated on this idea by basing his
-proofs on a few axioms of the programming language and target computer
-architecture, and building the proof from there.
+Hoare \cite{hoare69}, and others before them. Floyd wrote formulas as
+specifying in/out properties (pre and post conditions) of statements, and
+chaining these together to form a formal proof for the program. Hoare
+elaborated on this idea by basing his proofs on a few axioms of the programming
+language and target computer architecture, and building the proof from there.
 
 Other specification languages take a more informal approach, some allowing
 arbitrary code as part of the specification. Below we introduce and give an
@@ -237,13 +238,13 @@ overview to the most important and common specification languages.
 
 \subsection{Linear Temporal Logic} \label{section-ltl}
 
-Linear temporal logic (LTL) was first discussed by Pnueli \cite{pnueli77}, and
+Linear temporal logic (LTL) was first introduced by Pnueli \cite{pnueli77}, and
 has since been popular in many areas dealing with a system model containing a
-temporal dimension. LTL is simpler than other logics, but expressive enough to
-describe many problems of interest for verification. This has been affirmed by
-the diverse use of LTL by many researchers \cite{pnueli77}.
+temporal dimension. LTL aims to be simpler than other logics, but expressive
+enough to describe many problems of interest for verification. This has been
+affirmed by the diverse use of LTL by many researchers \cite{pnueli77}.
 
-LTL uses a system model of \textit{infinite execution traces}, or
+LTL is interpreted on \textit{infinite execution traces}, or
 \textit{histories}, of the states of the execution. LTL specifications are
 formulas that operate on these states. An LTL formula consists of
 \textit{propositional variables} that work on the domain model of the state
@@ -255,17 +256,17 @@ such as $\boldsymbol{G}$ (\textit{globally}, or always) and $\boldsymbol{F}$
 (\textit{eventually}, or sometime in the future).
 
 An example LTL formula, taken from a list of common specification patterns
-\cite{dwyer99patterns}, could be: $S$ precedes $P$, i.e.\ if the state $P$
-holds sometime, the state $S$ will hold before it. This is shown in
-Figure~\ref{figure-ltl}.
+\cite{dwyer99patterns}, could be: $S$ precedes $P$, i.e.\ if the predicate $P$
+holds sometime, the predicate $S$ will hold before it. The formula, shown in
+Figure~\ref{figure-ltl}, can be read as: Globally, if $P$ holds, then, $P$ did
+not hold until after a time $S \wedge \neg P$ held.
 
 \begin{figure}[h!]
 	\[
 	\boldsymbol{G} \, P \rightarrow (\neg P \, \boldsymbol{U} \, (S \wedge \neg P))
 	\]
 
-	\caption{An example of an LTL formula. This can be read as: Globally, if $P$
-	holds, then, before $P$, $S$ held at some point.}
+	\caption{An example of an LTL formula. }
 	\label{figure-ltl}
 \end{figure}
 
@@ -286,8 +287,8 @@ Temporal Logic (TLTL) and Metric Temporal Logic (MTL). They introduces clocks
 and time constraints to make specifications of real-time properties possible.
 The concept of real-time specifications is of great interest to runtime
 verification, but will not be discussed further here as it is out of scope for
-this work. See e.g.\ \cite{bauer06monitoring,drusinsky00temporalrover} for
-more.
+this work. See e.g.\
+\cite{bauer06monitoring,bauer07rvltl,drusinsky00temporalrover} for more.
 
 Several runtime verification approaches use LTL or versions thereof as
 specification language, see e.g.\ Bauer et al.\
@@ -298,7 +299,7 @@ specification language, see e.g.\ Bauer et al.\
 
 \subsection{\textsc{Eagle} and \textsc{RuleR}}
 
-Barringer et al.\ have written \textsc{Eagle} \cite{barringer03eagle} and
+Barringer et al.\ have proposed \textsc{Eagle} \cite{barringer03eagle} and
 \textsc{RuleR} \cite{barringer07ruler} as runtime verification frameworks and
 formal logics.  Inefficiency weaknesses were found in \textsc{Eagle}, and
 \textsc{RuleR} was proposed as a more efficient alternative, with a more
@@ -449,7 +450,7 @@ pre-conditions to make sure that the inputs are valid --- non-null and
 non-negative. Note that the return value of \texttt{malloc} is checked to be
 non-null using an if-statement --- this is a case that could happen (if the
 system runs out of memory), and should thus be handled by proper error-handling
-logic. Assertions are used to check for cases that should never happen.
+procedures. Assertions are used to check for cases that should never happen.
 
 Assertions are distinct from the normal program flow, and not to be conflated
 with exceptions. Assertions check for properties that should always be true,
@@ -463,7 +464,7 @@ are informal as well.
 
 
 
-\section{Verification against Specifications} \label{section-verification}
+\section{Verification} \label{section-verification}
 
 Specifications for runtime verification are written so that programs can be
 verified against them --- to see whether they follow the specification, or
@@ -489,15 +490,13 @@ difficult to do with more complex specifications.
 \section{Code Instrumentation} \label{section-instrumentation}
 
 For verification to work, the verifier needs access to events happening in the
-program. Depending on the system model of the specification language, such
-events can be function calls, statement executions, variable assignment, etc.
-The program needs to be instrumented for it to emit such events. This often
-means wrapping function calls and variable assignments in a ``recording
-layer'', which performs the desired action after logging the event. The events
-can then be passed on to the verification tools.
-
-In the following sections the main approaches for program instrumentation are
-discussed.
+program. Depending on the specification language, such events can be function
+calls, statement executions, variable assignment, etc.  The program needs to be
+instrumented to emit such events. This often means wrapping function calls and
+variable assignments in a ``recording layer'', which performs the desired
+action after logging the event. The events can then be passed on to the
+verification tools. In this section the main approaches for program
+instrumentation are discussed.
 
 
 \subsection{Pre-processing the Code}
@@ -542,22 +541,22 @@ In many dynamic languages, such as Python, Ruby or JavaScript, it is possible
 to rewrite the code during runtime, which is sometimes called \textit{monkey
 patching}. A function to be monitored could be rewritten, adding a lightweight
 wrapper that records all calls to it, and then passes on the call to the actual
-function. See e.g.\ \cite{matusiak09aoppy} for approaches using dynamic code
-rewriting.
+function. \cite{matusiak09aoppy} explains different approaches using dynamic
+code rewriting.
 
 
 \subsection{Aspects} \label{section-aspects}
 
 An interesting approach to code instrumentation is to use aspect-oriented
 programming. In aspect-oriented theory, a program should be divided into
-modules, each only dealing with their own \textit{concern}. Logging, however,
-is a \textit{crosscutting concern}, as it is used by several unrelated modules.
-The goal is to not scatter logging code across the modules, and to not tangle
-it with the modules' own logic. This can be done by defining the logging code
-as \textit{aspects}, which consists of the logging code, called the
-\textit{advice}, and a \textit{point cut}, which is a formula describing when
-the advice should be executed. The possible execution points for a point cut
-are called \textit{join points}.
+modules, each only dealing with their own \textit{concern}. There are some
+parts, such as logging, which are \textit{crosscutting concerns}, and are used
+by several, possibly unrelated, modules. The goal is to not scatter logging
+code (et al.) across the modules, and to not tangle it with the modules' own
+logic. This can be done by defining the logging code as \textit{aspects}, which
+consists of the logging code, called the \textit{advice}, and a \textit{point
+cut}, which is a formula describing when the advice should be executed. The
+possible execution points for a point cut are called \textit{join points}.
 AspectJ\footnote{\texttt{http://www.eclipse.org/aspectj/}} is the canonical
 framework for aspect-oriented programming.
 
@@ -581,5 +580,5 @@ services, or make sure that enough disk space is free. Other approaches could be
 to use existing features of the system, such as its logging, for runtime
 verification. The logs can be parsed by a separate process, during the
 execution or as a post-mortem, do determine that the execution followed the
-specification. Barringer et al.\ do this in \cite{barringer09tutorial}.
+specification, e.g.\ \cite{barringer09tutorial}.
 

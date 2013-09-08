@@ -93,9 +93,7 @@ Figure~\ref{figure-jasmine}.
 	\end{minipage}
 	\end{center}
   \caption{An example of unit testing syntax, written Java as a test case for
-    JUnit. All tests are marked with the \texttt{@Test} annotation. The
-    \texttt{assert} keyword and functions like \texttt{assertEquals} are used
-    to verify the correctness of the outputs.}
+    JUnit.}
 	\label{figure-junit}
 \end{figure}
 
@@ -107,33 +105,37 @@ Figure~\ref{figure-jasmine}.
 	\end{minipage}
 	\end{center}
   \caption{An example of unit testing syntax, written in JavaScript and
-    Jasmine. It consists of a \texttt{describe} test suite, and one test case
-    \texttt{it}, called a specification in jasmine parlance. The
-    \texttt{expect(\dots).toEqual(\dots)} style is used for verification.}
+    Jasmine.}
 	\label{figure-jasmine}
 \end{figure}
 
-In JUnit, and xUnit, you run a \textit{test suite} of \textit{test cases},
-which contain tests. The example in Figure~\ref{figure-junit}, the test suite
-is implicitly created by JUnit, although it is possible to create it and
-control it your self. A \textit{test runner} runs the test suite, reporting
-progress to the user. When the tests are finished, any errors are displayed.
+In JUnit, and xUnit, the major constructs are the \textit{test suite},
+comprising \textit{test cases}, which contain tests. In the example in
+Figure~\ref{figure-junit}, the test suite is implicitly created by JUnit,
+comprising the methods marked with the \texttt{@Test} annotation. The
+\texttt{assert} keyword and functions like \texttt{assertEquals} are used to
+verify the correctness of variables, program state, function outputs, etc. A
+\textit{test runner} runs the test suite, reporting progress to the user. When
+the tests are finished, any errors are displayed.
 
-In the example in Figure~\ref{figure-junit} has two tests, and methods to set
+The example in Figure~\ref{figure-junit} has two tests, and methods to set
 up and tear down the tests \textit{fixture}. These functions are usually called
 \textit{setUp} and \textit{tearDown}, respectively, and are called before and
 after each test. The fixture is the surrounding set of objects (environment)
-that the object under test requires to work properly.
+that the object under test requires to work properly. Test written in the style
+of Figure~\ref{figure-junit} are traditional unit tests.
 
-Test written in the style of Figure~\ref{figure-junit} are traditional unit
-tests.
-
+Similar to the JUnit structure, Jasmine (Figure~\ref{figure-jasmine}) test
+suites are created with the \texttt{describe} function, and test cases (called
+specifications here) with the \texttt{it} function. The
+\texttt{expect(\dots).toEqual(\dots)} style is used in favour of
+\texttt{assert} for verification.
 
 \section{Mocking and Faking} \label{section-mocking}
 
-A common issue when writing unit tests is that, to instantiate some object X,
-or to call some function Y, the program needs access to some other objects Z. Z
-might be something simple, which we can easily create in the test. It might
+A common issue when writing unit tests is that, to instantiate an object X,
+say, or to call a function Y, the program needs access to some other objects Z.
+Z might be something simple, which we can easily create in the test. It might
 also be a network or database connection, or something doing heavy calculation,
 or just something complex.
 
@@ -188,16 +190,15 @@ There are two common ways of specifying expectations: recording and explicit
 specification. Figure~\ref{figure-expectations} shows an example of how to
 explicitly specify expectations.
 
-When recording expectations, you create a mock object and call the expected
-functions, with expected arguments and return values, in the expected order.
-Then you set the mock into replay mode, and it will replay the recorded
+When recording expectations, the test setup creates a mock object and calls the
+expected functions, with expected arguments and return values, in the expected
+order. The mock is set into replay mode, and it will replay the recorded
 expectations, and verify that they occur correctly.
 
 There are several frameworks for working with expectations, such as
 jMock\footnote{\texttt{http://www.jmock.org/}} for Java, Rhino
 Mocks\footnote{\texttt{http://ayende.com/wiki/Rhino+Mocks.ashx}} for~.Net and
 Ludibrio\footnote{\texttt{https://github.com/nsigustavo/ludibrio/}} for Python.
-
 With both runtime verification and unit testing introduced, a combination of
 the two will be the main subject in the next two chapters.
 
