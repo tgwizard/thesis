@@ -12,9 +12,15 @@
       }
       h1 {
         font-size: 200%;
+        margin-top: 50px;
+        margin-bottom: 10px;
       }
       h2 {
+        margin-top: 0;
         font-size: 130%;
+      }
+      .abstract {
+        margin-top: 40px;
       }
     </style>
   </head>
@@ -24,18 +30,17 @@
     <h2>Using a unit test-like specification syntax for runtime
       verification</h2>
     <div class="author">Adam Renberg</div>
-    <h2>Abstract</h2>
+    <h2 class="abstract">Abstract</h2>
 <p>
 Computer software is growing ever more complex, and more sophisticated tools
 are required to make sure the software operates in a correct way &mdash; i.e.
-according to its specification. Traditional approaches to program verification
-have much to give, but they also have their disadvantages. While formal methods
-can give useful mathematical proofs about the correctness of programs, they
-suffer from complexity and are difficult to use. Often they work only on a
-constructed system model, not the actual program. Testing, on the other hand,
-has a simple syntax and great tool support, and it is in widespread use. But it
-is informal and incomplete, only testing the specific test cases that the
-test-writers can come up with.
+according to its specification. There are two general approaches to assure the
+correctness of software. While formal methods can give useful mathematical
+proofs about the correctness of programs, they suffer from complexity and are
+difficult to use. Often they work only on a constructed system model, not the
+actual program. Testing, on the other hand, has a simple syntax and great tool
+support, and it is in widespread use. It is however informal and incomplete,
+only testing the specific test cases that the test-writers can come up with.
 </p>
 <p>
 A relatively new approach called <em>runtime verification</em> is an attempt
