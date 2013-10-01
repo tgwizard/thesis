@@ -48,9 +48,9 @@ The name \textit{pythonrv} clearly reflects that it is a framework for runtime
 verification in Python. The syntax of the \textit{pythonrv} specifications are
 naturally heavily influenced by the fact that they are written in Python.
 
-\textit{pythonrv} is not the first runtime verification framework for Python,
-see e.g.\ \textsc{LogScope} \cite{barringer09tutorial}. But it is unique in its
-use of pure Python as specification language.
+The \textit{pythonrv} framework is not the first runtime verification framework
+for Python, see e.g.\ \textsc{LogScope} \cite{barringer09tutorial}. But it is
+  unique in its use of pure Python as specification language.
 
 
 \section{Syntax} \label{section-approach-syntax}
@@ -74,8 +74,8 @@ In \textit{pythonrv}, a \textit{specification function} is a Python function
 describing a specification, which \textit{pythonrv} can use for verification of
 the program. A specification function takes a special \textit{event} argument.
 A specification monitors points of the program, and the points being monitored
-are called \textit{monitorees}. \textit{pythonrv} supports only monitoring of
-function calls.
+are called \textit{monitorees}. Only monitoring of function calls is supported
+in \textit{pythonrv}.
 \end{mydef}
 
 The restriction that \textit{pythonrv} only supports monitoring of function
@@ -84,7 +84,7 @@ and $-$ are functions, and reading and writing variables can be turned into
 function calls through the $property$ construct and other so-called magic
 functions. See the Python documentation\footnote{Specifically
 \texttt{http://docs.python.org/2/reference/datamodel.html}.} for more details.
-\textit{pythonrv} thus supports monitoring of these events as well.
+Thus, \textit{pythonrv} supports monitoring of these events as well.
 
 A specification function consists of any valid Python code. It is passed the
 special \texttt{event} argument during verification, which allows the
@@ -507,8 +507,8 @@ well, which we can ignore).
 
 \footnotetext[4]{This is not true for closures --- functions defined inside
   other functions. These functions cannot be directly referenced or modified
-  from outside of the defining function. \textit{pythonrv} does not (as of
-  writing) support monitoring of closures.}
+  from outside of the defining function. As of writing, \textit{pythonrv} does
+  not support monitoring of closures.}
 
 So in the \textit{pythonrv} instrumentation process, the parent container of
 each monitoree is extracted, and the reference to the monitoree is overwritten
@@ -607,9 +607,9 @@ events that occur during the program's execution, with their associated data
 (arguments, object state, global state, etc.). This is described in more detail
 in Section~\ref{section-approach-formal-foundation-semantics}
 
-\textit{pythonrv} specifications are written as ordinary Python functions so we
-have to formalize them.  The Python programming language is rather informal -
-one implementation of it,
+Specifications in \textit{pythonrv} are written as ordinary Python functions so
+we have to formalize them.  The Python programming language is rather informal
+- one implementation of it,
 CPython\footnote{\texttt{http://wiki.python.org/moin/CPython}}, serves as the
 reference implementation.  There are no other specifications or formal
 semantics for Python\footnote{The development of Python is organized mainly
@@ -1198,9 +1198,9 @@ event $\alpha_i$ in $q_i$ and a progression of the system to state $q_{i+1}$,
 for all $0 \leq i < n$. Note that all $q_i \in  Q$ is defined as a success
 state, and that no state in the system model is a failure state. Each event
 $\alpha_i$ consists of two parts: the called function $\lambda_i$ and the
-associated data $\delta_i$. $\delta_i$ is a snapshot of the data in the system
-at the time the function $\lambda_i$ was called, i.e.\ in a simple case just
-the arguments passed as parameters.
+associated data $\delta_i$. The data $\delta_i$ is a snapshot of the data in
+the system at the time the function $\lambda_i$ was called, i.e.\ in a simple
+case just the arguments passed as parameters.
 
 Since the system model is an abstraction of an execution of the system (the
 target program), it is necessarily finite, but of arbitrary length, and
@@ -1266,7 +1266,7 @@ transitions --- \textit{leaf states} --- as $L(q) = R(q) \cap N(q)$, with $N(q)
 satisfying neighbours of $q$.
 
 
-\subsubsection{\textit{f-pythonrv} verification procedure}
+\subsubsection{The verification procedure in \textit{f-pythonrv}}
 
 Given a system model $M$ and a specification automaton $A$, we say that $M$
 violates specification $A$ if there exists a reachable state in $M \times A = (Q',
