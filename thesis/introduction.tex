@@ -72,23 +72,22 @@ correctness of programs.
 \section{Contribution}
 
 In this report we give a background on runtime verification and unit testing,
-and describe a proof-of-concept implementation called \textit{pythonrv}.
-\textit{pythonrv} is a runtime verification framework for Python. It allows the
-us to write specifications, both formal and informal,
-directly in Python. It makes good use of the Python decorator syntax, and gives
-a clean separation between the program and the specifications, while allowing
-the specifications to use the power of Python. It is the approach to formal
-verification for specifications written in Python that is our main
-contribution.
+and describe a proof-of-concept implementation called \textit{pythonrv}, which
+is a runtime verification framework for Python. It allows the us to write
+specifications, both formal and informal, directly in Python. It makes good use
+of the Python decorator syntax, and gives a clean separation between the
+program and the specifications, while allowing the specifications to use the
+power of Python. It is the approach to formal verification for specifications
+written in Python that is our main contribution.
 
 Naturally, there are some areas which are left out-of-scope for this report. We
 give a formalization for only a subset of Python --- for specifications
 constructed in a special way. We do not attempt to formalize Python. Also, we
 only deal with a single thread of execution --- no multi-threading or multiple
 processes --- and we do not handle real-time specifications. No performance
-testing or benchmarking is done on the implementation. These limitations to
-this work are of course all very interesting, and would be very suitable for
-future work in this area.
+testing or benchmarking is done on the implementation. These ideas are of
+course all very interesting, and would be suitable for future work in this
+area.
 
 
 \section{Report Organization}
