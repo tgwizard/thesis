@@ -46,8 +46,8 @@ process, and all of the functionality of Django.
 A problem with this, that is due to how Python works, and how \textit{pythonrv}
 does code instrumentation, is that \textit{pythonrv} needs to load the modules
 (files) for each function to be monitored. These modules are often heavily
-dependent on Django, and that it has been started correctly, with all settings
-loaded.
+dependent on Django, and that it has been started and initialized correctly,
+with all settings loaded.
 
 A suitable time to instrument the program --- to enable the specifications ---
 is during startup, after the settings have been loaded. Some specifications,
@@ -59,12 +59,13 @@ that.
 
 Early in the process of using \textit{pythonrv} in the web application we
 discovered that the copying of data that \textit{pythonrv} does, such as
-function arguments, would not work with Django. The latest version of Django,
-v1.4.1, uses a module called \texttt{cStringIO}, which produces objects that
-cannot be copied. All functions dealing with web requests are affected by this.
-This has been fixed in the development branch of Django, but in the meantime,
-\textit{pythonrv} has an option to disable argument copying, either for all
-specifications or for a subset of them, to work around this issue.
+function arguments, would not work with Django. As of writing, the latest
+version of Django, v1.4.1, uses a module called \texttt{cStringIO}, which
+produces objects that cannot be copied. All functions dealing with web requests
+are affected by this. This has been fixed in the development branch of Django,
+but in the meantime, \textit{pythonrv} has an option to disable argument
+copying, either for all specifications or for a subset of them, to work around
+this issue.
 
 
 \section{Specifications for the Application}
@@ -126,7 +127,7 @@ One especially interesting class of properties to write runtime verification
 specifications for is ``if the user takes action A now, result B should happen
 afterwards''. In our application, one example of this could be that when a user
 comments on a post, all watchers of that post should be notified. Another
-example could be that after a user has updated her profile status, this should
+example is that after a user has updated her profile status, this should
 be visible on the ``list of statuses''-screen, which in our application is the
 start page. The code for an informal specification verifying this is shown in
 Figure~\ref{figure-app-status-update-displayed-informal}. Here we monitor two
@@ -152,10 +153,10 @@ a monitoree (\texttt{event.fn.start.result}).
 	\label{figure-app-status-update-displayed-informal}
 \end{figure}
 
-Another, somewhat related, property to verify could be that a user should not
-be able to update her status twice without viewing the first one in between. A
-formal specification called \texttt{must\_view\_status\_update} which verifies
-this is shown in Figure~\ref{figure-app-status-update-viewed-formal}.
+Another, somewhat related, property to verify is that a user should not be able
+to update her status twice without viewing the first one in between. A formal
+specification called \texttt{must\_view\_status\_update} which verifies this is
+shown in Figure~\ref{figure-app-status-update-viewed-formal}.
 
 The specification works by asserting that if the status has been updated
 (\texttt{if\_updated}) then the next call must be to \texttt{start}
@@ -171,7 +172,41 @@ and \texttt{start}, not just the first one.
 	\end{minipage}
 	\end{center}
 
-  \caption{A formal \textit{f-pythonrv} specification verifying that user status
-    updates are viewed before they are changed again.}
+  \caption{A formal \textit{f-pythonrv} specification verifying that user
+    status updates are viewed before they are changed again.}
 	\label{figure-app-status-update-viewed-formal}
 \end{figure}
+
+
+\section{Summary}
+
+These four simple specifications were implemented and tested on a test version
+of the web application. A few test users were simulated, and the application
+code rewritten to sometimes violate the specifications. This gave a
+rough-and-shallow confirmation that \textit{pythonrv} works in practice. It
+also gave a better understanding of the existing code. When a specification
+violation occurred even though we thought it shouldn't, the error always lay
+in a misunderstanding of how the code worked. Specifications,
+be they formal or informal, for runtime verification or not, can, we feel, be
+used as tools to approach a new code base\footnote{What Eric Raymond calls
+\textit{Explorify}: \texttt{http://esr.ibiblio.org/?p=5178}}.
+
+The default action for when a specification is violated is to throw a Python
+exception, and thus usually terminate the application. For applications built
+using Django the entire application is not terminated, just the thread of
+execution for the current request. This can be changed using the customization
+of \textit{pythonrv} described in Section~\ref{section-approach-verification},
+e.g.~to terminate the application completely, or to return a special error page
+to the user, similarly to how websites usually return \textit{404 Not Found}
+and \textit{500 Internal Server Error} pages. On the web application we
+implemented the latter, together with logging functionality.
+
+The web application has some important functionality where runtime
+specifications suite well. Status updates are an important area, and we
+have shown in Figure~\ref{figure-app-status-update-displayed-informal} how to
+verify that they are displayed correctly. Similarly, the logic that
+determines to whom posts and events are visible is quite critical, especially
+as the web application is the main communication tool used in the company
+(company-wide emails are rare). With only a few lines of \textit{pythonrv}
+specification code (Figure~\ref{figure-app-status-update-displayed-informal} is
+just 12 lines), we can increase the reliability of the application.
