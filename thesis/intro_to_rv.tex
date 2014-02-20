@@ -72,7 +72,7 @@ in mathematics and logics, that a program/system/function follows its
 specifications, i.e.\ does what it is supposed to do.
 
 Research of interest include the early work on formal methods, e.g.\ by Hoare
-\cite{hoare69} and Floyd \cite{floyd67}, and work on logics , e.g.\ linear
+\cite{hoare69} and Floyd \cite{floyd67}, and work on logics, e.g.\ linear
 temporal logic (LTL) by Pnueli \cite{pnueli77}. The seminal work done by Hoare,
 Floyd and Pnueli lay the foundation for many interesting approaches for
 reasoning about program correctness. LTL is one of the common formal languages
@@ -250,7 +250,7 @@ formulas that operate on these states. An LTL formula consists of
 \textit{propositional variables} that work on the domain model of the state
 (checking variables, inputs, global state, etc.), the normal logical operators
 such as negation and disjunction, and some temporal operators. The most basic
-and common temporal operators are $\boldsymbol{X}$ (\textit{next}), and
+and common temporal operators are $\boldsymbol{X}$ (\textit{next}) and
 $\boldsymbol{U}$ (\textit{until}). Other operators can be derived from these,
 such as $\boldsymbol{G}$ (\textit{globally}, or always) and $\boldsymbol{F}$
 (\textit{eventually}, or sometime in the future).
@@ -279,10 +279,10 @@ specifications, the result can not only be that the specification is satisfied
 or violated; it can be inconclusive as well. For satisfied or violated
 specifications, no further verification is required --- we already know the
 outcome. For inconclusive results, we need to continue with the verification,
-as, with future events, the result could change into either satisfied or
+as, with future events, the result could change to either satisfied or
 violated.
 
-There are counterparts to LTL in the real-time setting such Timed Linear
+There are counterparts to LTL in the real-time setting such as Timed Linear
 Temporal Logic (TLTL) and Metric Temporal Logic (MTL). They introduces clocks
 and time constraints to make specifications of real-time properties possible.
 The concept of real-time specifications is of great interest to runtime
@@ -303,7 +303,7 @@ Barringer et al.\ have proposed \textsc{Eagle} \cite{barringer03eagle} and
 \textsc{RuleR} \cite{barringer07ruler} as runtime verification frameworks and
 formal logics.  Inefficiency weaknesses were found in \textsc{Eagle}, and
 \textsc{RuleR} was proposed as a more efficient alternative, with a more
-lower-level logic. They share much of the same basic ideas, however --- they
+lower-level logic. They share much of the same basic ideas, however, and they
 are written by mostly the same people.
 
 \textsc{Eagle} can be seen as a generalization of other logics, supporting both
@@ -412,7 +412,7 @@ the \texttt{ensure} block, and the function body in the \texttt{do} block. The
 contract in the example says that if we provide an element, it will be inserted
 as a child to the \texttt{Current} node, which will thus have one more child.
 Note the use of the language construct \texttt{old} to get the value of an
-attribute at before the function executed.
+attribute at the time before the function executed.
 
 Design by Contract is inspired by Hoare logic, and is essentially Hoare logic
 written in a certain style. However, most implementation of Design by Contract,
@@ -455,7 +455,7 @@ procedures. Assertions are used to check for cases that should never happen.
 Assertions are distinct from the normal program flow, and not to be conflated
 with exceptions. Assertions check for properties that should always be true,
 anything else would be a programming error. Assertions can sometimes be turned
-of with a compiler or runtime flag.
+off with a compiler or runtime flag.
 
 Assertions are suitable for simpler specifications, and those more coupled to
 code. Assertions are the simplest of runtime verification specifications. If
@@ -476,7 +476,7 @@ bodden05efficientrv, jalili07rverl, barringer03eagle}, is to generate state
 machines from the specification. These state machines, sometimes called
 \textit{runtime monitors}, operate with the input language of events emitted by
 the program. As the program executes, or a program execution is examined
-offline, transitions are taken in the state machines, switching states.
+offline, transitions are taken in the state machines, changing states.
 Violations against the specification can be described by failing to find a
 valid transition, or ending up in a fail state; Fulfilling a specification can
 be described by arriving at an accepting state.
@@ -491,7 +491,7 @@ difficult to do with more complex specifications.
 
 For verification to work, the verifier needs access to events happening in the
 program. Depending on the specification language, such events can be function
-calls, statement executions, variable assignment, etc.  The program needs to be
+calls, statement executions, variable assignments, etc.  The program needs to be
 instrumented to emit such events. This often means wrapping function calls and
 variable assignments in a ``recording layer'', which performs the desired
 action after logging the event. The events can then be passed on to the

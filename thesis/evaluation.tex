@@ -78,8 +78,7 @@ important. Specifications can be written to make sure all views or requests
 are made by an authenticated user (except for the login screen), and that they
 are allowed to perform the requested action.
 
-We show a specification showing a specification verifying that proper
-authentication has been done in
+We show a specification verifying that proper authentication has been done in
 Figure~\ref{figure-app-authentication-informal}. This is just one way of
 writing a specification function for this requirement. There are several other
 options, such as utilizing the temporal capabilities of runtime verification
@@ -154,12 +153,12 @@ a monitoree (\texttt{event.fn.start.result}).
 \end{figure}
 
 Another, somewhat related, property to verify is that a user should not be able
-to update her status twice without viewing the first one in between. A formal
+to update her status twice without viewing the first status in between. A formal
 specification called \texttt{must\_view\_status\_update} which verifies this is
 shown in Figure~\ref{figure-app-status-update-viewed-formal}.
 
 The specification works by asserting that if the status has been updated
-(\texttt{if\_updated}) then the next call must be to \texttt{start}
+(checked in \texttt{if\_updated}) then the next call must be to \texttt{start}
 (asserted in \texttt{must\_view}). On the next-to-last line, we also add a
 ``loop-back'' \textit{next} specification so that
 \texttt{must\_view\_status\_update} is verified on all calls to \texttt{status}

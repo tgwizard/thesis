@@ -13,11 +13,12 @@ address:
 
 \begin{itemize}
   \item \textbf{Syntax}. We define the syntax and general structure of
-    specification function (Section~\ref{section-approach-syntax}).
+    specification functions (Section~\ref{section-approach-syntax}).
   \item \textbf{Instrumentation}. How these specifications gain access to the
     target system (Section~\ref{section-approach-instrumentation}).
   \item \textbf{Formalization}. A subset of python, using a special structure
-    and methods, is given a formal foundation, and specifications written are
+    and methods, is given a formal foundation, and specifications written in
+    this subset are
     considered formal (Section~\ref{section-approach-formal-foundation}).
   \item \textbf{Verification}. We have chosen to perform verification online
     and synchronous with the target system. The technique for verification
@@ -57,7 +58,7 @@ for Python, see e.g.\ \textsc{LogScope} \cite{barringer09tutorial}. But it is
 
 The canonical framework for doing unit testing in Python is the
 \textit{unittest} framework that is included in all modern versions of Python.
-Not much development has happened on it in the last years. Many new frameworks
+Not much development has been done on it in the last years. Many new frameworks
 have have spawned, such as PyUnit, Nose and py.test. They build upon the style
 of unittest and mostly add new miscellaneous features, such as better test
 reporting. The original structure of the unit tests is still prevalent ---
@@ -340,7 +341,7 @@ next-to-last element is the previous element, which can also be accessed as
 
 In the last example, Figure~\ref{figure-syntax-example-3}, we show a more
 advanced specification, in which the \texttt{next} function of the
-\texttt{event} argument is used. \texttt{event.next} allows the specification
+\texttt{event} argument is used. The \texttt{event.next} function allows the specification
 function to add more specification functions (possibly implemented as closures
 or lambdas) to be executed when the next event occurs.
 
@@ -518,8 +519,8 @@ monitoree.
 The implementation of the instrumentation code in \textit{pythonrv} is more
 optimized than what is shown in Figure~\ref{figure-instrumentation-overview}.
 For instance, each monitoree only ever have one wrapper function, independent
-of how many specifications want to monitor it. The wrappers then iterate over
-the relevant specifications, passes the control (and an event) to them, and
+of how many specifications want to monitor it. The wrappers then iterates over
+the relevant specifications, passes the control (and event data) to them, and
 then runs the monitoree. As we stated in section~\ref{section-approach-syntax},
 a specification can either be verified before or after the function call. The
 wrapper function handles this. Multiple specification functions for the same
@@ -1024,7 +1025,7 @@ Conjunctive composition is commutative: $s_1 \; ; \; s_2 = s_2 \; ; \; s_1$.
 Conjunctive composition is essentially just a merge of the initial states of
 the two specifications, making the initial transitions of both specifications
 go out from the same state $q_0$, and merging the success states and fail
-states of the automata. Given two arbitrary specifications $s_1$ and $s_2$ with
+states of the automata. Given two arbitrary specifications $s$ and $s'$ with
 semantics defined as:
 
 \medskip
@@ -1157,7 +1158,7 @@ Given the formal semantics of \textit{f-pythonrv} and a system model we can
 deduce whether a model would satisfy a specification or not (i.e.\ they are
 conformant).
 
-First we recall some theory about automata define simple properties about them,
+First we recall some theory about automata and define some simple properties about them,
 taking inspiration from \cite{chaki04lks, schneider04kripke}. Then we show how
 to use these to define the system model of \textit{f-pythonrv}, the
 satisfaction of specification properties when applied to an event, and how to
@@ -1195,8 +1196,8 @@ The system model in \textit{f-pythonrv} consists of a sequence of
 automata $(Q, P, q_0, Q, \emptyset)$, where $Q = \{q_i \; | \; 0 \leq i < n\}$
 and a transition $(q_i, q_{i+1}, \alpha_i) \in P$ represents the occurrence of
 event $\alpha_i$ in $q_i$ and a progression of the system to state $q_{i+1}$,
-for all $0 \leq i < n$. Note that all $q_i \in  Q$ is defined as a success
-state, and that no state in the system model is a failure state. Each event
+for all $0 \leq i < n$. Note that all $q_i \in  Q$ are defined as success
+states, and that no state in the system model is a failure state. Each event
 $\alpha_i$ consists of two parts: the called function $\lambda_i$ and the
 associated data $\delta_i$. The data $\delta_i$ is a snapshot of the data in
 the system at the time the function $\lambda_i$ was called, i.e.\ in a simple
@@ -1227,7 +1228,7 @@ called function $\lambda$ and the associated data $\delta$.
       $\llbracket\texttt{False}\rrbracket$ & = & $\bot$ \\
       $\llbracket\texttt{event.fn.x.called}\rrbracket$ & = & $\lambda = x$ \\
       $\llbracket\texttt{event.called\_function == x}\rrbracket$ & = & $\lambda = x$ \\
-      $\llbracket\texttt{event.fn.x.property}\rrbracket$ & = & $\delta(x.\texttt{property}\rrbracket$ \\
+      $\llbracket\texttt{event.fn.x.property}\rrbracket$ & = & $\llbracket\delta(x.\texttt{property})\rrbracket$ \\
       $\llbracket\texttt{not a}\rrbracket$ & = & $\neg \llbracket\texttt{a}\rrbracket$ \\
       $\llbracket\texttt{a == b}\rrbracket$ & = & $\llbracket\texttt{a}\rrbracket = \llbracket\texttt{b}\rrbracket$ \\
       $\llbracket\texttt{a != b}\rrbracket$ & = & $\llbracket\texttt{a}\rrbracket \neq \llbracket\texttt{b}\rrbracket$ \\
@@ -1242,7 +1243,7 @@ called function $\lambda$ and the associated data $\delta$.
 \end{figure}
 
 
-Give an event $\alpha$ and an expression $E$ we say that $\alpha \models E$
+Given an event $\alpha$ and an expression $E$ we say that $\alpha \models E$
 (satisfies $E$) if the result of evaluating $E$ given $\alpha$, according to
 Figure~\ref{figure-semantics-translation}, evaluates to true ($\top$).
 
@@ -1256,14 +1257,13 @@ denoted by $R(q)$:
 
 \medskip
 \[
-  R(q) = q \cup \{R(q') \; | \; (q,q',(\alpha,E)) \in P \wedge \alpha \models E\}
+  R(q) = \{q\} \cup \{R(q') \; | \; (q,q',(\alpha,E)) \in P \wedge \alpha \models E\}
 \]
 \medskip
 
 Also, we define the set of reachable satisfying states that have no outgoing
-transitions --- \textit{leaf states} --- as $L(q) = R(q) \cap N(q)$, with $N(q)
-= \{q' \; | \; q' \ R(q) \wedge (q,q',x) \in P\}$ as the directly reachable
-satisfying neighbours of $q$.
+transitions --- \textit{leaf states} --- as $L(q) = \{q' \; | \; q' \in R(q)
+\wedge \forall q'' \in Q, (q',q'',x) \notin P\}$.
 
 
 \subsubsection{The verification procedure in \textit{f-pythonrv}}
@@ -1423,7 +1423,7 @@ accepts only interleaving calls to two functions, starting with
 the loop between the $q_0$ and $r_0$ states in the automata. Because the labels
 for the transitions between them are $\top$, i.e.\ always true, we are
 guaranteed that on every event we either transition into a state (in the system
-model-specification product) based containing $q_0$ or $q_1$, and verification
+model-specification product) containing $q_0$ or $q_1$, and verification
 will never be finished. The specification also asserts that if \texttt{foo} is
 called with $0$ as the first argument, the second argument must also be $0$.
 This is just to demonstrate how the \texttt{if-then} construct works.
