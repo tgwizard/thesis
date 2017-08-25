@@ -1,3 +1,4 @@
 # Adam Renberg's master thesis
 
-See [tgwizard.github.io/thesis/](http://tgwizard.github.io/thesis/).
+See
+[urn:nbn:se:kth:diva-153674](http://urn.kb.se/resolve?urn=urn%3Anbn%3Ase%3Akth%3Adiva-153674).
